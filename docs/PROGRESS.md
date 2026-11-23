@@ -9,7 +9,7 @@
 | Giai đoạn                     | 1 — Dữ liệu nội dung (한국어기초사전)                                                                                     |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T1.2** `content/hangul.json` (40 chữ) + `content/LICENSE-DATA.md` |
+| Task tiếp theo                 | **T1.3** FluentValidation validators + tool `Hanbit.ContentValidator` |
 | Việc song song (người dùng) | Đăng ký API key 한국어기초사전 + tải file dữ liệu (cần cho T1.5)                                                      |
 | Blocker                         | —                                                                                                                           |
 
@@ -24,6 +24,13 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T1.2 hangul.json + LICENSE-DATA.md
+- Đã làm: `content/hangul.json` — mảng 40 `HangulLetter` (14 phụ âm, 5 phụ âm kép, 10 nguyên âm, 11 nguyên âm ghép): `id` (`c-giyeok`, `dc-ssanggiyeok`, `v-a`, `cv-ae`…), tên chữ tiếng Hàn (chỉ phụ âm), Revised Romanization, gợi ý đọc cho người Việt, 1 từ ví dụ thông dụng (Hangul + RR + nghĩa Việt). `content/LICENSE-DATA.md`: ghi công 한국어기초사전 © 국립국어원 (CC BY-SA, phiên bản `TODO(verify)`), phạm vi áp dụng, dữ liệu tự biên soạn (giấy phép `TODO(owner)`).
+- File thay đổi: `content/hangul.json`, `content/LICENSE-DATA.md`, `tests/Hanbit.Infrastructure.Tests/{Content/HangulDataTests.cs, RepoRoot.cs}`
+- Kiểm tra: build ✅ (0 warning) · format ✅ · test ✅ (Infrastructure 14/14: đủ 14/5/10/11, tổng 40, id/ký tự không trùng, mỗi ký tự là 1 chữ cái tương thích, phụ âm có tên/nguyên âm không, có gợi ý + ví dụ, **mỗi từ ví dụ thật sự chứa chữ cái đó** — tách âm tiết theo công thức Unicode)
+- Vấn đề / ghi chú: dữ liệu tự biên soạn bằng tiếng Hàn → cần người dùng duyệt (câu hỏi 7). File JSON là mảng ở gốc (repository T1.4 đọc `List<HangulLetter>`).
+- Tiếp theo: T1.3
 
 ### 2026-11-24 — T1.1 Records nội dung + ContentJson
 - Đã làm: `src/Hanbit.Domain/Content/`: `Hangul.cs` (`HangulType`, `HangulLetter`, `HangulExample`), `Vocabulary.cs` (`VocabGrade`, `PartOfSpeech` — 15 từ loại theo 품사 krdict, `TODO(verify)` ở T1.5; `SourceRef`, `Example`, `VocabItem`, `GrammarPoint`), `Exercises.cs` (`Exercise` đa hình qua `type`: `multiple_choice`, `listen_choose`, `match_pairs` + `MatchPair`, `reorder`, `type_answer`), `Courses.cs` (`Lesson`, `Course`, `LessonSummary`), `ContentJson.Options` (snake_case tên trường + enum, `RespectNullableAnnotations`, `RespectRequiredConstructorParameters`, `UnmappedMemberHandling.Disallow`, `AllowOutOfOrderMetadataProperties`, comment + dấu phẩy cuối, ghi không escape chữ Hàn/Việt, read-only). Trường tùy chọn đưa xuống cuối record với `= null` (khác thứ tự sketch ARCHITECTURE §5 — tên/kiểu giữ nguyên) để JSON không phải ghi `"audio": null`. ARCHITECTURE §5 thêm bảng cấu trúc JSON 5 loại bài tập.
@@ -119,6 +126,8 @@
 4. ~~Tương phản màu~~ → đã chốt: thêm token `-ink` (xem Quyết định).
 5. ~~Lưu chế độ sáng/tối ở đâu~~ → đã chốt: qua `progress-store.js` ở T5.3.
 6. ~~Font qua CDN hay tự host~~ → đã chốt: trước mắt giữ CDN.
+7. **Duyệt `content/hangul.json` (T1.2):** AI tự biên soạn — tên chữ, RR và từ ví dụ là kiến thức phổ thông, test đã kiểm tra từ ví dụ chứa đúng chữ cái; **gợi ý đọc tiếng Việt (`vi_hint`)** mang tính chủ quan → người dùng đọc lại, sửa trực tiếp trong file nếu thấy chưa sát.
+8. **Giấy phép phần tự biên soạn** (`hangul.json`, `grammar/`, `courses/`): giữ mọi quyền hay CC BY-SA 4.0? (`content/LICENSE-DATA.md` §2 đang `TODO(owner)`).
 
 ## 📝 Quyết định đã chốt
 
