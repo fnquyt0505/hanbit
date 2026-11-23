@@ -7,8 +7,8 @@
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Giai đoạn                     | 0 — Khởi tạo solution                                                                                                     |
-| Task đang làm                 | —                                                                                                                           |
-| Task tiếp theo                 | **T0.7** Deploy sớm: `Dockerfile` multi-stage + `/health` + `render.yaml`, deploy lên Render |
+| Task đang làm                 | **T0.7** — code xong; chờ người dùng tạo service trên Render (Blueprint) để xác nhận URL                         |
+| Task tiếp theo                 | **T1.1** Records nội dung trong `Domain/Content` + `JsonSerializerOptions` |
 | Việc song song (người dùng) | Đăng ký API key 한국어기초사전 + tải file dữ liệu (cần cho T1.5)                                                      |
 | Blocker                         | —                                                                                                                           |
 
@@ -23,6 +23,13 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-23 — T0.7 Deploy sớm (phần code)
+- Đã làm: `/health` (`AddHealthChecks` + `MapHealthChecks`, có sẵn). `Program.cs`: bỏ `UseHttpsRedirection` (Render ép HTTPS ở proxy; health check nội bộ đi HTTP), bật forwarded headers qua `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true`. `Dockerfile` multi-stage: `sdk:10.0.401` (khớp `global.json`; Tailwind CLI linux tự tải + kiểm SHA-256) → `aspnet:10.0` (nhận bản vá runtime), cổng 10000, user không phải root; `.dockerignore`. `render.yaml`: Web Service Docker, plan free, region Singapore, `healthCheckPath: /health`, `autoDeployTrigger: checksPass` (chỉ deploy commit `main` khi CI xanh). CI thêm job `docker`: build image + chạy container (Production) + smoke test `/health`, `/`, `app.css`, Alpine, kiểm tra không chạy root.
+- File thay đổi: `Dockerfile`, `.dockerignore`, `render.yaml`, `src/Hanbit.Web/Program.cs`, `.github/workflows/ci.yml`, `tests/Hanbit.Web.Tests/HealthTests.cs`
+- Kiểm tra: build ✅ (0 warning) · format ✅ · test ✅ (45/45) · CI `build-test` ✅ + `docker` ✅ (image build + container chạy đúng ở Production)
+- Vấn đề / ghi chú: **Docker Desktop trên máy dev không phân giải DNS** (registry Docker Hub & MCR: `no such host`, trong khi Windows phân giải bình thường — nghi Cloudflare WARP) → chưa build được image local; đã kiểm chứng bằng job `docker` trên CI thay thế. Còn chờ: người dùng tạo Blueprint trên Render → AI kiểm tra URL `*.onrender.com` + auto-deploy → đánh dấu T0.7 `[x]`.
+- Tiếp theo: hoàn tất T0.7 trên Render, rồi T1.1
 
 ### 2026-11-23 — T0.6 UI cơ bản
 - Đã làm: token chữ `--success-ink #297C4F`, `--warning-ink #8F6614`, `--xp-ink #90650E` (light; dark = màu gốc) đạt ≥ 4.5:1 — cập nhật DESIGN.md §2 (quyết định câu 4). Tag Helper `<hb-button>` (variant `primary/secondary/outline/ghost`, size `sm/md/lg` — `lg` cao 48px, `href` → `<a>`, `disabled`, `block` full-width mobile; chữ trên nút dùng `--bg` vì chữ trắng trên `--primary` dark chỉ 3.7:1; variant/size sai → exception) và `<ko-text>` (`lang="ko"` + `font-ko` lớn hơn 1 bậc, `display` → `font-hangul text-hangul-display`, `romanization` → span `lang="ko-Latn"` nghiêng, màu phụ). Partial `_Card` (`CardViewModel` + Razor template), `_ProgressBar` (`role="progressbar"`, aria-value*), `_Dialog` (`<dialog>` gốc: khóa focus, Esc/nút/bấm nền để đóng; mở bằng `$dispatch('hb-dialog-open', id)`), `_ToastRegion` trong `_Layout` (`aria-live`, icon cho từng loại). `wwwroot/js/ui.js`: Alpine store `toast` (`show(message, kind, timeoutMs)`, `dismiss`) + component `hbDialog`; export `toast()` cho module khác. `/styleguide` thêm mục Components.
@@ -89,7 +96,7 @@
 
 | ID | Mô tả   | Task liên quan | Trạng thái |
 | -- | --------- | --------------- | ------------ |
-| — | Chưa có |                 |              |
+| E1 | Docker Desktop (WSL 2) không phân giải DNS registry (`lookup …: no such host`), Windows thì bình thường. Nghi Cloudflare WARP. Cách thử: khởi động lại Docker Desktop; tắt WARP; hoặc Docker Desktop → Settings → Docker Engine thêm `"dns": ["1.1.1.1", "8.8.8.8"]` | T0.7 | Mở — CI job `docker` thay thế |
 
 ## ❓ Câu hỏi / việc cần xác minh
 
