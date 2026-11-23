@@ -25,7 +25,8 @@ ENV ASPNETCORE_HTTP_PORTS=10000 \
     DOTNET_NOLOGO=true
 
 COPY --from=build /app/publish .
-# TODO(T1.x): COPY content/ ./content/ khi có dữ liệu học (ARCHITECTURE §10)
+# Dữ liệu học (ARCHITECTURE §10) — appsettings.json: Content:RootPath = "content" → /app/content
+COPY content/ ./content/
 
 EXPOSE 10000
 # User không phải root có sẵn trong image aspnet

@@ -16,11 +16,12 @@ namespace Hanbit.Infrastructure.Content.Validation;
 /// </summary>
 public sealed partial class ContentValidationService
 {
-    private const string HangulFile = "hangul.json";
-    private const string VocabReviewsFile = "vocab-reviews.json";
+    private const string HangulFile = ContentPaths.Hangul;
+    private const string VocabReviewsFile = ContentPaths.VocabReviews;
 
     private static readonly HangulLetterValidator HangulLetterValidator = new();
     private static readonly VocabItemValidator VocabItemValidator = new();
+    private static readonly VocabReviewValidator VocabReviewValidator = new();
     private static readonly GrammarPointValidator GrammarPointValidator = new();
     private static readonly CourseValidator CourseValidator = new();
     private static readonly LessonValidator LessonValidator = new();
@@ -73,7 +74,19 @@ public sealed partial class ContentValidationService
                 break;
 
             case [VocabReviewsFile]:
-                // Định dạng vocab-reviews.json được định nghĩa ở T1.4 (JsonContentRepository) → kiểm tra từ T1.4.
+                var reviews = await LoadAsync<List<VocabReview>>(context, file, cancellationToken);
+                if (reviews is not null)
+                {
+                    ValidateItems(context, file, reviews, VocabReviewValidator, r => r.Id);
+                    ReportDuplicates(context, file, reviews.Select(r => r.Id), "id");
+                    context.Reviews.AddRange(reviews);
+                    context.ReviewsFile = file;
+                }
+                else
+                {
+                    context.VocabIncomplete = true;
+                }
+
                 break;
 
             case ["vocab", _]:
@@ -194,8 +207,22 @@ public sealed partial class ContentValidationService
             context.Add(context.Display(duplicate.First().File), null, $"id ngữ pháp '{duplicate.Key}' bị trùng ({where}).");
         }
 
-        var vocabById = context.Vocab.GroupBy(v => v.Item.Id, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.First().Item);
+        // Gộp vocab-reviews.json giống JsonContentRepository → "đã duyệt" tính trên dữ liệu sau gộp.
+        var uniqueVocab = context.Vocab.GroupBy(v => v.Item.Id, StringComparer.Ordinal).Select(g => g.First().Item);
+        var vocabById = VocabReviewMerger.Apply(uniqueVocab, context.Reviews).ToDictionary(v => v.Id, StringComparer.Ordinal);
         var grammarIds = context.Grammar.Select(g => g.Item.Id).ToHashSet(StringComparer.Ordinal);
+
+        if (context.ReviewsFile is not null && !context.VocabIncomplete)
+        {
+            for (var i = 0; i < context.Reviews.Count; i++)
+            {
+                if (!vocabById.ContainsKey(context.Reviews[i].Id))
+                {
+                    context.Add(context.Display(context.ReviewsFile), $"[{i}].id",
+                        $"không tìm thấy từ vựng '{context.Reviews[i].Id}' trong content/vocab/.");
+                }
+            }
+        }
 
         foreach (var (courseDir, fileSlug, file, lesson) in context.Lessons)
         {
@@ -297,6 +324,10 @@ public sealed partial class ContentValidationService
         public List<(string File, VocabItem Item)> Vocab { get; } = [];
 
         public List<(string File, GrammarPoint Item)> Grammar { get; } = [];
+
+        public List<VocabReview> Reviews { get; } = [];
+
+        public string? ReviewsFile { get; set; }
 
         /// <summary>Có file từ vựng không đọc được → danh sách id chưa đầy đủ.</summary>
         public bool VocabIncomplete { get; set; }

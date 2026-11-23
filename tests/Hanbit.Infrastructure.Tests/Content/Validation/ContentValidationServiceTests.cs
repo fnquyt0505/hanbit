@@ -192,6 +192,46 @@ public sealed class ContentValidationServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task ValidateAsync_ReviewApprovesVocab_LessonMayUseIt()
+    {
+        Write("vocab-reviews.json", """[ { "id": "kd-2", "reviewed": true, "vi": "ngọn lửa" } ]""");
+        Write("courses/beginner/lessons/01-nuoc.json", Lesson.Replace("[\"kd-1\"]", "[\"kd-1\", \"kd-2\"]", StringComparison.Ordinal));
+
+        (await ValidateAsync()).Issues.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ReviewRevokesApproval_LessonUsingVocabFails()
+    {
+        Write("vocab-reviews.json", """[ { "id": "kd-1", "reviewed": false, "note": "nghĩa chưa chuẩn" } ]""");
+
+        var issue = (await ValidateAsync()).Issues.ShouldHaveSingleItem();
+
+        issue.Path.ShouldBe("vocab_ids[0]");
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ReviewForUnknownVocab_ReportsIssue()
+    {
+        Write("vocab-reviews.json", """[ { "id": "kd-999", "reviewed": true } ]""");
+
+        var issue = (await ValidateAsync()).Issues.ShouldHaveSingleItem();
+
+        issue.File.ShouldBe(DisplayPath("vocab-reviews.json"));
+        issue.Path.ShouldBe("[0].id");
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ReviewWithBlankVi_ReportsIssue()
+    {
+        Write("vocab-reviews.json", """[ { "id": "kd-1", "reviewed": true, "vi": " " } ]""");
+
+        var issue = (await ValidateAsync()).Issues.ShouldHaveSingleItem();
+
+        issue.Path.ShouldBe("[0].vi");
+    }
+
+    [Fact]
     public async Task ValidateAsync_UnknownFile_ReportsIssue()
     {
         Write("misc/notes.json", "{}");

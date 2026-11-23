@@ -77,6 +77,17 @@ public sealed class VocabItemValidator : AbstractValidator<VocabItem>
     }
 }
 
+public sealed class VocabReviewValidator : AbstractValidator<VocabReview>
+{
+    public VocabReviewValidator()
+    {
+        RuleFor(x => x.Id).Required().Slug();
+        RuleFor(x => x.Vi).NotBlankWhenPresent();
+        RuleFor(x => x.DefinitionVi).NotBlankWhenPresent();
+        RuleFor(x => x.Note).NotBlankWhenPresent();
+    }
+}
+
 public sealed class GrammarPointValidator : AbstractValidator<GrammarPoint>
 {
     public GrammarPointValidator()

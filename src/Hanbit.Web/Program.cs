@@ -1,7 +1,19 @@
+using Hanbit.Infrastructure;
+using Hanbit.Infrastructure.Content;
+using Hanbit.Web.HealthChecks;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddCheck<ContentHealthCheck>("content");
+
+// Nội dung học (content/): đường dẫn tương đối tính từ ContentRootPath
+// (dev: src/Hanbit.Web → ../../content; Docker: /app → content).
+builder.Services.Configure<ContentOptions>(builder.Configuration.GetSection(ContentOptions.SectionName));
+builder.Services.PostConfigure<ContentOptions>(options =>
+    options.RootPath = Path.GetFullPath(options.RootPath, builder.Environment.ContentRootPath));
+builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 

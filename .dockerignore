@@ -11,3 +11,4 @@ docs/
 **/wwwroot/css/app.css
 *.md
 !src/Hanbit.Web/wwwroot/lib/README.md
+!content/LICENSE-DATA.md

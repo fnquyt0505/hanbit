@@ -9,7 +9,7 @@
 | Giai đoạn                     | 1 — Dữ liệu nội dung (한국어기초사전)                                                                                     |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T1.4** `IContentRepository` + `JsonContentRepository` (IMemoryCache, merge `vocab-reviews.json`) |
+| Task tiếp theo                 | **T1.5** Tool `Hanbit.ContentImporter` (krdict → `content/vocab/krdict-beginner.json`) — cần file dữ liệu/API key krdict |
 | Việc song song (người dùng) | Đăng ký API key 한국어기초사전 + tải file dữ liệu (cần cho T1.5)                                                      |
 | Blocker                         | —                                                                                                                           |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T1.4 IContentRepository + JsonContentRepository
+- Đã làm: `Application/Abstractions/IContentRepository` (Hangul, khóa học, bài học, từ vựng/ngữ pháp theo id — async + `CancellationToken`). `Infrastructure/Content/JsonContentRepository`: đọc bằng `ContentJson.Options`, cache `IMemoryCache` (hết hạn theo `Content:CacheDuration`, null = không hết hạn), **slug kiểm tra regex trước khi ghép đường dẫn** (chặn path traversal), từ vựng = mọi `vocab/*.json` gộp `vocab-reviews.json`. Chốt định dạng `vocab-reviews.json` + `VocabReview`/`VocabReviewMerger` (Domain, hàm thuần) — validator T1.3 giờ kiểm tra file review (id tồn tại, không trùng, trường không rỗng) và tính "đã duyệt" trên dữ liệu sau gộp. `ContentPaths` dùng chung. `AddInfrastructure()` + Web cấu hình `Content` (dev `../../content`, cache 2 giây). `ContentHealthCheck`: `/health` chỉ Healthy khi đọc được `hangul.json`. Docker copy `content/` (kèm `LICENSE-DATA.md`) vào `/app/content`; CI smoke test kiểm tra file trong container. Package mới: `Microsoft.Extensions.Caching.Memory` 10.0.12 (cho `IMemoryCache` — ARCHITECTURE đã định).
+- File thay đổi: `src/Hanbit.Domain/Content/VocabReview.cs`, `src/Hanbit.Application/Abstractions/IContentRepository.cs`, `src/Hanbit.Infrastructure/{Content/*, DependencyInjection.cs, Hanbit.Infrastructure.csproj}`, `src/Hanbit.Web/{Program.cs, appsettings*.json, HealthChecks/ContentHealthCheck.cs}`, `Dockerfile`, `.dockerignore`, `.github/workflows/ci.yml`, `docs/ARCHITECTURE.md`, tests
+- Kiểm tra: build ✅ (0 warning) · format ✅ · test ✅ (140/140: Domain merger 6, repository 19 gồm cache/hết hạn/path traversal/gộp review, validator review 4, Web: DI đọc `content/` thật = 40 chữ, `/health` 503 khi sai đường dẫn content)
+- Tiếp theo: T1.5 (cần người dùng: file dữ liệu tải từ krdict hoặc API key)
 
 ### 2026-11-24 — T1.3 Validators + Hanbit.ContentValidator
 - Đã làm: package **FluentValidation 12.2.0** (Infrastructure — có trong stack ARCHITECTURE §1). `Infrastructure/Content/Validation/`: validator cho `HangulLetter`, `VocabItem` (+ `SourceRef` URL http(s)), `GrammarPoint`, `Course`, `Lesson` + 5 loại bài tập qua `SetInheritanceValidator` (VD `answer_index` trong khoảng, lựa chọn ≥ 2 & không trùng, `audio_ko` có Hangul, cặp nối không trùng vế), quy tắc chung slug/Hangul/không rỗng, thông báo tiếng Việt. `ContentValidationService`: quét `content/` theo cấu trúc ARCHITECTURE §3, đọc bằng `ContentJson.Options` (lỗi JSON kèm **số dòng**), chạy validator, **kiểm tra chéo** (id trùng giữa file; bài học chỉ dùng từ vựng `reviewed` + ngữ pháp tồn tại; mục lục khóa học ↔ file bài học: thiếu file / file thừa / title, order lệch; slug trùng tên file/thư mục; file JSON lạ; thiếu `hangul.json`), tránh báo lỗi dây chuyền khi file từ vựng/ngữ pháp hỏng. Lỗi dạng `content/<file>: <json path snake_case>: <lý do>`. Tool `tools/Hanbit.ContentValidator` (exit 1 khi có lỗi). CI `build-test` chạy validator trên `content/`. `vocab-reviews.json` được chấp nhận nhưng chưa kiểm tra (định dạng chốt ở T1.4). Áp dụng quyết định câu 7–8: `LICENSE-DATA.md` §2 → giữ mọi quyền.
