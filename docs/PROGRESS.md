@@ -7,7 +7,8 @@
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Giai đoạn                     | 0 — Khởi tạo solution                                                                                                     |
-| Task đang làm                 | **T0.7** — code xong; chờ người dùng tạo service trên Render (Blueprint) để xác nhận URL                         |
+| Task đang làm                 | —                                                                                                                           |
+| Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
 | Task tiếp theo                 | **T1.1** Records nội dung trong `Domain/Content` + `JsonSerializerOptions` |
 | Việc song song (người dùng) | Đăng ký API key 한국어기초사전 + tải file dữ liệu (cần cho T1.5)                                                      |
 | Blocker                         | —                                                                                                                           |
@@ -23,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T0.7 Deploy sớm (hoàn tất trên Render)
+- Đã làm: người dùng tạo tài khoản Render (đăng nhập GitHub), cài GitHub App Render, tạo Blueprint `hanbit` từ `render.yaml` (branch `main`) → service web `hanbit` **Live** tại https://hanbit.onrender.com.
+- Kiểm tra trên production: `/health` → 200 `Healthy` · `/`, `/styleguide` → 200 (`lang="vi"`) · `/css/app.css` → 200, nén Brotli, link có fingerprint (static web assets đúng ở Production) · Alpine → 200 · đường dẫn lạ → 404 · HSTS có mặt (forwarded headers hoạt động sau proxy) · HTTP → 301 HTTPS. Auto-deploy: kiểm chứng bằng commit của PR này (Render tự deploy sau khi CI xanh — `autoDeployTrigger: checksPass`).
+- Tiếp theo: T1.1
 
 ### 2026-11-23 — T0.7 Deploy sớm (phần code)
 - Đã làm: `/health` (`AddHealthChecks` + `MapHealthChecks`, có sẵn). `Program.cs`: bỏ `UseHttpsRedirection` (Render ép HTTPS ở proxy; health check nội bộ đi HTTP), bật forwarded headers qua `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true`. `Dockerfile` multi-stage: `sdk:10.0.401` (khớp `global.json`; Tailwind CLI linux tự tải + kiểm SHA-256) → `aspnet:10.0` (nhận bản vá runtime), cổng 10000, user không phải root; `.dockerignore`. `render.yaml`: Web Service Docker, plan free, region Singapore, `healthCheckPath: /health`, `autoDeployTrigger: checksPass` (chỉ deploy commit `main` khi CI xanh). CI thêm job `docker`: build image + chạy container (Production) + smoke test `/health`, `/`, `app.css`, Alpine, kiểm tra không chạy root.
