@@ -68,8 +68,18 @@ public static class KrdictLmfReader
             Pos: Feature(entry, "partOfSpeech") ?? string.Empty,
             Link: $"https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo={targetCode}",
             Senses: senses,
-            LexicalUnit: Feature(entry, "lexicalUnit"));
+            LexicalUnit: Feature(entry, "lexicalUnit"),
+            // Dữ liệu gốc viết sai tên thuộc tính "subjectCategiory" — đọc cả hai cách viết
+            SubjectCategories: Features(entry, "subjectCategiory").Concat(Features(entry, "subjectCategory")).Distinct(StringComparer.Ordinal).ToList());
     }
+
+    /// <summary>Mọi giá trị <c>val</c> của các <c>feat</c> có <c>att</c> = <paramref name="att"/>.</summary>
+    private static IEnumerable<string> Features(JsonElement element, string att) =>
+        Items(Property(element, "feat"))
+            .Where(f => String(f, "att") == att)
+            .Select(f => String(f, "val")?.Trim())
+            .Where(v => !string.IsNullOrEmpty(v))
+            .OfType<string>();
 
     private static KrdictSense ParseSense(JsonElement sense, int index)
     {

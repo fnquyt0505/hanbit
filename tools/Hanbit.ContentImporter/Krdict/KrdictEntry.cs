@@ -7,6 +7,7 @@ namespace Hanbit.ContentImporter.Krdict;
 /// <param name="WordGrade">초급 / 중급 / 고급 / 없음 / null.</param>
 /// <param name="Pos">Từ loại bằng tiếng Hàn, VD 명사 (rỗng nếu không có).</param>
 /// <param name="LexicalUnit">단어 / 구 / 관용구 / 속담 / 문법‧표현.</param>
+/// <param name="SubjectCategories">Chủ đề tình huống (주제 및 상황 범주), VD 인사하기, 소개하기(가족 소개).</param>
 public sealed record KrdictEntry(
     string TargetCode,
     string Word,
@@ -17,7 +18,8 @@ public sealed record KrdictEntry(
     string Pos,
     string Link,
     IReadOnlyList<KrdictSense> Senses,
-    string? LexicalUnit = null);
+    string? LexicalUnit = null,
+    IReadOnlyList<string>? SubjectCategories = null);
 
 /// <summary>Một nghĩa: định nghĩa tiếng Hàn + bản dịch tiếng Việt.</summary>
 public sealed record KrdictSense(int Order, string Definition, string? TransWord, string? TransDefinition);
