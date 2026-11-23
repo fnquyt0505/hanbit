@@ -17,7 +17,7 @@
 ## Giai đoạn 1 — Dữ liệu nội dung (한국어기초사전)
 
 - [x] **T1.1** Records nội dung trong `Domain/Content` + `JsonSerializerOptions` (snake_case, polymorphic Exercise). DoD: test deserialize.
-- [ ] **T1.2** `content/hangul.json` (40 chữ, tự biên soạn) + `content/LICENSE-DATA.md`. DoD: đủ 14 phụ âm, 5 phụ âm kép, 10 nguyên âm, 11 nguyên âm ghép.
+- [x] **T1.2** `content/hangul.json` (40 chữ, tự biên soạn) + `content/LICENSE-DATA.md`. DoD: đủ 14 phụ âm, 5 phụ âm kép, 10 nguyên âm, 11 nguyên âm ghép.
 - [ ] **T1.3** FluentValidation validators + tool `Hanbit.ContentValidator`. DoD: báo lỗi rõ file/trường.
 - [ ] **T1.4** `IContentRepository` + `JsonContentRepository` (IMemoryCache, merge `vocab-reviews.json`). DoD: unit test.
 - [ ] **T1.5** Tool `Hanbit.ContentImporter` (krdict → `content/vocab/krdict-beginner.json`, lọc 초급, nghĩa tiếng Việt, `SourceRef`). Xác minh định dạng & mã ngôn ngữ trước. DoD: test với file mẫu nhỏ; không ghi đè `vocab-reviews.json`; báo cáo số từ.
