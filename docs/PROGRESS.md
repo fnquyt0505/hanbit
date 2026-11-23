@@ -7,10 +7,10 @@
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Giai đoạn                     | 1 — Dữ liệu nội dung (한국어기초사전)                                                                                     |
-| Task đang làm                 | **T1.7** — công cụ xong; người dùng đang duyệt `data-raw/review/dot-01.csv` (150 từ)                                |
+| Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
 | Task tiếp theo                 | **T1.8** Soạn khóa `beginner`: 5 bài đầu (chỉ từ đã duyệt) |
-| Việc song song (người dùng) | 👤 Duyệt `data-raw/review/dot-01.csv` (cột `duyet`: x / loai; `nghia_moi` nếu sửa) → báo AI chạy `review-import` |
+| Việc song song (người dùng) | (tùy chọn) Tinh chỉnh nghĩa các từ đã duyệt hàng loạt khi soạn bài — xem câu hỏi 9 |
 | Blocker                         | —                                                                                                                           |
 
 ## 💻 Môi trường máy dev
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T1.7 Duyệt nghĩa đợt 1 (150 từ)
+- Đã làm: người dùng **quyết định duyệt cả 150 từ bộ chủ đề A với nghĩa krdict nguyên bản** (không sửa nghĩa). AI tạo `data-raw/review/dot-01-duyet-tat-ca.csv` (`duyet = x`, ghi chú `duyệt hàng loạt theo nghĩa krdict (người dùng, 2026-11-24)`) và nhập qua `review-import` → `content/vocab-reviews.json` 150 bản duyệt. File CSV gốc giữ nguyên.
+- Kiểm tra: validator ✅ · sau gộp: **150/2.501 từ `reviewed`** (VD 가족 = gia đình, 가수 = ca sĩ, 간호사 = y tá)
+- Vấn đề / ghi chú: một số nghĩa krdict hơi văn vẻ/dài so với cách dạy thông thường (VD 안녕히 = "một cách an lành", 경찰 = "(cơ quan) cảnh sát; (viên) cảnh sát") — xem câu hỏi 9.
+- Tiếp theo: T1.8
 
 ### 2026-11-24 — T1.7 (phần AI) Công cụ duyệt nghĩa CSV
 - Đã làm: `KrdictLmfReader` đọc thêm chủ đề tình huống (`subjectCategiory` — dữ liệu gốc viết sai tên, đọc cả 2 cách viết). `tools/Hanbit.ContentImporter/Review/`: `Csv` (RFC 4180 tự viết, ghi UTF-8 BOM, đọc tự nhận `,`/`;`/tab), `ReviewExporter` (chọn từ chưa duyệt theo chủ đề, giữ thứ tự chủ đề, bỏ trùng; CSV có phiên âm RR, từ loại tiếng Việt, Hán tự, nghĩa/định nghĩa krdict, cột trống `nghia_moi`/`dinh_nghia_moi`/`duyet`/`ghi_chu`, link krdict), `ReviewImporter` (gộp vào `vocab-reviews.json`: `x`/`có`/`1`… = duyệt, `loai`/`không`/`0`… = loại, trống = chưa quyết; id lạ/trùng/giá trị không hiểu → báo lỗi theo dòng và **không ghi file**; giữ bản duyệt cũ; file không phải UTF-8 → hướng dẫn lưu "CSV UTF-8"). CLI `review-export` / `review-import` (chạy validator sau khi ghi). Xuất đợt 1: **bộ A = 150 từ** → `data-raw/review/dot-01.csv` (không commit).
@@ -166,6 +172,7 @@
 6. ~~Font qua CDN hay tự host~~ → đã chốt: trước mắt giữ CDN.
 7. ~~Duyệt `content/hangul.json`~~ → đã duyệt (2026-11-24); tinh chỉnh `vi_hint` khi làm trang `/hangul` (T3.2) nếu cần.
 8. ~~Giấy phép phần tự biên soạn~~ → đã chốt: giữ mọi quyền.
+9. **Nghĩa duyệt hàng loạt (T1.7):** 150 từ đợt 1 dùng nghĩa krdict nguyên bản. Khi soạn bài (T1.8) nếu gặp nghĩa chưa tự nhiên, AI sẽ liệt kê để người dùng quyết sửa qua `nghia_moi` (xuất lại bằng `review-export` không lấy từ đã duyệt → cần sửa trực tiếp `vocab-reviews.json` hoặc một CSV mới chỉ chứa các id cần sửa).
 
 ## 📝 Quyết định đã chốt
 
