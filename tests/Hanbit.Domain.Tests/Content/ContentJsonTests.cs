@@ -233,7 +233,7 @@ public class ContentJsonTests
         json.ShouldContain("\"ko\": \"물\"");
         json.ShouldContain("\"vi\": \"nước\"");
         json.ShouldContain("\"pos\": \"dependent_noun\"");
-        json.ShouldContain("\"definition_vi\": null");
+        json.ShouldNotContain("definition_vi"); // null → bỏ khỏi file
         JsonSerializer.Deserialize<VocabItem>(json, ContentJson.Options).ShouldBe(item, new VocabItemComparer());
     }
 

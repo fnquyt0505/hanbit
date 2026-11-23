@@ -9,7 +9,7 @@ public enum VocabGrade
     None,
 }
 
-/// <summary>Từ loại (품사) theo 한국어기초사전. TODO(verify): đối chiếu giá trị thực khi làm importer (T1.5).</summary>
+/// <summary>Từ loại (품사) theo 한국어기초사전 — 15 giá trị khớp tài liệu Open API (đã xác minh T1.5).</summary>
 public enum PartOfSpeech
 {
     Noun,               // 명사
