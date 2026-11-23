@@ -85,6 +85,19 @@ public class HangulDataTests
         }
     }
 
+    [Fact]
+    public void HangulJson_ExampleRomanization_MatchesRomanizationService()
+    {
+        foreach (var letter in Letters)
+        {
+            foreach (var example in letter.Examples)
+            {
+                Hanbit.Domain.Hangul.RomanizationService.Romanize(example.Ko)
+                    .ShouldBe(example.Romanization, $"{letter.Id}: {example.Ko}");
+            }
+        }
+    }
+
     [Theory]
     [InlineData("가방", "ㄱㅏㅂㅏㅇ")]
     [InlineData("의사", "ㅇㅢㅅㅏ")]

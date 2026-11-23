@@ -9,7 +9,7 @@
 | Giai đoạn                     | 1 — Dữ liệu nội dung (한국어기초사전)                                                                                     |
 | Task đang làm                 | **T1.5** — code xong; chờ krdict truy cập lại được để chạy import thật (E2)                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T1.6** `RomanizationService` (không cần dữ liệu ngoài) — làm trong lúc chờ T1.5 |
+| Task tiếp theo                 | Hoàn tất **T1.5** (chạy import khi krdict truy cập được) → **T1.7** người dùng duyệt nghĩa |
 | Việc song song (người dùng) | Kiểm tra krdict.korean.go.kr mở được trong trình duyệt chưa (E2)                                                      |
 | Blocker                         | E2 — krdict không phản hồi từ máy dev                                                                                       |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T1.6 RomanizationService
+- Đã làm: `Domain/Hangul/HangulSyllable` (tách/ghép âm tiết theo công thức Unicode — dùng lại cho `HangulComposer` T3.3) và `RomanizationService.Romanize(text)` theo **Revised Romanization**: ghi theo cách đọc với biến âm giữa các âm tiết trong một từ — nối âm (kể cả phụ âm cuối kép, ㅎ câm), mũi hóa, ㄹ (ㄴ+ㄹ→ll, ㄹ+ㄴ→ll, ㅁㅇ/ㄱㅂ+ㄹ→ㄴ), bật hơi với ㅎ (cả hai chiều), vòm hóa; không ghi âm căng; biến âm không vượt qua khoảng trắng; ký tự khác giữ nguyên. Giới hạn (ghi trong XML doc): chèn ㄴ, ㄴ+ㄹ đọc ㄴㄴ trong từ ghép (신문로), ngoại lệ danh từ giữ "h" (묵호), 밟-. Importer chưa điền `romanization` (để null) — tính khi hiển thị bằng service.
+- File thay đổi: `src/Hanbit.Domain/Hangul/{HangulSyllable.cs, RomanizationService.cs}`, `tests/Hanbit.Domain.Tests/Hangul/RomanizationServiceTests.cs`, `tests/Hanbit.Infrastructure.Tests/Content/HangulDataTests.cs`
+- Kiểm tra: build ✅ (0 warning) · format ✅ · test ✅ — **60 từ** theo RR (phần lớn là ví dụ chính thức: 백암 baegam, 종로 jongno, 왕십리 wangsimni, 독립 dongnip, 좋고 joko, 같이 gachi…), câu có dấu câu, 11.172 âm tiết đều ra chữ Latin thường, và **40 ví dụ trong `hangul.json` khớp 100%** với service (đối chiếu chéo dữ liệu viết tay ↔ thuật toán).
+- Vấn đề / ghi chú: đã bắt được nguồn gốc warning "không tái hiện" ở T0.5/T0.6: `MSB3101 … file is being used by another process` — VS Code (C# Dev Kit) build song song khóa file `obj/`. Không phải lỗi code; build lại là sạch.
 
 ### 2026-11-24 — T1.5 Hanbit.ContentImporter (phần code — chưa chạy import đầy đủ)
 - Đã làm: người dùng đăng ký API key krdict, lưu bằng `dotnet user-secrets` (`Krdict:ApiKey`, không vào repo/chat). Xác minh tài liệu Open API + **gọi thử API thật** (lệnh `probe`, che key): `trans_lang=7` = tiếng Việt, `level=level1` = 초급, `start` = số trang, `num` ≤ 100, XML thật (ARCHITECTURE §8); API **không** hỗ trợ từ khóa rỗng/ký tự đại diện → quét 11.172 âm tiết `가…힣` (`method=start`). Xác minh chính sách bản quyền krdict: **CC BY-SA 2.0 KR** (câu hỏi 1–2 đã đóng; `LICENSE-DATA.md`, ARCHITECTURE §9). `tools/Hanbit.ContentImporter`: `KrdictXmlParser` (đọc phòng thủ, lỗi `<error>` → `KrdictApiException`, 010 = hết lượt ngày), `KrdictVocabMapper` (id `kd-<target_code>`, `vi` ≤ 3 nghĩa, `definition_vi`, `hanja` từ `origin`, 15 từ loại, NFC + gộp khoảng trắng, bỏ mục không có nghĩa Việt; ví dụ để trống vì krdict chỉ có ví dụ tiếng Hàn), `KrdictHttpSearchSource` (cache XML thô `data-raw/krdict-cache/`, không cache trang lỗi, không ghi key; tuần tự + nghỉ 300 ms + thử lại 5→120 s), `KrdictImporter` (gộp theo target_code, lọc đúng cấp, sắp xếp ổn định, **từ chối ghi `vocab-reviews.json`**, ghi file tạm rồi đổi tên), CLI `import`/`probe` + chạy validator sau khi ghi + báo cáo số từ. `ContentJson` bỏ trường null khi ghi. Project `tests/Hanbit.Tools.Tests` (fixture XML thật nhỏ, CC BY-SA ghi công trong `Fixtures/README.md`). Package: `Microsoft.Extensions.Configuration.UserSecrets` + `EnvironmentVariables` 10.0.12 (đọc key).
