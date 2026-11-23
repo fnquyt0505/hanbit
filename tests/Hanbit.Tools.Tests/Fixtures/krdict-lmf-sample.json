@@ -1,0 +1,744 @@
+{
+ "LexicalResource": {
+  "GlobalInformation": {
+   "feat": [
+    {
+     "att": "label",
+     "val": "한국어기초사전 - 국립국어원 제공"
+    }
+   ]
+  },
+  "Lexicon": {
+   "LexicalEntry": [
+    {
+     "Lemma": {
+      "feat": {
+       "att": "writtenForm",
+       "val": "첫가을"
+      }
+     },
+     "Sense": {
+      "Equivalent": [
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "베트남어"
+         },
+         {
+          "att": "lemma",
+          "val": "đầu thu, chớm thu"
+         },
+         {
+          "att": "definition",
+          "val": "Lúc đầu khi mùa thu được bắt đầu."
+         }
+        ]
+       },
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "영어"
+         },
+         {
+          "att": "lemma",
+          "val": "early autumn"
+         },
+         {
+          "att": "definition",
+          "val": "The start of an autumn. "
+         }
+        ]
+       }
+      ],
+      "SenseExample": [
+       {
+        "feat": [
+         {
+          "att": "type",
+          "val": "구"
+         },
+         {
+          "att": "example",
+          "val": "그해 첫가을."
+         }
+        ]
+       }
+      ],
+      "att": "id",
+      "feat": {
+       "att": "definition",
+       "val": "가을이 시작되는 처음 무렵."
+      },
+      "val": "1"
+     },
+     "WordForm": {
+      "feat": [
+       {
+        "att": "type",
+        "val": "발음"
+       },
+       {
+        "att": "pronunciation",
+        "val": "첟까을"
+       },
+       {
+        "att": "sound",
+        "val": "https://dicmedia.korean.go.kr/multimedia/naver/2016/40000/37000/77611_cheotkkaeul.wav"
+       }
+      ]
+     },
+     "att": "id",
+     "feat": [
+      {
+       "att": "homonym_number",
+       "val": "0"
+      },
+      {
+       "att": "lexicalUnit",
+       "val": "단어"
+      },
+      {
+       "att": "partOfSpeech",
+       "val": "명사"
+      },
+      {
+       "att": "vocabularyLevel",
+       "val": "중급"
+      },
+      {
+       "att": "semanticCategory",
+       "val": "개념 > 시간"
+      }
+     ],
+     "val": "77611"
+    },
+    {
+     "Lemma": {
+      "feat": {
+       "att": "writtenForm",
+       "val": "청년"
+      }
+     },
+     "Sense": {
+      "Equivalent": [
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "베트남어"
+         },
+         {
+          "att": "lemma",
+          "val": "thanh niên"
+         },
+         {
+          "att": "definition",
+          "val": "Người trẻ đã lớn hẳn về mặt thể chất hay tinh thần."
+         }
+        ]
+       },
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "영어"
+         },
+         {
+          "att": "lemma",
+          "val": "young person; youth"
+         },
+         {
+          "att": "definition",
+          "val": "A young person who is mature both physically and mentally."
+         }
+        ]
+       }
+      ],
+      "SenseExample": [
+       {
+        "feat": [
+         {
+          "att": "type",
+          "val": "구"
+         },
+         {
+          "att": "example",
+          "val": "건장한 청년."
+         }
+        ]
+       }
+      ],
+      "att": "id",
+      "feat": {
+       "att": "definition",
+       "val": "육체적으로나 정신적으로 다 자란 젊은 사람."
+      },
+      "val": "1"
+     },
+     "WordForm": {
+      "feat": [
+       {
+        "att": "type",
+        "val": "발음"
+       },
+       {
+        "att": "pronunciation",
+        "val": "청년"
+       },
+       {
+        "att": "sound",
+        "val": "https://dicmedia.korean.go.kr/multimedia/sound_file/chieut_2005/cheongnyeon.wav"
+       }
+      ]
+     },
+     "att": "id",
+     "feat": [
+      {
+       "att": "homonym_number",
+       "val": "0"
+      },
+      {
+       "att": "lexicalUnit",
+       "val": "단어"
+      },
+      {
+       "att": "partOfSpeech",
+       "val": "명사"
+      },
+      {
+       "att": "origin",
+       "val": "靑年"
+      },
+      {
+       "att": "vocabularyLevel",
+       "val": "초급"
+      },
+      {
+       "att": "semanticCategory",
+       "val": "인간 > 사람의 종류"
+      }
+     ],
+     "val": "72119"
+    },
+    {
+     "Lemma": {
+      "feat": {
+       "att": "writtenForm",
+       "val": "청소되다"
+      }
+     },
+     "Sense": {
+      "Equivalent": [
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "베트남어"
+         },
+         {
+          "att": "lemma",
+          "val": "được quét dọn, được lau chùi, được dọn dẹp, được vệ sinh"
+         },
+         {
+          "att": "definition",
+          "val": "Thứ bừa bộn và dơ bẩn được dọn dẹp một cách sạch sẽ."
+         }
+        ]
+       },
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "영어"
+         },
+         {
+          "att": "lemma",
+          "val": "be cleaned"
+         },
+         {
+          "att": "definition",
+          "val": "For something dirty and messy to be cleaned."
+         }
+        ]
+       }
+      ],
+      "SenseExample": [
+       {
+        "feat": [
+         {
+          "att": "type",
+          "val": "구"
+         },
+         {
+          "att": "example",
+          "val": "청소된 골목."
+         }
+        ]
+       }
+      ],
+      "att": "id",
+      "feat": [
+       {
+        "att": "syntacticPattern",
+        "val": "1이 청소되다"
+       },
+       {
+        "att": "definition",
+        "val": "더럽고 지저분한 것이 깨끗하게 치워지다."
+       }
+      ],
+      "val": "1"
+     },
+     "WordForm": [
+      {
+       "feat": [
+        {
+         "att": "type",
+         "val": "발음"
+        },
+        {
+         "att": "pronunciation",
+         "val": "청소되다"
+        },
+        {
+         "att": "sound",
+         "val": "https://dicmedia.korean.go.kr/multimedia/sound_file/chieut_2006/cheongsodoeda.wav"
+        }
+       ]
+      },
+      {
+       "feat": [
+        {
+         "att": "type",
+         "val": "발음"
+        },
+        {
+         "att": "pronunciation",
+         "val": "청소뒈다"
+        },
+        {
+         "att": "sound",
+         "val": "https://dicmedia.korean.go.kr/multimedia/sound_file/chieut_2006/cheongsodweda.wav"
+        }
+       ]
+      }
+     ],
+     "att": "id",
+     "feat": [
+      {
+       "att": "homonym_number",
+       "val": "0"
+      },
+      {
+       "att": "lexicalUnit",
+       "val": "단어"
+      },
+      {
+       "att": "partOfSpeech",
+       "val": "동사"
+      },
+      {
+       "att": "origin",
+       "val": "淸掃되다"
+      },
+      {
+       "att": "vocabularyLevel",
+       "val": "초급"
+      },
+      {
+       "att": "semanticCategory",
+       "val": "삶 > 일상 행위"
+      }
+     ],
+     "val": "91894"
+    },
+    {
+     "Lemma": [
+      {
+       "feat": {
+        "att": "writtenForm",
+        "val": "체크 카드"
+       }
+      },
+      {
+       "feat": {
+        "att": "variant",
+        "val": "케크카드, 셰크카드"
+       }
+      }
+     ],
+     "Sense": {
+      "Equivalent": [
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "베트남어"
+         },
+         {
+          "att": "lemma",
+          "val": "thẻ séc"
+         },
+         {
+          "att": "definition",
+          "val": "Thẻ chỉ được thanh toán trong vòng số dư có giá trị mua sản phẩm hay dịch vụ được nhập vào."
+         }
+        ]
+       },
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "영어"
+         },
+         {
+          "att": "lemma",
+          "val": "check card"
+         },
+         {
+          "att": "definition",
+          "val": "A card of which the payment of goods or services is only paid within one's bank balance."
+         }
+        ]
+       }
+      ],
+      "SenseExample": [
+       {
+        "feat": [
+         {
+          "att": "type",
+          "val": "구"
+         },
+         {
+          "att": "example",
+          "val": "체크 카드 가맹점.      "
+         }
+        ]
+       }
+      ],
+      "att": "id",
+      "feat": {
+       "att": "definition",
+       "val": "상품이나 서비스를 구입한 대금이 예금된 잔액 내에서만 지불되는 카드."
+      },
+      "val": "1"
+     },
+     "att": "id",
+     "feat": [
+      {
+       "att": "homonym_number",
+       "val": "0"
+      },
+      {
+       "att": "lexicalUnit",
+       "val": "구"
+      },
+      {
+       "att": "partOfSpeech",
+       "val": "품사 없음"
+      },
+      {
+       "att": "origin",
+       "val": "check card"
+      },
+      {
+       "att": "vocabularyLevel",
+       "val": "초급"
+      },
+      {
+       "att": "annotation",
+       "val": "붙여쓰기를 허용한다."
+      }
+     ],
+     "val": "92434"
+    },
+    {
+     "Lemma": [
+      {
+       "feat": {
+        "att": "writtenForm",
+        "val": "초콜릿"
+       }
+      },
+      {
+       "feat": {
+        "att": "variant",
+        "val": "쵸코렛, 초코렛"
+       }
+      }
+     ],
+     "Sense": {
+      "Equivalent": [
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "베트남어"
+         },
+         {
+          "att": "lemma",
+          "val": "sô-cô-la"
+         },
+         {
+          "att": "definition",
+          "val": "Loại thức ăn ngọt thường có màu nâu đen được làm bằng bột cacao trộn với những thứ như sữa và đường."
+         }
+        ]
+       },
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "영어"
+         },
+         {
+          "att": "lemma",
+          "val": "chocolate"
+         },
+         {
+          "att": "definition",
+          "val": "Sweet, mostly dark-colored food, that is made by mixing cocoa powder, milk, sugar, etc.  "
+         }
+        ]
+       }
+      ],
+      "SenseExample": [
+       {
+        "feat": [
+         {
+          "att": "type",
+          "val": "구"
+         },
+         {
+          "att": "example",
+          "val": "초콜릿 과자."
+         }
+        ]
+       }
+      ],
+      "att": "id",
+      "feat": {
+       "att": "definition",
+       "val": "코코아 가루에 우유, 설탕 등을 섞어 만든, 주로 검은색의 달콤한 음식."
+      },
+      "val": "1"
+     },
+     "att": "id",
+     "feat": [
+      {
+       "att": "homonym_number",
+       "val": "0"
+      },
+      {
+       "att": "lexicalUnit",
+       "val": "단어"
+      },
+      {
+       "att": "partOfSpeech",
+       "val": "명사"
+      },
+      {
+       "att": "origin",
+       "val": "chocolate"
+      },
+      {
+       "att": "vocabularyLevel",
+       "val": "초급"
+      },
+      {
+       "att": "semanticCategory",
+       "val": "식생활 > 음식"
+      },
+      {
+       "att": "subjectCategiory",
+       "val": "음식 주문하기"
+      }
+     ],
+     "val": "72128"
+    },
+    {
+     "Lemma": {
+      "feat": {
+       "att": "writtenForm",
+       "val": "첫"
+      }
+     },
+     "Sense": {
+      "Equivalent": [
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "베트남어"
+         },
+         {
+          "att": "lemma",
+          "val": "đầu, đầu tiên, trước tiên"
+         },
+         {
+          "att": "definition",
+          "val": "Trước tiên hết."
+         }
+        ]
+       },
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "영어"
+         },
+         {
+          "att": "lemma",
+          "val": "first"
+         },
+         {
+          "att": "definition",
+          "val": "Of the very first."
+         }
+        ]
+       }
+      ],
+      "SenseExample": [
+       {
+        "feat": [
+         {
+          "att": "type",
+          "val": "구"
+         },
+         {
+          "att": "example",
+          "val": "첫 경험."
+         }
+        ]
+       }
+      ],
+      "att": "id",
+      "feat": {
+       "att": "definition",
+       "val": "맨 처음의."
+      },
+      "val": "1"
+     },
+     "WordForm": {
+      "feat": [
+       {
+        "att": "type",
+        "val": "발음"
+       },
+       {
+        "att": "pronunciation",
+        "val": "첟"
+       },
+       {
+        "att": "sound",
+        "val": "https://dicmedia.korean.go.kr/multimedia/sound_file/chieut_2005/cheot.wav"
+       }
+      ]
+     },
+     "att": "id",
+     "feat": [
+      {
+       "att": "homonym_number",
+       "val": "0"
+      },
+      {
+       "att": "lexicalUnit",
+       "val": "단어"
+      },
+      {
+       "att": "partOfSpeech",
+       "val": "관형사"
+      },
+      {
+       "att": "vocabularyLevel",
+       "val": "초급"
+      },
+      {
+       "att": "semanticCategory",
+       "val": "개념 > 순서"
+      }
+     ],
+     "val": "77610"
+    },
+    {
+     "Lemma": {
+      "feat": {
+       "att": "writtenForm",
+       "val": "첫 단추를 끼우다"
+      }
+     },
+     "Sense": {
+      "Equivalent": [
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "베트남어"
+         },
+         {
+          "att": "lemma",
+          "val": "(cài cúc đầu), bắt tay vào, bước chân vào"
+         },
+         {
+          "att": "definition",
+          "val": "Bắt đầu công việc hay xuất  phát một quá trình mới."
+         }
+        ]
+       },
+       {
+        "feat": [
+         {
+          "att": "language",
+          "val": "영어"
+         },
+         {
+          "att": "lemma",
+          "val": "fasten the first button"
+         },
+         {
+          "att": "definition",
+          "val": "To start a new process or task."
+         }
+        ]
+       }
+      ],
+      "SenseExample": [
+       {
+        "feat": [
+         {
+          "att": "type",
+          "val": "문장"
+         },
+         {
+          "att": "example",
+          "val": "그 가수는 실수 없이 데뷔 무대를 치르며 가수 생활의 첫 단추를 끼웠다."
+         }
+        ]
+       }
+      ],
+      "att": "id",
+      "feat": [
+       {
+        "att": "syntacticPattern",
+        "val": "1이 2의 첫 단추를 끼우다"
+       },
+       {
+        "att": "definition",
+        "val": "새로운 과정을 출발하거나 일을 시작하다."
+       }
+      ],
+      "val": "1"
+     },
+     "att": "id",
+     "feat": {
+      "att": "lexicalUnit",
+      "val": "관용구"
+     },
+     "val": "77610"
+    }
+   ]
+  }
+ }
+}

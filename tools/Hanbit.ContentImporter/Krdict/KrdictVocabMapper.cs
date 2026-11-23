@@ -42,28 +42,40 @@ public static class KrdictVocabMapper
     public static PartOfSpeech MapPos(string pos) =>
         PartsOfSpeech.TryGetValue(pos.Trim(), out var value) ? value : PartOfSpeech.None;
 
-    /// <summary>null nếu mục từ không có nghĩa tiếng Việt (không dùng được cho người học Việt).</summary>
+    /// <summary>
+    /// null nếu mục từ không có tiếng Việt (không dùng được cho người học Việt).
+    /// <c>vi</c>: nghĩa của tối đa 3 sense (ngăn bởi "; "), bỏ placeholder "(Không có từ tương ứng)" và bỏ phần nghĩa
+    /// (tách theo dấu phẩy) đã xuất hiện ở sense trước. Không còn nghĩa nào → dùng định nghĩa tiếng Việt đầu tiên.
+    /// </summary>
     public static VocabItem? Map(KrdictEntry entry)
     {
-        var meanings = entry.Senses
-            .OrderBy(s => s.Order)
-            .Select(s => Normalize(s.TransWord))
-            .OfType<string>()
-            .Distinct(StringComparer.Ordinal)
-            .Take(MaxMeanings)
-            .ToList();
+        var senses = entry.Senses.OrderBy(s => s.Order).ToList();
+        var definition = senses.Select(s => Normalize(s.TransDefinition)).FirstOrDefault(d => d is not null);
 
-        if (meanings.Count == 0)
+        var meanings = new List<string>();
+        var seenParts = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var meaning in senses.Select(s => Normalize(s.TransWord)).OfType<string>().Where(m => !IsPlaceholder(m)))
+        {
+            // krdict đôi khi có ";" ngay trong 1 nghĩa (VD 돈 đơn vị: "Don; tiền") → tách theo cả "," và ";"
+            var newParts = meaning.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(seenParts.Add)
+                .ToList();
+            if (newParts.Count > 0 && meanings.Count < MaxMeanings)
+            {
+                meanings.Add(string.Join(", ", newParts));
+            }
+        }
+
+        var vi = meanings.Count > 0 ? string.Join("; ", meanings) : definition?.TrimEnd('.');
+        if (string.IsNullOrEmpty(vi))
         {
             return null;
         }
 
-        var definition = entry.Senses.OrderBy(s => s.Order).Select(s => Normalize(s.TransDefinition)).FirstOrDefault(d => d is not null);
-
         return new VocabItem(
             Id: $"kd-{entry.TargetCode}",
             Ko: Normalize(entry.Word) ?? entry.Word,
-            Vi: string.Join("; ", meanings),
+            Vi: vi,
             Pos: MapPos(entry.Pos),
             Grade: MapGrade(entry.WordGrade),
             Examples: [], // ví dụ krdict chỉ có tiếng Hàn — Example cần cả nghĩa Việt → để trống
@@ -74,7 +86,7 @@ public static class KrdictVocabMapper
             Hanja: entry.Origin is not null && entry.Origin.Any(IsHan) ? entry.Origin : null);
     }
 
-    /// <summary>NFC (so sánh đáp án ổn định — RULES §7) + gộp khoảng trắng thừa; rỗng → null.</summary>
+    /// <summary>Giải mã HTML entity (&amp;apos; …) + gộp khoảng trắng thừa + NFC (so sánh đáp án ổn định — RULES §7); rỗng → null.</summary>
     public static string? Normalize(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -82,9 +94,14 @@ public static class KrdictVocabMapper
             return null;
         }
 
-        var collapsed = string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
-        return collapsed.Replace(" ,", ",", StringComparison.Ordinal).Normalize(System.Text.NormalizationForm.FormC);
+        var decoded = System.Net.WebUtility.HtmlDecode(text);
+        var collapsed = string.Join(' ', decoded.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        return collapsed.Length == 0 ? null : collapsed.Replace(" ,", ",", StringComparison.Ordinal).Normalize(System.Text.NormalizationForm.FormC);
     }
+
+    /// <summary>krdict ghi "(Không có từ tương ứng)" khi sense không có từ tiếng Việt tương đương.</summary>
+    private static bool IsPlaceholder(string meaning) =>
+        meaning.StartsWith('(') && meaning.EndsWith(')') && meaning.Contains("không có từ tương ứng", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsHan(char c) => c is (>= '一' and <= '鿿') or (>= '㐀' and <= '䶿') or (>= '豈' and <= '﫿');
 }

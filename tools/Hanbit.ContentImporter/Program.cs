@@ -1,11 +1,10 @@
-// Hanbit.ContentImporter — nhập từ vựng 한국어기초사전 (krdict Open API) → content/vocab/krdict-<grade>.json
+// Hanbit.ContentImporter — nhập từ vựng 한국어기초사전 → content/vocab/krdict-<grade>.json
 //
-//   dotnet run --project tools/Hanbit.ContentImporter -- import --grade beginner --out content/vocab/krdict-beginner.json
-//       [--cache data-raw/krdict-cache] [--concurrency 1] [--delay-ms 300] [--syllables 가나학] [--content-root content]
-//   dotnet run --project tools/Hanbit.ContentImporter -- probe search "q=...&translated=y" [maxChars]
-//
-// API key: dotnet user-secrets set "Krdict:ApiKey" "..." --project tools/Hanbit.ContentImporter
-// (hoặc biến môi trường Krdict__ApiKey). Key không bao giờ được in ra.
+//   dotnet run --project tools/Hanbit.ContentImporter -- import --grade beginner --input data-raw --out content/vocab/krdict-beginner.json [--content-root content]
+//       --input: file JSON "사전 전체 내려받기" (LMF) hoặc thư mục chứa các file đó (data-raw/, không commit).
+//   dotnet run --project tools/Hanbit.ContentImporter -- probe search "q=...&translated=y&trans_lang=7" [maxChars]
+//       Tra 1 truy vấn Open API (cần key: dotnet user-secrets set "Krdict:ApiKey" "..." --project tools/Hanbit.ContentImporter).
+//       Không dùng API để import hàng loạt: server chặn theo tần suất (PROGRESS E2).
 using System.Globalization;
 using System.Text;
 
@@ -24,44 +23,16 @@ Console.CancelKeyPress += (_, e) =>
     cancellation.Cancel();
 };
 
-var config = new ConfigurationBuilder()
-    .AddUserSecrets<Program>()
-    .AddEnvironmentVariables()
-    .Build();
-
-var apiKey = config["Krdict:ApiKey"];
-if (string.IsNullOrWhiteSpace(apiKey))
+return args switch
 {
-    Console.Error.WriteLine("Chưa có Krdict:ApiKey. Chạy: dotnet user-secrets set \"Krdict:ApiKey\" \"<key>\" --project tools/Hanbit.ContentImporter");
-    return 2;
-}
-
-using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
-http.DefaultRequestHeaders.UserAgent.ParseAdd("Hanbit.ContentImporter/1.0");
-
-try
-{
-    return args switch
-    {
-        ["import", .. var rest] => await ImportAsync(ParseOptions(rest)),
-        ["probe", var endpoint, var query, .. var rest] => await ProbeAsync(endpoint, query, rest),
-        _ => Usage(),
-    };
-}
-catch (KrdictApiException ex) when (ex.IsDailyLimitExceeded)
-{
-    Console.Error.WriteLine("✖ Hết lượt gọi API trong ngày (50.000). Các trang đã tải nằm trong cache — chạy lại vào ngày mai để tiếp tục.");
-    return 1;
-}
-catch (KrdictApiException ex)
-{
-    Console.Error.WriteLine($"✖ {ex.Message}");
-    return 1;
-}
+    ["import", .. var rest] => await ImportAsync(ParseOptions(rest)),
+    ["probe", var endpoint, var query, .. var rest] => await ProbeAsync(endpoint, query, rest),
+    _ => Usage(),
+};
 
 async Task<int> ImportAsync(Dictionary<string, string> options)
 {
-    if (!options.TryGetValue("grade", out var gradeText) || !options.TryGetValue("out", out var output))
+    if (!options.TryGetValue("grade", out var gradeText) || !options.TryGetValue("input", out var input) || !options.TryGetValue("out", out var output))
     {
         return Usage();
     }
@@ -73,21 +44,16 @@ async Task<int> ImportAsync(Dictionary<string, string> options)
         "advanced" => VocabGrade.Advanced,
         _ => throw new ArgumentException($"--grade không hợp lệ: {gradeText} (beginner|intermediate|advanced)"),
     };
-    var cacheDir = options.GetValueOrDefault("cache", Path.Combine("data-raw", "krdict-cache"));
-    var concurrency = int.Parse(options.GetValueOrDefault("concurrency", "1"), CultureInfo.InvariantCulture);
-    var delayMs = int.Parse(options.GetValueOrDefault("delay-ms", "300"), CultureInfo.InvariantCulture);
-    var syllables = options.TryGetValue("syllables", out var only) ? only.ToList() : KrdictImporter.AllSyllables().ToList();
 
-    Console.WriteLine($"Nhập từ vựng {gradeText} từ 한국어기초사전: {syllables.Count} âm tiết, cache '{cacheDir}', song song {concurrency}.");
-    var source = new KrdictHttpSearchSource(http, apiKey, cacheDir, TimeSpan.FromMilliseconds(delayMs), log: Console.WriteLine);
-    var importer = new KrdictImporter(source, Console.WriteLine);
-    var (items, report) = await importer.ImportAsync(grade, syllables, concurrency, cancellation.Token);
+    var files = KrdictImporter.ResolveInputFiles(input);
+    Console.WriteLine($"Nhập từ vựng {gradeText} từ 한국어기초사전: {files.Count} file trong '{input}'.");
+    var (items, report) = await KrdictImporter.ImportAsync(grade, files, cancellation.Token);
     await KrdictImporter.WriteAsync(output, items, cancellation.Token);
 
-    Console.WriteLine();
     Console.WriteLine($"✔ Đã ghi {output}");
-    Console.WriteLine($"  Âm tiết quét: {report.SyllablesQueried} · trang API/cache: {report.PagesFetched}");
-    Console.WriteLine($"  Mục từ tìm thấy: {report.EntriesFound} · nhập: {report.ImportedCount} · bỏ qua (không có nghĩa tiếng Việt): {report.SkippedWithoutVietnamese.Count}");
+    Console.WriteLine($"  File đọc: {report.FilesRead} · mục quét: {report.EntriesScanned} · đúng cấp {gradeText}: {report.MatchingGrade}");
+    Console.WriteLine("  Loại trừ (không phải 단어): " + (report.ExcludedNonWordUnits.Count == 0 ? "0" : string.Join(", ", report.ExcludedNonWordUnits.Select(u => $"{u.Key} {u.Value}"))));
+    Console.WriteLine($"  Đã nhập: {report.ImportedCount} từ · bỏ qua (không có nghĩa tiếng Việt): {report.SkippedWithoutVietnamese.Count}");
     Console.WriteLine("  Theo từ loại: " + string.Join(", ", report.CountByPos.Select(p => $"{p.Key} {p.Value}")));
     foreach (var skipped in report.SkippedWithoutVietnamese.Take(20))
     {
@@ -109,9 +75,17 @@ async Task<int> ImportAsync(Dictionary<string, string> options)
 
 async Task<int> ProbeAsync(string endpoint, string query, string[] rest)
 {
+    var apiKey = new ConfigurationBuilder().AddUserSecrets<Program>().AddEnvironmentVariables().Build()["Krdict:ApiKey"];
+    if (string.IsNullOrWhiteSpace(apiKey))
+    {
+        Console.Error.WriteLine("Chưa có Krdict:ApiKey. Chạy: dotnet user-secrets set \"Krdict:ApiKey\" \"<key>\" --project tools/Hanbit.ContentImporter");
+        return 2;
+    }
+
     var maxChars = rest.Length > 0 ? int.Parse(rest[0], CultureInfo.InvariantCulture) : 4000;
-    using var response = await http.GetAsync(new Uri($"https://krdict.korean.go.kr/api/{endpoint}?key={Uri.EscapeDataString(apiKey)}&{query}"));
-    var body = (await response.Content.ReadAsStringAsync()).Replace(apiKey, "***", StringComparison.Ordinal);
+    using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+    using var response = await http.GetAsync(new Uri($"https://krdict.korean.go.kr/api/{endpoint}?key={Uri.EscapeDataString(apiKey)}&{query}"), cancellation.Token);
+    var body = (await response.Content.ReadAsStringAsync(cancellation.Token)).Replace(apiKey, "***", StringComparison.Ordinal);
     Console.WriteLine($"HTTP {(int)response.StatusCode} {response.Content.Headers.ContentType}");
     Console.WriteLine(body.Length > maxChars ? body[..maxChars] + $"\n…(cắt, tổng {body.Length} ký tự)" : body);
     return 0;
@@ -130,7 +104,7 @@ static Dictionary<string, string> ParseOptions(string[] args)
 
 static int Usage()
 {
-    Console.Error.WriteLine("Dùng: import --grade beginner --out content/vocab/krdict-beginner.json [--cache dir] [--concurrency 1] [--delay-ms 300] [--syllables 가나]");
+    Console.Error.WriteLine("Dùng: import --grade beginner --input data-raw --out content/vocab/krdict-beginner.json [--content-root content]");
     Console.Error.WriteLine("      probe search|view \"q=...\" [maxChars]");
     return 2;
 }

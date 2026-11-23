@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Text.Json;
 
 using Hanbit.Domain.Content;
@@ -8,68 +7,53 @@ namespace Hanbit.ContentImporter.Krdict;
 
 /// <summary>Kết quả import để báo cáo (DoD: báo cáo số từ).</summary>
 public sealed record KrdictImportReport(
-    int SyllablesQueried,
-    int PagesFetched,
-    int EntriesFound,
+    int FilesRead,
+    int EntriesScanned,
+    int MatchingGrade,
+    IReadOnlyDictionary<string, int> ExcludedNonWordUnits,
     int ImportedCount,
     IReadOnlyList<string> SkippedWithoutVietnamese,
     IReadOnlyDictionary<PartOfSpeech, int> CountByPos);
 
 /// <summary>
-/// Quét mọi âm tiết Hangul (가…힣) bằng tìm kiếm "bắt đầu bằng" + lọc cấp độ → toàn bộ từ của cấp đó
-/// (API không hỗ trợ từ khóa rỗng/ký tự đại diện — đã thử). Gộp theo target_code, map sang VocabItem, sắp xếp ổn định.
+/// Nhập từ vựng một cấp độ từ các file LMF "사전 전체 내려받기": lọc đúng cấp + chỉ <c>단어</c>
+/// (cụm từ/quán ngữ/tục ngữ/mẫu ngữ pháp soạn riêng), gộp theo mã mục từ, map sang <see cref="VocabItem"/>, sắp xếp ổn định.
 /// </summary>
-public sealed class KrdictImporter(IKrdictSearchSource source, Action<string>? log = null)
+public static class KrdictImporter
 {
-    public const char FirstSyllable = '가';
-    public const char LastSyllable = '힣';
+    public const string WordUnit = "단어";
 
-    public static string LevelParameter(VocabGrade grade) => grade switch
-    {
-        VocabGrade.Beginner => "level1",
-        VocabGrade.Intermediate => "level2",
-        VocabGrade.Advanced => "level3",
-        _ => throw new ArgumentOutOfRangeException(nameof(grade), grade, "Chỉ hỗ trợ beginner/intermediate/advanced."),
-    };
-
-    public async Task<(IReadOnlyList<VocabItem> Items, KrdictImportReport Report)> ImportAsync(
+    public static async Task<(IReadOnlyList<VocabItem> Items, KrdictImportReport Report)> ImportAsync(
         VocabGrade grade,
-        IEnumerable<char> syllables,
-        int maxConcurrency,
+        IReadOnlyList<string> files,
         CancellationToken cancellationToken)
     {
-        var level = LevelParameter(grade);
-        var syllableList = syllables.ToList();
-        var entries = new ConcurrentDictionary<string, KrdictEntry>(StringComparer.Ordinal);
-        var pages = 0;
-        var done = 0;
+        var entries = new Dictionary<string, KrdictEntry>(StringComparer.Ordinal);
+        var excludedUnits = new Dictionary<string, int>(StringComparer.Ordinal);
+        var scanned = 0;
+        var matching = 0;
 
-        await Parallel.ForEachAsync(
-            syllableList,
-            new ParallelOptions { MaxDegreeOfParallelism = maxConcurrency, CancellationToken = cancellationToken },
-            async (syllable, ct) =>
+        foreach (var file in files)
+        {
+            foreach (var entry in await KrdictLmfReader.ReadAsync(file, cancellationToken))
             {
-                for (var page = 1; ; page++)
+                scanned++;
+                if (KrdictVocabMapper.MapGrade(entry.WordGrade) != grade)
                 {
-                    var result = KrdictXmlParser.ParseSearch(await source.GetStartsWithPageAsync(syllable, level, page, ct));
-                    Interlocked.Increment(ref pages);
-                    foreach (var entry in result.Items.Where(e => KrdictVocabMapper.MapGrade(e.WordGrade) == grade))
-                    {
-                        entries.TryAdd(entry.TargetCode, entry);
-                    }
-
-                    if (result.Items.Count == 0 || page * KrdictHttpSearchSource.PageSize >= result.Total)
-                    {
-                        break;
-                    }
+                    continue;
                 }
 
-                var count = Interlocked.Increment(ref done);
-                if (count % 1000 == 0 || count == syllableList.Count)
+                matching++;
+                if (entry.LexicalUnit != WordUnit)
                 {
-                    log?.Invoke($"  … {count}/{syllableList.Count} âm tiết, {entries.Count} mục từ");
+                    var unit = entry.LexicalUnit ?? "(không rõ)";
+                    excludedUnits[unit] = excludedUnits.GetValueOrDefault(unit) + 1;
+                    continue;
                 }
-            });
+
+                entries.TryAdd(entry.TargetCode, entry);
+            }
+        }
 
         var items = new List<VocabItem>();
         var skipped = new List<string>();
@@ -92,14 +76,32 @@ public sealed class KrdictImporter(IKrdictSearchSource source, Action<string>? l
             .ToList();
 
         var report = new KrdictImportReport(
-            SyllablesQueried: syllableList.Count,
-            PagesFetched: pages,
-            EntriesFound: entries.Count,
+            FilesRead: files.Count,
+            EntriesScanned: scanned,
+            MatchingGrade: matching,
+            ExcludedNonWordUnits: excludedUnits,
             ImportedCount: sorted.Count,
             SkippedWithoutVietnamese: skipped.Order(StringComparer.Ordinal).ToList(),
             CountByPos: sorted.GroupBy(v => v.Pos).OrderByDescending(g => g.Count()).ToDictionary(g => g.Key, g => g.Count()));
 
         return (sorted, report);
+    }
+
+    /// <summary>File LMF trong <paramref name="input"/> (1 file .json hoặc thư mục chứa các file .json).</summary>
+    public static IReadOnlyList<string> ResolveInputFiles(string input)
+    {
+        if (File.Exists(input))
+        {
+            return [input];
+        }
+
+        if (Directory.Exists(input))
+        {
+            var files = Directory.GetFiles(input, "*.json", SearchOption.TopDirectoryOnly).Order(StringComparer.Ordinal).ToList();
+            return files.Count > 0 ? files : throw new FileNotFoundException($"Thư mục '{input}' không có file .json nào.");
+        }
+
+        throw new FileNotFoundException($"Không tìm thấy file/thư mục đầu vào '{input}'.");
     }
 
     /// <summary>Ghi file vocab. Từ chối ghi vào vocab-reviews.json (dữ liệu của người duyệt — RULES §7).</summary>
@@ -118,13 +120,5 @@ public sealed class KrdictImporter(IKrdictSearchSource source, Action<string>? l
         }
 
         File.Move(temp, outputPath, overwrite: true);
-    }
-
-    public static IEnumerable<char> AllSyllables()
-    {
-        for (var c = FirstSyllable; c <= LastSyllable; c++)
-        {
-            yield return c;
-        }
     }
 }

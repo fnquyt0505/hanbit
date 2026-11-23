@@ -44,8 +44,8 @@ dotnet test --filter "Category!=E2E"           # bỏ qua E2E (nhanh hơn)
 dotnet watch --project src/Hanbit.Web          # chạy local, hot reload
 dotnet format                                  # định dạng code
 dotnet run --project tools/Hanbit.ContentValidator -- ./content   # kiểm tra dữ liệu
-dotnet run --project tools/Hanbit.ContentImporter -- import --grade beginner --out content/vocab/krdict-beginner.json   # krdict Open API, cache data-raw/krdict-cache
-# API key (1 lần, KHÔNG commit): dotnet user-secrets set "Krdict:ApiKey" "<key>" --project tools/Hanbit.ContentImporter
+dotnet run --project tools/Hanbit.ContentImporter -- import --grade beginner --input data-raw --out content/vocab/krdict-beginner.json   # file LMF "사전 전체 내려받기" trong data-raw/
+# Tra lẻ Open API (lệnh probe) cần key — 1 lần, KHÔNG commit: dotnet user-secrets set "Krdict:ApiKey" "<key>" --project tools/Hanbit.ContentImporter
 
 # Docker (giống môi trường Render)
 docker build -t hanbit .

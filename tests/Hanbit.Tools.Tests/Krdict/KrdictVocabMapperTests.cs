@@ -48,6 +48,62 @@ public class KrdictVocabMapperTests
     }
 
     [Fact]
+    public void Map_PlaceholderMeaning_IsDropped()
+    {
+        // Dữ liệu thật (물): sense 3 không có từ tương đương
+        var item = KrdictVocabMapper.Map(Entry(
+            new KrdictSense(1, "x", "nước", null),
+            new KrdictSense(2, "x", "nước triều, thủy triều", null),
+            new KrdictSense(3, "x", "(Không có từ tương ứng)", null))).ShouldNotBeNull();
+
+        item.Vi.ShouldBe("nước; nước triều, thủy triều");
+    }
+
+    [Fact]
+    public void Map_OnlyPlaceholder_FallsBackToDefinition()
+    {
+        // Dữ liệu thật (지각하다)
+        var item = KrdictVocabMapper.Map(Entry(
+            new KrdictSense(1, "x", "(Không có từ tương ứng)", "Đi làm hoặc đi học trễ hơn giờ đã định."))).ShouldNotBeNull();
+
+        item.Vi.ShouldBe("Đi làm hoặc đi học trễ hơn giờ đã định");
+        item.DefinitionVi.ShouldBe("Đi làm hoặc đi học trễ hơn giờ đã định.");
+    }
+
+    [Fact]
+    public void Map_PartsRepeatedAcrossSenses_AreDeduplicated()
+    {
+        // Dữ liệu thật (불편하다): "khó chịu" lặp ở sense 3; sense 3 bị bỏ hẳn vì không còn phần mới
+        var item = KrdictVocabMapper.Map(Entry(
+            new KrdictSense(1, "x", "bất tiện", null),
+            new KrdictSense(2, "x", "khó chịu, bực bội, bứt rứt", null),
+            new KrdictSense(3, "x", "khó chịu", null),
+            new KrdictSense(4, "x", "bực bội, phiền", null))).ShouldNotBeNull();
+
+        item.Vi.ShouldBe("bất tiện; khó chịu, bực bội, bứt rứt; phiền");
+    }
+
+    [Fact]
+    public void Map_SemicolonInsideMeaning_IsDeduplicatedToo()
+    {
+        // Dữ liệu thật (접시): sense 2 "jeopsi; đĩa" lặp "đĩa" của sense 1
+        var item = KrdictVocabMapper.Map(Entry(
+            new KrdictSense(1, "x", "đĩa", null),
+            new KrdictSense(2, "x", "jeopsi; đĩa", null))).ShouldNotBeNull();
+
+        item.Vi.ShouldBe("đĩa; jeopsi");
+    }
+
+    [Fact]
+    public void Map_HtmlEntities_AreDecoded()
+    {
+        var item = KrdictVocabMapper.Map(Entry(
+            new KrdictSense(1, "x", "hậu tố", "Hậu tố thêm nghĩa &apos;thực hiện hành động đó&apos; &amp; tạo thành động từ."))).ShouldNotBeNull();
+
+        item.DefinitionVi.ShouldBe("Hậu tố thêm nghĩa 'thực hiện hành động đó' & tạo thành động từ.");
+    }
+
+    [Fact]
     public void Map_MessyWhitespace_IsCollapsed()
     {
         var item = KrdictVocabMapper.Map(Entry(new KrdictSense(1, "x", "cửa hàng, cửa hiệu,  cửa tiệm ,\n quầy", null))).ShouldNotBeNull();
