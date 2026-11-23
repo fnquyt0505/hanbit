@@ -71,6 +71,8 @@ jobs:
           curl -fsS http://localhost:8080/css/app.css | grep -q 'tailwindcss v4'
           curl -fsS -o /dev/null http://localhost:8080/lib/alpinejs/alpine.min.js
           test "$(docker exec hanbit id -u)" != "0"
+          docker exec hanbit test -f /app/content/hangul.json
+          docker exec hanbit test -f /app/content/LICENSE-DATA.md
 
       - name: Container logs
         if: always()

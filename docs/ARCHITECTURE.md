@@ -197,6 +197,9 @@ public sealed record DailyActivity(DateOnly Date, int Xp, int Reviews);
 - Lọc **초급**; lấy 표제어, 발음, 품사, 한자, nghĩa & định nghĩa tiếng Việt, ví dụ. Id ổn định `kd-<target_code>`, gắn `SourceRef`.
 - Không ghi đè `vocab-reviews.json`.
 - ⚠️ `TODO(verify)`: định dạng file tải về và mã ngôn ngữ tiếng Việt của API.
+- `vocab-reviews.json` (T1.4) — mảng bản duyệt, **chỉ người duyệt sửa**:
+  `[ { "id": "kd-123", "reviewed": true, "vi": "…", "definition_vi": "…", "note": "…" } ]` (`vi`, `definition_vi`, `note` tùy chọn).
+  `VocabReviewMerger` (Domain) gộp vào từ krdict: `reviewed` lấy theo bản duyệt, `vi`/`definition_vi` thay nếu có. Repository và validator dùng chung hàm này → "chỉ dùng từ đã duyệt" luôn tính trên dữ liệu sau gộp.
 
 ## 9. Giấy phép & ghi công
 
@@ -212,5 +215,7 @@ public sealed record DailyActivity(DateOnly Date, int Xp, int Reviews);
 
 ## 11. Cấu hình & secrets
 
-`appsettings.json`: `{ "Content": { "RootPath": "content" } }`
+`appsettings.json`: `{ "Content": { "RootPath": "content" } }` — đường dẫn tương đối tính từ `ContentRootPath` (Docker: `/app/content`).
+`appsettings.Development.json`: `RootPath: "../../content"` (repo root), `CacheDuration: "00:00:02"` (sửa content thấy ngay). Production: cache không hết hạn.
+`/health` gồm check `content` (đọc được `hangul.json`) → Render phát hiện image thiếu/sai `content/`.
 Importer: `dotnet user-secrets set "Krdict:ApiKey" "..."` — không commit, không đưa lên Render.
