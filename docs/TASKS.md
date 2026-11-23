@@ -5,7 +5,7 @@
 
 ## Giai đoạn 0 — Khởi tạo solution
 
-- [ ] **T0.1** Tạo `Hanbit.sln` + 4 project (`Domain`, `Application`, `Infrastructure` là classlib; `Web` từ `dotnet new mvc`, **không auth**), reference đúng hướng phụ thuộc; xóa Bootstrap/jQuery mặc định của template. DoD: `dotnet run --project src/Hanbit.Web` mở được trang.
+- [x] **T0.1** Tạo `Hanbit.sln` + 4 project (`Domain`, `Application`, `Infrastructure` là classlib; `Web` từ `dotnet new mvc`, **không auth**), reference đúng hướng phụ thuộc; xóa Bootstrap/jQuery mặc định của template. DoD: `dotnet run --project src/Hanbit.Web` mở được trang.
 - [ ] **T0.2** `Directory.Build.props` (net10.0, Nullable, TreatWarningsAsErrors), `.editorconfig`, `.gitignore` (thêm `data-raw/`, `wwwroot/css/app.css`), `global.json`. DoD: `dotnet build` 0 warning.
 - [ ] **T0.3** 4 project test (xUnit + Shouldly; `Hanbit.Web.Tests` dùng `WebApplicationFactory`; Playwright), mỗi project 1 test mẫu. DoD: `dotnet test` xanh.
 - [ ] **T0.4** Tailwind v4 standalone CLI (`Styles/input.css` → `wwwroot/css/app.css`, MSBuild target trước build) + vendor Alpine.js vào `wwwroot/lib`. DoD: class Tailwind và `x-data` hoạt động.
