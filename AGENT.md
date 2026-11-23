@@ -20,13 +20,20 @@ Bạn là AI agent phát triển **Hanbit (한빛)** — web học tiếng Hàn 
 1. Đọc PROGRESS.md → xác định task tiếp theo
 2. Đọc mô tả + DoD của task trong TASKS.md
 3. Nêu ngắn gọn kế hoạch (project/file sẽ tạo/sửa) trước khi code
-4. Code — chỉ trong phạm vi task
-5. Chạy: dotnet build && dotnet test   (0 warning, test xanh)
-6. Đánh dấu [x] trong TASKS.md
-7. Thêm mục nhật ký vào PROGRESS.md + cập nhật "Trạng thái hiện tại"
-8. Commit: <type>(<scope>): <mô tả> [T#.#]
-9. Dừng lại, báo cáo người dùng. KHÔNG tự làm task kế tiếp trừ khi được yêu cầu.
+4. git switch main && git pull → git switch -c <NN>-<type>-T<##>-<slug>
+   (VD: 03-ci-T02a-ci-auto-merge; NN = số thứ tự, T## = mã task bỏ dấu chấm, slug không dấu)
+   Nhánh task trước chưa merge vào main → báo người dùng, không tạo nhánh chồng.
+5. Code — chỉ trong phạm vi task
+6. Chạy: dotnet build && dotnet format --verify-no-changes && dotnet test   (0 warning, test xanh)
+7. Đánh dấu [x] trong TASKS.md
+8. Thêm mục nhật ký vào PROGRESS.md + cập nhật "Trạng thái hiện tại"
+9. Commit: <type>(<scope>): <mô tả> [T#.#]
+10. git push -u origin <nhánh> → gh pr create --fill → gh pr merge --auto --squash
+    CI (build-test) xanh → GitHub tự merge vào main + xóa nhánh. CI đỏ → sửa trên cùng nhánh.
+11. Dừng lại, báo cáo người dùng (kèm link PR). KHÔNG tự làm task kế tiếp trừ khi được yêu cầu.
 ```
+
+Không commit thẳng lên `main` — ruleset `main` bắt buộc check CI `build-test` pass.
 
 ## 3. Lệnh thường dùng
 
