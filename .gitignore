@@ -484,5 +484,6 @@ $RECYCLE.BIN/
 # Hanbit
 data-raw/
 src/Hanbit.Web/wwwroot/css/app.css
+.tools/
 # Template VisualStudio ignore *.e2e — Git trên Windows không phân biệt hoa thường nên khớp cả thư mục này
 !/tests/Hanbit.E2E/

@@ -1,0 +1,12 @@
+/* Nguồn Tailwind v4 → build ra wwwroot/css/app.css (Tailwind.targets). Không sửa app.css. */
+@import "tailwindcss" source(none);
+
+/* Chỉ quét các nơi có class Tailwind */
+@source "../Views";
+@source "../TagHelpers";
+@source "../wwwroot/js";
+
+/* Alpine.js: ẩn phần tử x-cloak cho tới khi Alpine khởi tạo xong */
+[x-cloak] {
+  display: none !important;
+}

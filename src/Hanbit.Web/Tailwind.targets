@@ -1,0 +1,91 @@
+<Project>
+  <!--
+    Tailwind CSS v4 standalone CLI (không cần Node/npm).
+    - Tự tải CLI đúng OS/CPU vào <repo>/.tools/tailwindcss/<version>/ (gitignored), kiểm tra SHA-256.
+    - Build Styles/input.css → wwwroot/css/app.css trước mỗi lần build (incremental), luôn minify:
+      app.css dùng chung cho mọi Configuration, nếu chỉ minify ở Release thì bản Debug cũ sẽ lọt vào publish.
+    Nâng phiên bản: đổi TailwindVersion + các TailwindSha256 theo sha256sums.txt của release.
+  -->
+  <PropertyGroup>
+    <TailwindVersion>4.3.5</TailwindVersion>
+    <TailwindInput>$(MSBuildProjectDirectory)/Styles/input.css</TailwindInput>
+    <TailwindOutput>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/wwwroot/css/app.css'))</TailwindOutput>
+    <TailwindCacheDir Condition="'$(TailwindCacheDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../.tools/tailwindcss/$(TailwindVersion)'))/</TailwindCacheDir>
+    <TailwindArgs Condition="'$(TailwindArgs)' == ''">--minify</TailwindArgs>
+    <_TailwindArch>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_TailwindArch>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows')) And '$(_TailwindArch)' == 'X64'">
+    <TailwindAsset>tailwindcss-windows-x64.exe</TailwindAsset>
+    <TailwindSha256>2803583268c53f4713e89943e211081fddb186c0a4a7d07b5c342c6ae853ec95</TailwindSha256>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$(_TailwindArch)' == 'X64'">
+    <TailwindAsset>tailwindcss-linux-x64</TailwindAsset>
+    <TailwindSha256>e47695cee3f0d90623a91f3939b08bdee610eb5ad99340adff9d4145b284d6cc</TailwindSha256>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$(_TailwindArch)' == 'Arm64'">
+    <TailwindAsset>tailwindcss-linux-arm64</TailwindAsset>
+    <TailwindSha256>ffcd0d21dbd7c605dc12743ff0c0b47debc963c86b399674084c1c8f2c96ecad</TailwindSha256>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$(_TailwindArch)' == 'Arm64'">
+    <TailwindAsset>tailwindcss-macos-arm64</TailwindAsset>
+    <TailwindSha256>f3f4f5d1727e2b693b8f1c9a1492b5dd87008c86ea286bee1589cb458e6235fc</TailwindSha256>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$(_TailwindArch)' == 'X64'">
+    <TailwindAsset>tailwindcss-macos-x64</TailwindAsset>
+    <TailwindSha256>a63702686a3ed048b3135d84a73be49ea9d47f880c9b20e54b3ef60934ad8cdf</TailwindSha256>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TailwindCli>$(TailwindCacheDir)$(TailwindAsset)</TailwindCli>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TailwindSource Include="Styles/**/*.css;Views/**/*.cshtml;TagHelpers/**/*.cs;wwwroot/js/**/*.js" />
+  </ItemGroup>
+
+  <Target Name="TailwindEnsureCli" Condition="!Exists('$(TailwindCli)')">
+    <Error Condition="'$(TailwindAsset)' == ''"
+           Text="Tailwind: không hỗ trợ OS/CPU này ($(_TailwindArch)). Thêm asset tương ứng vào Tailwind.targets." />
+
+    <DownloadFile SourceUrl="https://github.com/tailwindlabs/tailwindcss/releases/download/v$(TailwindVersion)/$(TailwindAsset)"
+                  DestinationFolder="$(TailwindCacheDir)"
+                  DestinationFileName="$(TailwindAsset).download"
+                  Retries="3" />
+
+    <GetFileHash Files="$(TailwindCacheDir)$(TailwindAsset).download" Algorithm="SHA256">
+      <Output TaskParameter="Hash" PropertyName="_TailwindActualSha256" />
+    </GetFileHash>
+
+    <Delete Files="$(TailwindCacheDir)$(TailwindAsset).download"
+            Condition="'$(_TailwindActualSha256.ToLowerInvariant())' != '$(TailwindSha256)'" />
+    <Error Condition="'$(_TailwindActualSha256.ToLowerInvariant())' != '$(TailwindSha256)'"
+           Text="Tailwind: SHA-256 của $(TailwindAsset) không khớp (nhận $(_TailwindActualSha256), cần $(TailwindSha256))." />
+
+    <Move SourceFiles="$(TailwindCacheDir)$(TailwindAsset).download" DestinationFiles="$(TailwindCli)" />
+    <Exec Condition="!$([MSBuild]::IsOSPlatform('Windows'))" Command="chmod +x &quot;$(TailwindCli)&quot;" />
+  </Target>
+
+  <Target Name="TailwindBuild"
+          DependsOnTargets="TailwindEnsureCli"
+          Inputs="@(TailwindSource);$(MSBuildThisFileFullPath)"
+          Outputs="$(TailwindOutput)">
+    <Exec Command="&quot;$(TailwindCli)&quot; -i &quot;$(TailwindInput)&quot; -o &quot;$(TailwindOutput)&quot; $(TailwindArgs)"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
+  <!--
+    app.css có thể sinh ra sau bước evaluate (clone mới, CI, Docker) → glob wwwroot/** mặc định chưa thấy nó.
+    Thêm lại vào Content bằng đường dẫn TƯƠNG ĐỐI: static web assets chỉ nhận item khớp pattern wwwroot/**
+    (đường dẫn tuyệt đối sẽ bị bỏ qua → MapStaticAssets trả 404 ở Production).
+  -->
+  <Target Name="TailwindIncludeOutput" BeforeTargets="BeforeBuild" DependsOnTargets="TailwindBuild">
+    <PropertyGroup>
+      <_TailwindOutputRelative>$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)/', '$(TailwindOutput)'))</_TailwindOutputRelative>
+    </PropertyGroup>
+    <ItemGroup>
+      <Content Remove="@(Content)" Condition="'%(Content.FullPath)' == '$(TailwindOutput)'" />
+      <Content Include="$(_TailwindOutputRelative)" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    </ItemGroup>
+  </Target>
+</Project>

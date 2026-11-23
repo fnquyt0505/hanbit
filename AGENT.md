@@ -38,8 +38,9 @@ Không commit thẳng lên `main` — ruleset `main` bắt buộc check CI `buil
 ## 3. Lệnh thường dùng
 
 ```bash
-dotnet build                                   # build toàn solution
+dotnet build                                   # build toàn solution (tự build Tailwind → wwwroot/css/app.css)
 dotnet test                                    # chạy toàn bộ test
+dotnet test --filter "Category!=E2E"           # bỏ qua E2E (nhanh hơn)
 dotnet watch --project src/Hanbit.Web          # chạy local, hot reload
 dotnet format                                  # định dạng code
 dotnet run --project tools/Hanbit.ContentValidator -- ./content   # kiểm tra dữ liệu
@@ -49,9 +50,12 @@ dotnet run --project tools/Hanbit.ContentImporter -- --input data-raw/<file> --g
 docker build -t hanbit .
 docker run -p 8080:10000 -e ASPNETCORE_HTTP_PORTS=10000 hanbit   # mở http://localhost:8080
 
-# Playwright (lần đầu)
-pwsh tests/Hanbit.E2E/bin/Debug/net10.0/playwright.ps1 install
+# Playwright (lần đầu, sau dotnet build) — máy dev không có pwsh, dùng Windows PowerShell
+# Cần biến môi trường PLAYWRIGHT_BROWSERS_PATH=D:\DevCache\ms-playwright
+powershell -ExecutionPolicy Bypass -File tests\Hanbit.E2E\bin\Debug\net10.0\playwright.ps1 install chromium
 ```
+
+**Tailwind CSS**: CLI standalone tự tải (kiểm SHA-256) vào `.tools/` lần build đầu — xem `src/Hanbit.Web/Tailwind.targets`. Class Tailwind chỉ được quét trong `Views/`, `TagHelpers/`, `wwwroot/js/` (`Styles/input.css`). **Alpine.js** vendored ở `wwwroot/lib/` (phiên bản ghi trong `wwwroot/lib/README.md`).
 
 ## 4. Bối cảnh quan trọng
 

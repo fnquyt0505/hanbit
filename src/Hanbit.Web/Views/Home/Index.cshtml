@@ -2,5 +2,14 @@
     ViewData["Title"] = "Trang chủ";
 }
 
-<h1>Hanbit <span lang="ko" class="font-ko">한빛</span></h1>
-<p>Học tiếng Hàn cho người Việt.</p>
+@* Trang chủ tạm thời — thay bằng trang chủ thật ở T2.2. Màu/font theo design tokens ở T0.5. *@
+<section class="mx-auto max-w-xl p-4" x-data="{ open: false }">
+    <h1 class="text-2xl font-bold">Hanbit <span lang="ko" class="font-ko">한빛</span></h1>
+    <p class="mt-2">Học tiếng Hàn cho người Việt.</p>
+
+    <button type="button" class="mt-4 rounded-lg border px-4 py-2"
+            x-on:click="open = !open" x-bind:aria-expanded="open" data-testid="alpine-toggle">
+        Kiểm tra Alpine.js
+    </button>
+    <p class="mt-2" x-show="open" x-cloak data-testid="alpine-panel">Alpine.js đang hoạt động.</p>
+</section>
