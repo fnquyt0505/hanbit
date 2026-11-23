@@ -85,4 +85,48 @@
             <p class="text-4xl">text-4xl · 2.25rem</p>
         </div>
     </section>
+
+    <section aria-labelledby="components-heading" class="space-y-6">
+        <h2 id="components-heading" class="text-2xl font-semibold">Components</h2>
+
+        @await Html.PartialAsync("_Card", new CardViewModel("<hb-button>", @<div class="space-y-4" data-testid="buttons">
+            <div class="flex flex-wrap items-center gap-3">
+                <hb-button variant="primary">Bắt đầu</hb-button>
+                <hb-button variant="secondary">Tiếp tục</hb-button>
+                <hb-button variant="outline">Bỏ qua</hb-button>
+                <hb-button variant="ghost">Để sau</hb-button>
+                <hb-button variant="primary" disabled="true">Đang tải</hb-button>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <hb-button size="sm">Nhỏ</hb-button>
+                <hb-button size="md">Vừa</hb-button>
+                <hb-button size="lg">Lớn</hb-button>
+                <hb-button variant="outline" href="#components-heading">Liên kết dạng nút</hb-button>
+            </div>
+            <hb-button size="lg" block="true">Kiểm tra (full-width ở mobile)</hb-button>
+        </div>))
+
+        @await Html.PartialAsync("_Card", new CardViewModel("<ko-text>", @<div class="space-y-3" data-testid="ko-text">
+            <p>Tên dự án là <ko-text romanization="Hanbit">한빛</ko-text>, nghĩa là "ánh sáng lớn".</p>
+            <p><ko-text display="true">가</ko-text></p>
+        </div>))
+
+        @await Html.PartialAsync("_Card", new CardViewModel("_ProgressBar", @<div class="space-y-3">
+            <p class="text-sm text-ink-muted">3/10 câu</p>
+            <partial name="_ProgressBar" model='new ProgressBarViewModel(3, 10, "Tiến độ bài học")' />
+        </div>))
+
+        @await Html.PartialAsync("_Card", new CardViewModel("_Dialog và toast", @<div class="flex flex-wrap gap-3">
+            <hb-button variant="secondary" data-testid="open-dialog"
+                       x-data x-on:click="$dispatch('hb-dialog-open', 'demo-dialog')">Mở hộp thoại</hb-button>
+            <hb-button variant="outline" data-testid="toast-success"
+                       x-data x-on:click="$store.toast.show('Tuyệt! Bạn đã trả lời đúng.', 'success')">Toast đúng</hb-button>
+            <hb-button variant="outline" data-testid="toast-danger"
+                       x-data x-on:click="$store.toast.show('Gần đúng rồi! Thử lại nhé.', 'danger')">Toast sai</hb-button>
+            <hb-button variant="outline" data-testid="toast-info"
+                       x-data x-on:click="$store.toast.show('Hôm nay ôn 12 thẻ nhé.', 'info', 0)">Toast thông tin (không tự tắt)</hb-button>
+        </div>))
+
+        @await Html.PartialAsync("_Dialog", new DialogViewModel("demo-dialog", "Thoát bài học?", @<p class="text-ink-muted">Tiến độ của bài này sẽ không được lưu.</p>))
+    </section>
 </div>

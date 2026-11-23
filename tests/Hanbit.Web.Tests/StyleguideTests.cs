@@ -19,7 +19,7 @@ public class StyleguideTests(WebApplicationFactory<Program> factory)
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();
         string[] tokens = ["--bg", "--surface", "--ink", "--ink-muted", "--border", "--primary",
-            "--secondary", "--success", "--warning", "--danger", "--xp"];
+            "--secondary", "--success", "--warning", "--danger", "--xp", "--success-ink", "--warning-ink", "--xp-ink"];
         foreach (var token in tokens)
         {
             html.ShouldContain($"data-token=\"{token}\"");

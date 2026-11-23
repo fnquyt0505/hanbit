@@ -11,7 +11,7 @@
 - [x] **T0.3** 4 project test (xUnit + Shouldly; `Hanbit.Web.Tests` dùng `WebApplicationFactory`; Playwright), mỗi project 1 test mẫu. DoD: `dotnet test` xanh.
 - [x] **T0.4** Tailwind v4 standalone CLI (`Styles/input.css` → `wwwroot/css/app.css`, MSBuild target trước build) + vendor Alpine.js vào `wwwroot/lib`. DoD: class Tailwind và `x-data` hoạt động.
 - [x] **T0.5** Design tokens (màu light/dark, font) theo DESIGN.md; trang `/styleguide`. DoD: đủ màu & font, chuyển dark mode được.
-- [ ] **T0.6** UI cơ bản: Tag Helper `<hb-button>`, `<ko-text>`; partial `_Card`, `_Dialog`, `_ProgressBar`; toast bằng Alpine. DoD: hiển thị trên `/styleguide`, test render Tag Helper.
+- [x] **T0.6** UI cơ bản: Tag Helper `<hb-button>`, `<ko-text>`; partial `_Card`, `_Dialog`, `_ProgressBar`; toast bằng Alpine. DoD: hiển thị trên `/styleguide`, test render Tag Helper.
 - [ ] **T0.7** Deploy sớm: `Dockerfile` multi-stage + `/health` + `render.yaml`, deploy lên Render. DoD: URL `*.onrender.com` chạy, auto-deploy khi push `main`.
 
 ## Giai đoạn 1 — Dữ liệu nội dung (한국어기초사전)

@@ -21,8 +21,14 @@ Từ khóa: *tối giản · ấm áp · tập trung · khích lệ (không tr�
 | `--warning` | `#D99A1E` | `#F0B94A` | "Khó", sắp hết hạn |
 | `--danger` | `#C8323C` | `#E0565F` | Đáp án sai |
 | `--xp` | `#E8A317` | `#F3C04F` | Điểm XP, huy hiệu |
+| `--success-ink` | `#297C4F` | `#4CB97E` | **Chữ** màu đúng (bản đậm của `--success`) |
+| `--warning-ink` | `#8F6614` | `#F0B94A` | **Chữ** màu cảnh báo (bản đậm của `--warning`) |
+| `--xp-ink` | `#90650E` | `#F3C04F` | **Chữ** số XP (bản đậm của `--xp`) |
 
 Quy tắc: không dùng quá 1 màu nhấn mạnh trên một màn hình; đúng/sai luôn đi kèm icon (không chỉ dựa vào màu).
+
+- `--success`, `--warning`, `--xp` ở light mode **không đủ tương phản làm màu chữ** (2–3.8:1) → chỉ dùng làm nền/viền/icon; chữ dùng bản `-ink` (≥ 4.5:1). *(Chốt 2026-11-23)*
+- Chữ trên nút `primary`/`secondary` dùng màu `--bg` (≥ 4.9:1 cả sáng lẫn tối); chữ trắng trên `--primary` dark chỉ 3.7:1.
 
 ## 3. Typography
 
