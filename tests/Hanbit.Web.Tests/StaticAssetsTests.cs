@@ -40,6 +40,19 @@ public class StaticAssetsTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
+    public async Task Get_TailwindCss_ContainsOnlyDesignTokenColors()
+    {
+        using var client = factory.CreateClient();
+
+        var css = await client.GetStringAsync("/css/app.css");
+
+        // RULES §6: không hard-code màu → bảng màu mặc định của Tailwind bị tắt (--color-*: initial).
+        css.ShouldContain("--primary:");
+        css.ShouldNotContain("--color-red-");
+        css.ShouldNotContain("--color-blue-");
+    }
+
+    [Fact]
     public async Task Get_AlpineScript_ReturnsJavaScript()
     {
         using var client = factory.CreateClient();

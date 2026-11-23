@@ -9,7 +9,7 @@ public class HomePageTests(WebServerFixture server)
     [Fact]
     public async Task Open_HomePage_ShowsBrandWithKoreanText()
     {
-        var page = await server.Browser.NewPageAsync();
+        var page = await server.NewPageAsync();
 
         var response = await page.GotoAsync(server.BaseUrl);
 
@@ -22,7 +22,7 @@ public class HomePageTests(WebServerFixture server)
     [Fact]
     public async Task Open_HomePage_AppliesTailwindClasses()
     {
-        var page = await server.Browser.NewPageAsync();
+        var page = await server.NewPageAsync();
         await page.GotoAsync(server.BaseUrl);
 
         var fontWeight = await page.Locator("h1").EvaluateAsync<string>(
@@ -34,7 +34,7 @@ public class HomePageTests(WebServerFixture server)
     [Fact]
     public async Task ClickToggle_AlpineComponent_ShowsPanel()
     {
-        var page = await server.Browser.NewPageAsync();
+        var page = await server.NewPageAsync();
         await page.GotoAsync(server.BaseUrl);
         var panel = page.GetByTestId("alpine-panel");
         (await panel.IsVisibleAsync()).ShouldBeFalse();
