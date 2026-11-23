@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 0 — Khởi tạo solution                                                                                                     |
+| Giai đoạn                     | 1 — Dữ liệu nội dung (한국어기초사전)                                                                                     |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T1.1** Records nội dung trong `Domain/Content` + `JsonSerializerOptions` |
+| Task tiếp theo                 | **T1.2** `content/hangul.json` (40 chữ) + `content/LICENSE-DATA.md` |
 | Việc song song (người dùng) | Đăng ký API key 한국어기초사전 + tải file dữ liệu (cần cho T1.5)                                                      |
 | Blocker                         | —                                                                                                                           |
 
@@ -24,6 +24,13 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T1.1 Records nội dung + ContentJson
+- Đã làm: `src/Hanbit.Domain/Content/`: `Hangul.cs` (`HangulType`, `HangulLetter`, `HangulExample`), `Vocabulary.cs` (`VocabGrade`, `PartOfSpeech` — 15 từ loại theo 품사 krdict, `TODO(verify)` ở T1.5; `SourceRef`, `Example`, `VocabItem`, `GrammarPoint`), `Exercises.cs` (`Exercise` đa hình qua `type`: `multiple_choice`, `listen_choose`, `match_pairs` + `MatchPair`, `reorder`, `type_answer`), `Courses.cs` (`Lesson`, `Course`, `LessonSummary`), `ContentJson.Options` (snake_case tên trường + enum, `RespectNullableAnnotations`, `RespectRequiredConstructorParameters`, `UnmappedMemberHandling.Disallow`, `AllowOutOfOrderMetadataProperties`, comment + dấu phẩy cuối, ghi không escape chữ Hàn/Việt, read-only). Trường tùy chọn đưa xuống cuối record với `= null` (khác thứ tự sketch ARCHITECTURE §5 — tên/kiểu giữ nguyên) để JSON không phải ghi `"audio": null`. ARCHITECTURE §5 thêm bảng cấu trúc JSON 5 loại bài tập.
+- File thay đổi: `src/Hanbit.Domain/Content/*.cs`, `tests/Hanbit.Domain.Tests/Content/ContentJsonTests.cs`, `docs/ARCHITECTURE.md`
+- Kiểm tra: build ✅ (0 warning) · format ✅ · test ✅ (Domain 17/17: deserialize mọi record + 5 loại bài tập, `type` không đứng đầu, round-trip, lỗi khi thiếu trường / null sai / trường lạ / `type` lạ / enum dạng số)
+- Vấn đề / ghi chú: Domain dùng `System.Text.Json` (BCL, không phải package) cho `[JsonPolymorphic]` như ARCHITECTURE đã định; test kiến trúc vẫn xanh.
+- Tiếp theo: T1.2
 
 ### 2026-11-24 — T0.7 Deploy sớm (hoàn tất trên Render)
 - Đã làm: người dùng tạo tài khoản Render (đăng nhập GitHub), cài GitHub App Render, tạo Blueprint `hanbit` từ `render.yaml` (branch `main`) → service web `hanbit` **Live** tại https://hanbit.onrender.com.

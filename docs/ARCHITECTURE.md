@@ -155,6 +155,17 @@ public sealed record Course(string Slug, string Title, VocabGrade Level, string 
 - Bài tập = `ExerciseGenerator` (từ VocabIds, seed = hash(course/lesson) → ổn định) + bài tự soạn.
 - Khi gửi bài tập xuống trình duyệt, dùng DTO **không có đáp án**.
 - JSON dùng `snake_case`.
+- Định nghĩa đầy đủ: `src/Hanbit.Domain/Content/*.cs` (T1.1). Trường tùy chọn (`= null`) đặt cuối record và được bỏ trống trong JSON.
+- Đọc/ghi chỉ qua `ContentJson.Options`: enum là chuỗi snake_case; **chặt** — thiếu trường bắt buộc, `null` ở trường không-null, trường lạ, `type` lạ → lỗi; cho phép comment + dấu phẩy cuối.
+- Bài tập tự soạn (trường `type` chọn loại; mọi loại có `id`, tùy chọn `explanation_vi`):
+
+| `type` | Trường | Đáp án nằm ở |
+|---|---|---|
+| `multiple_choice` | `prompt`, `choices[]`, `answer_index` | `answer_index` |
+| `listen_choose` | `audio_ko`, `choices[]`, `answer_index` | `answer_index` |
+| `match_pairs` | `prompt`, `pairs[{left, right}]` | cặp `left`–`right` |
+| `reorder` | `prompt`, `tokens[]` (theo thứ tự đúng) | thứ tự `tokens` |
+| `type_answer` | `prompt`, `accepted_answers[]` | `accepted_answers` |
 
 ## 6. Model tiến độ (lưu localStorage, server chỉ xử lý)
 
