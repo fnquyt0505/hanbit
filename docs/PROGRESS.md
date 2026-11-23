@@ -7,10 +7,10 @@
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Giai đoạn                     | 1 — Dữ liệu nội dung (한국어기초사전)                                                                                     |
-| Task đang làm                 | —                                                                                                                           |
+| Task đang làm                 | **T1.7** — công cụ xong; người dùng đang duyệt `data-raw/review/dot-01.csv` (150 từ)                                |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T1.7** 👤 Người dùng duyệt nghĩa ~150 từ đầu (AI hỗ trợ xuất CSV + tool nhập lại) |
-| Việc song song (người dùng) | —                                                      |
+| Task tiếp theo                 | **T1.8** Soạn khóa `beginner`: 5 bài đầu (chỉ từ đã duyệt) |
+| Việc song song (người dùng) | 👤 Duyệt `data-raw/review/dot-01.csv` (cột `duyet`: x / loai; `nghia_moi` nếu sửa) → báo AI chạy `review-import` |
 | Blocker                         | —                                                                                                                           |
 
 ## 💻 Môi trường máy dev
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T1.7 (phần AI) Công cụ duyệt nghĩa CSV
+- Đã làm: `KrdictLmfReader` đọc thêm chủ đề tình huống (`subjectCategiory` — dữ liệu gốc viết sai tên, đọc cả 2 cách viết). `tools/Hanbit.ContentImporter/Review/`: `Csv` (RFC 4180 tự viết, ghi UTF-8 BOM, đọc tự nhận `,`/`;`/tab), `ReviewExporter` (chọn từ chưa duyệt theo chủ đề, giữ thứ tự chủ đề, bỏ trùng; CSV có phiên âm RR, từ loại tiếng Việt, Hán tự, nghĩa/định nghĩa krdict, cột trống `nghia_moi`/`dinh_nghia_moi`/`duyet`/`ghi_chu`, link krdict), `ReviewImporter` (gộp vào `vocab-reviews.json`: `x`/`có`/`1`… = duyệt, `loai`/`không`/`0`… = loại, trống = chưa quyết; id lạ/trùng/giá trị không hiểu → báo lỗi theo dòng và **không ghi file**; giữ bản duyệt cũ; file không phải UTF-8 → hướng dẫn lưu "CSV UTF-8"). CLI `review-export` / `review-import` (chạy validator sau khi ghi). Xuất đợt 1: **bộ A = 150 từ** → `data-raw/review/dot-01.csv` (không commit).
+- File thay đổi: `tools/Hanbit.ContentImporter/{Krdict/KrdictEntry.cs, Krdict/KrdictLmfReader.cs, Review/*, Program.cs}`, `tests/Hanbit.Tools.Tests/Review/ReviewToolsTests.cs`, `AGENT.md`
+- Kiểm tra: build ✅ (0 warning) · format ✅ · test ✅ (Tools 61)
+- Tiếp theo: người dùng duyệt CSV → `review-import` → đóng T1.7
 
 ### 2026-11-24 — T1.5 hoàn tất: import từ file "사전 전체 내려받기"
 - Đã làm: import qua Open API thất bại (E2 — krdict chặn IP khi gọi liên tục, kể cả tuần tự + nghỉ 300 ms qua WARP). Người dùng tải **11 file JSON LMF** (~1 GB, 53.671 mục, 2026-11-19) vào `data-raw/`. Khảo sát cấu trúc LMF bằng script (thuộc tính `feat`, `Lemma` object/mảng có `variant`, `WordForm` object/mảng/vắng, 2.884 mục trùng mã, `Equivalent` 11 ngôn ngữ). Thay phần import qua API bằng `KrdictLmfReader` (đọc phòng thủ) + `KrdictImporter` (lọc cấp + chỉ `단어`, gộp theo mã, báo cáo); **gỡ** parser XML / nguồn HTTP có cache (không dùng nữa); giữ lệnh `probe` tra lẻ API. Chất lượng dữ liệu: bỏ placeholder `(Không có từ tương ứng)` (13 từ; 2 từ chỉ có placeholder → dùng định nghĩa tiếng Việt), bỏ phần nghĩa lặp giữa các sense (272 → 0), giải mã HTML entity (`&apos;`). Fixture test = 7 mục thật trích từ file (phủ các trường hợp đặc biệt). Cập nhật ARCHITECTURE §8, LICENSE-DATA, AGENT.md (`import --input data-raw`).
@@ -184,6 +190,7 @@
 | 2026-11-23      | Lưu chế độ sáng/tối qua `progress-store.js` (T5.3) + script `<head>` đặt `data-theme` trước khi vẽ | Giữ RULES §5 (localStorage chỉ qua progress-store.js) |
 | 2026-11-23      | Font qua CDN (Google Fonts, jsDelivr) — trước mắt | Nhanh, tự subset tiếng Hàn; mở CSP cho 3 domain ở T7.3 |
 | 2026-11-23      | Mỗi task 1 nhánh `NN-type-T##-slug` → PR → auto-merge khi CI `build-test` xanh; repo public | Ruleset/auto-merge miễn phí cho repo public |
+| 2026-11-24      | Đợt duyệt 1 = bộ chủ đề A (150 từ): 인사하기, 감사하기, 사과하기, 소개하기(자기소개), 개인 정보 교환하기, 소개하기(가족 소개), 요일 표현하기 | Chọn theo chủ đề tình huống của krdict (dữ liệu thật); khớp 5 bài đầu T1.8 |
 | 2026-11-24      | `content/hangul.json` đã duyệt (AI biên soạn, người dùng duyệt) | Gợi ý đọc chỉ là phụ — người học nghe audio thật |
 | 2026-11-24      | Nội dung tự biên soạn (`hangul.json`, `grammar/`, `courses/`): **giữ mọi quyền** | Có thể mở giấy phép sau; CC thì không rút lại được |
 
