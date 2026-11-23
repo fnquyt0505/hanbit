@@ -20,5 +20,8 @@ public sealed record StyleguideViewModel(IReadOnlyList<ColorTokenViewModel> Colo
         new("--warning", "\"Khó\", sắp hết hạn", TextSafe: false),
         new("--danger", "Đáp án sai", TextSafe: true),
         new("--xp", "Điểm XP, huy hiệu", TextSafe: false),
+        new("--success-ink", "Chữ màu đúng", TextSafe: true),
+        new("--warning-ink", "Chữ màu cảnh báo", TextSafe: true),
+        new("--xp-ink", "Chữ số XP", TextSafe: true),
     ]);
 }
