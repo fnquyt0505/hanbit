@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+.tools/
+.git/
+.github/
+.vs/
+.vscode/
+data-raw/
+tests/
+docs/
+**/wwwroot/css/app.css
+*.md
+!src/Hanbit.Web/wwwroot/lib/README.md
