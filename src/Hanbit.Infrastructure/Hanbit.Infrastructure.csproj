@@ -4,4 +4,8 @@
     <ProjectReference Include="..\Hanbit.Application\Hanbit.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.2.0" />
+  </ItemGroup>
+
 </Project>

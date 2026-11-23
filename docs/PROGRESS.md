@@ -9,7 +9,7 @@
 | Giai đoạn                     | 1 — Dữ liệu nội dung (한국어기초사전)                                                                                     |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T1.3** FluentValidation validators + tool `Hanbit.ContentValidator` |
+| Task tiếp theo                 | **T1.4** `IContentRepository` + `JsonContentRepository` (IMemoryCache, merge `vocab-reviews.json`) |
 | Việc song song (người dùng) | Đăng ký API key 한국어기초사전 + tải file dữ liệu (cần cho T1.5)                                                      |
 | Blocker                         | —                                                                                                                           |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T1.3 Validators + Hanbit.ContentValidator
+- Đã làm: package **FluentValidation 12.2.0** (Infrastructure — có trong stack ARCHITECTURE §1). `Infrastructure/Content/Validation/`: validator cho `HangulLetter`, `VocabItem` (+ `SourceRef` URL http(s)), `GrammarPoint`, `Course`, `Lesson` + 5 loại bài tập qua `SetInheritanceValidator` (VD `answer_index` trong khoảng, lựa chọn ≥ 2 & không trùng, `audio_ko` có Hangul, cặp nối không trùng vế), quy tắc chung slug/Hangul/không rỗng, thông báo tiếng Việt. `ContentValidationService`: quét `content/` theo cấu trúc ARCHITECTURE §3, đọc bằng `ContentJson.Options` (lỗi JSON kèm **số dòng**), chạy validator, **kiểm tra chéo** (id trùng giữa file; bài học chỉ dùng từ vựng `reviewed` + ngữ pháp tồn tại; mục lục khóa học ↔ file bài học: thiếu file / file thừa / title, order lệch; slug trùng tên file/thư mục; file JSON lạ; thiếu `hangul.json`), tránh báo lỗi dây chuyền khi file từ vựng/ngữ pháp hỏng. Lỗi dạng `content/<file>: <json path snake_case>: <lý do>`. Tool `tools/Hanbit.ContentValidator` (exit 1 khi có lỗi). CI `build-test` chạy validator trên `content/`. `vocab-reviews.json` được chấp nhận nhưng chưa kiểm tra (định dạng chốt ở T1.4). Áp dụng quyết định câu 7–8: `LICENSE-DATA.md` §2 → giữ mọi quyền.
+- File thay đổi: `src/Hanbit.Infrastructure/{Hanbit.Infrastructure.csproj, Content/Validation/*}`, `tools/Hanbit.ContentValidator/*`, `Hanbit.sln`, `.github/workflows/ci.yml`, `content/LICENSE-DATA.md`, `tests/Hanbit.Infrastructure.Tests/Content/Validation/*`
+- Kiểm tra: build ✅ (0 warning) · format ✅ · test ✅ (109/109; Infrastructure 49: 18 unit test validator + 15 test service với thư mục tạm, gồm `content/` thật hợp lệ) · chạy tool trên dữ liệu hỏng mẫu → 4 lỗi rõ file/trường, exit 1
+- Tiếp theo: T1.4
 
 ### 2026-11-24 — T1.2 hangul.json + LICENSE-DATA.md
 - Đã làm: `content/hangul.json` — mảng 40 `HangulLetter` (14 phụ âm, 5 phụ âm kép, 10 nguyên âm, 11 nguyên âm ghép): `id` (`c-giyeok`, `dc-ssanggiyeok`, `v-a`, `cv-ae`…), tên chữ tiếng Hàn (chỉ phụ âm), Revised Romanization, gợi ý đọc cho người Việt, 1 từ ví dụ thông dụng (Hangul + RR + nghĩa Việt). `content/LICENSE-DATA.md`: ghi công 한국어기초사전 © 국립국어원 (CC BY-SA, phiên bản `TODO(verify)`), phạm vi áp dụng, dữ liệu tự biên soạn (giấy phép `TODO(owner)`).
@@ -126,8 +132,8 @@
 4. ~~Tương phản màu~~ → đã chốt: thêm token `-ink` (xem Quyết định).
 5. ~~Lưu chế độ sáng/tối ở đâu~~ → đã chốt: qua `progress-store.js` ở T5.3.
 6. ~~Font qua CDN hay tự host~~ → đã chốt: trước mắt giữ CDN.
-7. **Duyệt `content/hangul.json` (T1.2):** AI tự biên soạn — tên chữ, RR và từ ví dụ là kiến thức phổ thông, test đã kiểm tra từ ví dụ chứa đúng chữ cái; **gợi ý đọc tiếng Việt (`vi_hint`)** mang tính chủ quan → người dùng đọc lại, sửa trực tiếp trong file nếu thấy chưa sát.
-8. **Giấy phép phần tự biên soạn** (`hangul.json`, `grammar/`, `courses/`): giữ mọi quyền hay CC BY-SA 4.0? (`content/LICENSE-DATA.md` §2 đang `TODO(owner)`).
+7. ~~Duyệt `content/hangul.json`~~ → đã duyệt (2026-11-24); tinh chỉnh `vi_hint` khi làm trang `/hangul` (T3.2) nếu cần.
+8. ~~Giấy phép phần tự biên soạn~~ → đã chốt: giữ mọi quyền.
 
 ## 📝 Quyết định đã chốt
 
@@ -152,6 +158,8 @@
 | 2026-11-23      | Lưu chế độ sáng/tối qua `progress-store.js` (T5.3) + script `<head>` đặt `data-theme` trước khi vẽ | Giữ RULES §5 (localStorage chỉ qua progress-store.js) |
 | 2026-11-23      | Font qua CDN (Google Fonts, jsDelivr) — trước mắt | Nhanh, tự subset tiếng Hàn; mở CSP cho 3 domain ở T7.3 |
 | 2026-11-23      | Mỗi task 1 nhánh `NN-type-T##-slug` → PR → auto-merge khi CI `build-test` xanh; repo public | Ruleset/auto-merge miễn phí cho repo public |
+| 2026-11-24      | `content/hangul.json` đã duyệt (AI biên soạn, người dùng duyệt) | Gợi ý đọc chỉ là phụ — người học nghe audio thật |
+| 2026-11-24      | Nội dung tự biên soạn (`hangul.json`, `grammar/`, `courses/`): **giữ mọi quyền** | Có thể mở giấy phép sau; CC thì không rút lại được |
 
 ---
 

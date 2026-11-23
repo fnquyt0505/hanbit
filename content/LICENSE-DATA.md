@@ -25,5 +25,5 @@ Mã nguồn Hanbit và dữ liệu trong `content/` có giấy phép **riêng bi
 | `courses/**` | Cấu trúc khóa học, bài học, bài tập tự soạn |
 
 - Do dự án Hanbit tự biên soạn; **không** sao chép từ giáo trình, đề thi TOPIK hay nguồn có bản quyền khác (RULES — mục "AI tuyệt đối không được" #9).
-- Giấy phép: `TODO(owner)` — chủ dự án chọn (VD giữ mọi quyền, hoặc CC BY-SA 4.0 để đồng bộ với dữ liệu từ vựng).
+- Giấy phép: **© Hanbit — giữ mọi quyền (All rights reserved)**. Không được sao chép, phân phối lại hay dùng cho mục đích khác khi chưa có sự đồng ý của chủ dự án. *(Chốt 2026-11-24; có thể chuyển sang giấy phép mở sau này.)*
 - Bài học tham chiếu từ vựng bằng `id` (không sao chép), nên phần từ vựng trong bài học vẫn thuộc mục 1.
