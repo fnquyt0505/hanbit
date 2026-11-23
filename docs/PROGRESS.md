@@ -8,7 +8,7 @@
 |---|---|
 | Giai đoạn | 0 — Khởi tạo solution |
 | Task đang làm | — |
-| Task tiếp theo | **T0.3** 4 project test (xUnit + Shouldly, WebApplicationFactory, Playwright) |
+| Task tiếp theo | **T0.4** Tailwind v4 standalone CLI + vendor Alpine.js |
 | Việc song song (người dùng) | Đăng ký API key 한국어기초사전 + tải file dữ liệu (cần cho T1.5) |
 | Blocker | — |
 
@@ -23,6 +23,13 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D** |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-23 — T0.3 Project test
+- Đã làm: `tests/Hanbit.Domain.Tests`, `Hanbit.Infrastructure.Tests` (test kiến trúc: assembly không tham chiếu sai hướng), `Hanbit.Web.Tests` (`WebApplicationFactory`: `/` trả 200 HTML `lang="vi"`, đường dẫn lạ trả 404), `Hanbit.E2E` (`WebServerFixture`: app chạy Kestrel cổng ngẫu nhiên qua `UseKestrel(0)` của .NET 10 + Chromium dùng chung; test mở trang chủ, kiểm tra title và chữ `한빛` có `lang="ko"`; `[Trait("Category","E2E")]`). Package: xunit 2.9.3 (template), Shouldly 4.3.0, Microsoft.AspNetCore.Mvc.Testing 10.0.12 (khớp runtime 10.0.12 của SDK 10.0.401; bản 11.0 chỉ hỗ trợ net11), Microsoft.Playwright 1.65.1. CI thêm bước cài Chromium (`--with-deps`). `Hanbit.Tools.Tests` để tới T1.3 (khi có tool).
+- File thay đổi: `tests/**`, `Hanbit.sln`, `.github/workflows/ci.yml`
+- Kiểm tra: build ✅ (0 warning) · format ✅ · test ✅ (5/5)
+- Vấn đề / ghi chú: biến môi trường `PLAYWRIGHT_BROWSERS_PATH` **chưa được đặt** ở cấp User (bảng môi trường ghi đã đặt). Chromium đã cài vào `D:\DevCache\ms-playwright` bằng cách đặt biến tạm thời → cần `setx PLAYWRIGHT_BROWSERS_PATH D:\DevCache\ms-playwright` để chạy E2E từ terminal/VS Code. Máy không có `pwsh` (PowerShell 7) → dùng `powershell -File …\playwright.ps1 install chromium`.
+- Tiếp theo: T0.4
 
 ### 2026-11-23 — T0.2a CI GitHub Actions + auto-merge
 - Đã làm: `.github/workflows/ci.yml`, job `build-test` (ubuntu, SDK theo `global.json`: restore → build Release → `dotnet format --verify-no-changes` → test), chạy khi có PR vào `main` và push `main`. Ruleset `main-protection` (người dùng tạo trên UI, vì quyền đổi cài đặt repo không giao cho AI): bắt buộc check `build-test`, chặn force-push và xóa nhánh. Người dùng: chuyển repo sang public (gói Free không có auto-merge/ruleset cho repo private), bật *Allow auto-merge* + *Automatically delete head branches*, đăng nhập `gh` bằng PAT classic (`repo`, `workflow`, `read:org`). Cập nhật quy trình git trong AGENT.md §2.

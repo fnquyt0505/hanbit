@@ -38,5 +38,8 @@ jobs:
       - name: Format check
         run: dotnet format --no-restore --verify-no-changes
 
+      - name: Install Playwright Chromium
+        run: pwsh tests/Hanbit.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
       - name: Test
         run: dotnet test --no-build --configuration Release
