@@ -7,11 +7,11 @@
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Giai đoạn                     | 1 — Dữ liệu nội dung (한국어기초사전)                                                                                     |
-| Task đang làm                 | —                                                                                                                           |
+| Task đang làm                 | **T1.5** — code xong; chờ krdict truy cập lại được để chạy import thật (E2)                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T1.5** Tool `Hanbit.ContentImporter` (krdict → `content/vocab/krdict-beginner.json`) — cần file dữ liệu/API key krdict |
-| Việc song song (người dùng) | Đăng ký API key 한국어기초사전 + tải file dữ liệu (cần cho T1.5)                                                      |
-| Blocker                         | —                                                                                                                           |
+| Task tiếp theo                 | **T1.6** `RomanizationService` (không cần dữ liệu ngoài) — làm trong lúc chờ T1.5 |
+| Việc song song (người dùng) | Kiểm tra krdict.korean.go.kr mở được trong trình duyệt chưa (E2)                                                      |
+| Blocker                         | E2 — krdict không phản hồi từ máy dev                                                                                       |
 
 ## 💻 Môi trường máy dev
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T1.5 Hanbit.ContentImporter (phần code — chưa chạy import đầy đủ)
+- Đã làm: người dùng đăng ký API key krdict, lưu bằng `dotnet user-secrets` (`Krdict:ApiKey`, không vào repo/chat). Xác minh tài liệu Open API + **gọi thử API thật** (lệnh `probe`, che key): `trans_lang=7` = tiếng Việt, `level=level1` = 초급, `start` = số trang, `num` ≤ 100, XML thật (ARCHITECTURE §8); API **không** hỗ trợ từ khóa rỗng/ký tự đại diện → quét 11.172 âm tiết `가…힣` (`method=start`). Xác minh chính sách bản quyền krdict: **CC BY-SA 2.0 KR** (câu hỏi 1–2 đã đóng; `LICENSE-DATA.md`, ARCHITECTURE §9). `tools/Hanbit.ContentImporter`: `KrdictXmlParser` (đọc phòng thủ, lỗi `<error>` → `KrdictApiException`, 010 = hết lượt ngày), `KrdictVocabMapper` (id `kd-<target_code>`, `vi` ≤ 3 nghĩa, `definition_vi`, `hanja` từ `origin`, 15 từ loại, NFC + gộp khoảng trắng, bỏ mục không có nghĩa Việt; ví dụ để trống vì krdict chỉ có ví dụ tiếng Hàn), `KrdictHttpSearchSource` (cache XML thô `data-raw/krdict-cache/`, không cache trang lỗi, không ghi key; tuần tự + nghỉ 300 ms + thử lại 5→120 s), `KrdictImporter` (gộp theo target_code, lọc đúng cấp, sắp xếp ổn định, **từ chối ghi `vocab-reviews.json`**, ghi file tạm rồi đổi tên), CLI `import`/`probe` + chạy validator sau khi ghi + báo cáo số từ. `ContentJson` bỏ trường null khi ghi. Project `tests/Hanbit.Tools.Tests` (fixture XML thật nhỏ, CC BY-SA ghi công trong `Fixtures/README.md`). Package: `Microsoft.Extensions.Configuration.UserSecrets` + `EnvironmentVariables` 10.0.12 (đọc key).
+- Chạy thử 3 âm tiết (가, 학, 나): 66 từ 초급, 0 bỏ qua, file hợp lệ. **Chạy đầy đủ thất bại** (E2) — xem "Lỗi đang mở".
+- Kiểm tra: build ✅ (0 warning) · format ✅ · test ✅ (Tools 47 + toàn bộ)
+- Tiếp theo: chạy lại import khi krdict truy cập được → commit `content/vocab/krdict-beginner.json` + báo cáo số từ → đóng T1.5. Trong lúc chờ: T1.6.
 
 ### 2026-11-24 — T1.4 IContentRepository + JsonContentRepository
 - Đã làm: `Application/Abstractions/IContentRepository` (Hangul, khóa học, bài học, từ vựng/ngữ pháp theo id — async + `CancellationToken`). `Infrastructure/Content/JsonContentRepository`: đọc bằng `ContentJson.Options`, cache `IMemoryCache` (hết hạn theo `Content:CacheDuration`, null = không hết hạn), **slug kiểm tra regex trước khi ghép đường dẫn** (chặn path traversal), từ vựng = mọi `vocab/*.json` gộp `vocab-reviews.json`. Chốt định dạng `vocab-reviews.json` + `VocabReview`/`VocabReviewMerger` (Domain, hàm thuần) — validator T1.3 giờ kiểm tra file review (id tồn tại, không trùng, trường không rỗng) và tính "đã duyệt" trên dữ liệu sau gộp. `ContentPaths` dùng chung. `AddInfrastructure()` + Web cấu hình `Content` (dev `../../content`, cache 2 giây). `ContentHealthCheck`: `/health` chỉ Healthy khi đọc được `hangul.json`. Docker copy `content/` (kèm `LICENSE-DATA.md`) vào `/app/content`; CI smoke test kiểm tra file trong container. Package mới: `Microsoft.Extensions.Caching.Memory` 10.0.12 (cho `IMemoryCache` — ARCHITECTURE đã định).
@@ -129,11 +135,12 @@
 | ID | Mô tả   | Task liên quan | Trạng thái |
 | -- | --------- | --------------- | ------------ |
 | E1 | Docker Desktop (WSL 2) không phân giải DNS registry (`lookup …: no such host`), Windows thì bình thường. Nghi Cloudflare WARP. Cách thử: khởi động lại Docker Desktop; tắt WARP; hoặc Docker Desktop → Settings → Docker Engine thêm `"dns": ["1.1.1.1", "8.8.8.8"]` | T0.7 | Mở — CI job `docker` thay thế |
+| E2 | 2026-11-24: chạy import với 4 kết nối song song → sau 35 trang, krdict.korean.go.kr **timeout mọi kết nối** từ máy dev (cả trang chủ) — nghi IP bị chặn tạm vì gọi dồn dập. Đã sửa importer: mặc định 1 kết nối, nghỉ 300 ms/request, thử lại 5 lần chờ 5→120 giây. 35 trang đã cache trong `data-raw/krdict-cache/`. Chờ truy cập lại rồi chạy lại (tiếp tục từ cache). | T1.5 | Mở |
 
 ## ❓ Câu hỏi / việc cần xác minh
 
-1. Định dạng file tải về & mã ngôn ngữ tiếng Việt của krdict API → xác minh khi làm T1.5.
-2. Điều khoản bản quyền chính thức của krdict (CC BY-SA phiên bản nào, điều kiện ghi công) → xác minh trước T7.4.
+1. ~~Định dạng & mã ngôn ngữ tiếng Việt của krdict API~~ → đã xác minh (T1.5): `trans_lang=7`, chi tiết ARCHITECTURE §8.
+2. ~~Điều khoản bản quyền krdict~~ → đã xác minh (2026-11-24): CC BY-SA 2.0 KR, cho phép thương mại, ghi tác giả + cùng giấy phép; đa phương tiện giấy phép riêng (`content/LICENSE-DATA.md`).
 3. Ai duyệt nghĩa tiếng Việt (T1.7)? Mặc định: chủ dự án.
 4. ~~Tương phản màu~~ → đã chốt: thêm token `-ink` (xem Quyết định).
 5. ~~Lưu chế độ sáng/tối ở đâu~~ → đã chốt: qua `progress-store.js` ở T5.3.

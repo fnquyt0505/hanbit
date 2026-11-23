@@ -193,17 +193,18 @@ public sealed record DailyActivity(DateOnly Date, int Xp, int Reviews);
 
 ## 8. Content Importer (krdict → JSON)
 
-- Đầu vào ưu tiên: file tải từ trang **사전 내려받기** của krdict (`data-raw/`, không commit). Dự phòng: Open API `https://krdict.korean.go.kr/api/search` (cần key).
-- Lọc **초급**; lấy 표제어, 발음, 품사, 한자, nghĩa & định nghĩa tiếng Việt, ví dụ. Id ổn định `kd-<target_code>`, gắn `SourceRef`.
-- Không ghi đè `vocab-reviews.json`.
-- ⚠️ `TODO(verify)`: định dạng file tải về và mã ngôn ngữ tiếng Việt của API.
+- **Đã chọn (T1.5): Open API** `https://krdict.korean.go.kr/api/search` — key trong user-secrets `Krdict:ApiKey`, giới hạn 50.000 request/ngày. (Phương án khác: file **사전 전체 내려받기** — chưa dùng.)
+- **Đã xác minh với API thật (2026-11-24):** tiếng Việt = `translated=y&trans_lang=7`; cấp độ = `advanced=y&level=level1|level2|level3` (초급/중급/고급); `num` ≤ 100, `start` = **số trang**; kết quả XML: `channel/total`, `item/{target_code, word, sup_no, origin (Hán tự/nguyên ngữ), pronunciation, word_grade, pos (chữ Hàn), link, sense/{sense_order, definition, translation/{trans_word, trans_dfn}}}`; lỗi `<error><error_code/><message/></error>` (010 = hết lượt ngày, 020 = key sai). **Không hỗ trợ từ khóa rỗng/ký tự đại diện** → liệt kê toàn bộ một cấp bằng cách quét 11.172 âm tiết `가…힣` với `method=start`.
+- Map → `VocabItem`: `id = kd-<target_code>`, `vi` = tối đa 3 `trans_word` khác nhau nối "; ", `definition_vi` = `trans_dfn` nghĩa đầu, `hanja` = `origin` nếu là Hán tự, `pos`/`grade` từ chữ Hàn, `source` = 한국어기초사전 + link + `CC BY-SA 2.0 KR`, `reviewed = false`; chuẩn hóa NFC + gộp khoảng trắng. **Ví dụ để trống** (ví dụ krdict chỉ có tiếng Hàn, `Example` cần cả nghĩa Việt). Mục từ không có nghĩa tiếng Việt → bỏ qua, ghi vào báo cáo. Không lấy file đa phương tiện (giấy phép riêng từng file).
+- XML thô cache ở `data-raw/krdict-cache/` (gitignored) → chạy lại không gọi lại API, tiếp tục được khi bị ngắt/hết lượt.
+- Không ghi đè `vocab-reviews.json` (importer từ chối ghi vào file này).
 - `vocab-reviews.json` (T1.4) — mảng bản duyệt, **chỉ người duyệt sửa**:
   `[ { "id": "kd-123", "reviewed": true, "vi": "…", "definition_vi": "…", "note": "…" } ]` (`vi`, `definition_vi`, `note` tùy chọn).
   `VocabReviewMerger` (Domain) gộp vào từ krdict: `reviewed` lấy theo bản duyệt, `vi`/`definition_vi` thay nếu có. Repository và validator dùng chung hàm này → "chỉ dùng từ đã duyệt" luôn tính trên dữ liệu sau gộp.
 
 ## 9. Giấy phép & ghi công
 
-- 한국어기초사전 theo **CC BY-SA** → `content/LICENSE-DATA.md`, trang `/nguon-du-lieu`, `_Footer.cshtml`: *"Dữ liệu từ vựng: 한국어기초사전 © 국립국어원, CC BY-SA 2.0 KR"*.
+- 한국어기초사전 theo **CC BY-SA 2.0 KR** (đã xác minh chính sách 저작권 정책 của krdict 2026-11-24: cho phép cả thương mại; bắt buộc ghi tác giả; tác phẩm dẫn xuất cùng giấy phép; đa phương tiện có giấy phép riêng) → `content/LICENSE-DATA.md`, trang `/nguon-du-lieu`, `_Footer.cshtml`: *"Dữ liệu từ vựng: 한국어기초사전 © 국립국어원, CC BY-SA 2.0 KR"*.
 - Dữ liệu dẫn xuất cũng CC BY-SA; mã nguồn không bị ảnh hưởng.
 
 ## 10. Deploy — Render

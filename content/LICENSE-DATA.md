@@ -8,7 +8,9 @@ Mã nguồn Hanbit và dữ liệu trong `content/` có giấy phép **riêng bi
 |---|---|
 | Nguồn | 한국어기초사전 (Basic Korean Dictionary) — https://krdict.korean.go.kr |
 | Chủ sở hữu | © 국립국어원 (Viện Quốc ngữ Quốc gia Hàn Quốc — National Institute of Korean Language) |
-| Giấy phép | Creative Commons **BY-SA** — `TODO(verify)`: phiên bản chính xác (dự kiến CC BY-SA 2.0 KR) và điều kiện ghi công, xác minh trước T7.5 |
+| Giấy phép | **Creative Commons Attribution-ShareAlike 2.0 Korea (CC BY-SA 2.0 KR)** — https://creativecommons.org/licenses/by-sa/2.0/kr/ |
+| Xác minh | Chính sách 저작권 정책 trên krdict (trang đăng ký Open API), 2026-11-24: mọi tài liệu không ghi chú riêng theo CC BY-SA 2.0 KR; **được dùng cả cho mục đích thương mại**, không cần xin phép riêng; điều kiện: **ghi tác giả** (저작자 표시) và **tác phẩm dẫn xuất cùng giấy phép** (동일조건변경허락). Tệp đa phương tiện (ảnh, video, âm thanh, phát âm) có **giấy phép riêng từng tệp** → Hanbit **không** nhập các tệp này. |
+| Cách lấy | Open API `https://krdict.korean.go.kr/api/search` qua `tools/Hanbit.ContentImporter` |
 | Áp dụng cho | `vocab/krdict-*.json` (sinh bởi `Hanbit.ContentImporter`), `vocab-reviews.json` (bản sửa/duyệt nghĩa tiếng Việt — **dữ liệu dẫn xuất**) |
 
 - Mỗi mục từ giữ trường `source` (`SourceRef`: tên nguồn, mã mục từ, link gốc, giấy phép).
@@ -27,3 +29,4 @@ Mã nguồn Hanbit và dữ liệu trong `content/` có giấy phép **riêng bi
 - Do dự án Hanbit tự biên soạn; **không** sao chép từ giáo trình, đề thi TOPIK hay nguồn có bản quyền khác (RULES — mục "AI tuyệt đối không được" #9).
 - Giấy phép: **© Hanbit — giữ mọi quyền (All rights reserved)**. Không được sao chép, phân phối lại hay dùng cho mục đích khác khi chưa có sự đồng ý của chủ dự án. *(Chốt 2026-11-24; có thể chuyển sang giấy phép mở sau này.)*
 - Bài học tham chiếu từ vựng bằng `id` (không sao chép), nên phần từ vựng trong bài học vẫn thuộc mục 1.
+- ⚠️ Nếu bài tập **chép nguyên văn** nghĩa/định nghĩa lấy từ krdict (VD lựa chọn "nước" trong `multiple_choice`), phần chữ đó vẫn là dữ liệu CC BY-SA 2.0 KR của mục 1 (ghi công như mục 1); phần còn lại của bài học giữ mọi quyền.

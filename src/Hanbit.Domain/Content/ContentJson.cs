@@ -15,7 +15,7 @@ public static class ContentJson
     /// snake_case cho tên trường và giá trị enum; đọc CHẶT để bắt lỗi dữ liệu sớm:
     /// thiếu trường bắt buộc, <c>null</c> ở trường không cho phép null, trường lạ (gõ sai) → <see cref="JsonException"/>.
     /// Cho phép comment + dấu phẩy cuối (file viết tay); <c>type</c> của Exercise không cần đứng đầu.
-    /// Ghi: thụt lề, giữ nguyên chữ Hàn/Việt (không escape \uXXXX).
+    /// Ghi: thụt lề, bỏ trường null, giữ nguyên chữ Hàn/Việt (không escape \uXXXX).
     /// </summary>
     public static JsonSerializerOptions Options { get; } = CreateOptions();
 
@@ -33,6 +33,8 @@ public static class ContentJson
             ReadCommentHandling = JsonCommentHandling.Skip,
             AllowTrailingCommas = true,
             WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, // trường tùy chọn null → bỏ khỏi file
+
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
         };
