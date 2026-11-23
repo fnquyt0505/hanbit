@@ -7,11 +7,11 @@
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Giai đoạn                     | 1 — Dữ liệu nội dung (한국어기초사전)                                                                                     |
-| Task đang làm                 | **T1.5** — code xong; chờ krdict truy cập lại được để chạy import thật (E2)                                        |
+| Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | Hoàn tất **T1.5** (chạy import khi krdict truy cập được) → **T1.7** người dùng duyệt nghĩa |
-| Việc song song (người dùng) | Kiểm tra krdict.korean.go.kr mở được trong trình duyệt chưa (E2)                                                      |
-| Blocker                         | E2 — krdict không phản hồi từ máy dev                                                                                       |
+| Task tiếp theo                 | **T1.7** 👤 Người dùng duyệt nghĩa ~150 từ đầu (AI hỗ trợ xuất CSV + tool nhập lại) |
+| Việc song song (người dùng) | —                                                      |
+| Blocker                         | —                                                                                                                           |
 
 ## 💻 Môi trường máy dev
 
@@ -24,6 +24,13 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T1.5 hoàn tất: import từ file "사전 전체 내려받기"
+- Đã làm: import qua Open API thất bại (E2 — krdict chặn IP khi gọi liên tục, kể cả tuần tự + nghỉ 300 ms qua WARP). Người dùng tải **11 file JSON LMF** (~1 GB, 53.671 mục, 2026-11-19) vào `data-raw/`. Khảo sát cấu trúc LMF bằng script (thuộc tính `feat`, `Lemma` object/mảng có `variant`, `WordForm` object/mảng/vắng, 2.884 mục trùng mã, `Equivalent` 11 ngôn ngữ). Thay phần import qua API bằng `KrdictLmfReader` (đọc phòng thủ) + `KrdictImporter` (lọc cấp + chỉ `단어`, gộp theo mã, báo cáo); **gỡ** parser XML / nguồn HTTP có cache (không dùng nữa); giữ lệnh `probe` tra lẻ API. Chất lượng dữ liệu: bỏ placeholder `(Không có từ tương ứng)` (13 từ; 2 từ chỉ có placeholder → dùng định nghĩa tiếng Việt), bỏ phần nghĩa lặp giữa các sense (272 → 0), giải mã HTML entity (`&apos;`). Fixture test = 7 mục thật trích từ file (phủ các trường hợp đặc biệt). Cập nhật ARCHITECTURE §8, LICENSE-DATA, AGENT.md (`import --input data-raw`).
+- **Báo cáo:** 11 file · 56.555 mục quét · 2.545 mục 초급 · loại 44 cụm (구) · **đã nhập 2.501 từ**, 0 từ thiếu nghĩa tiếng Việt · Danh từ 1.401, Động từ 527, Tính từ 168, Phó từ 127, Định từ 74, Danh từ phụ thuộc 53, Số từ 53, Đại từ 38, Thán từ 31, Trợ động từ 9, Phụ tố 8, Không từ loại 8, Trợ tính từ 3, Trợ từ 1. File `content/vocab/krdict-beginner.json` (1,3 MB, mọi từ `reviewed = false`). Validator ✅.
+- Kiểm tra: build ✅ (0 warning) · format ✅ · test ✅ (Tools 45 + toàn bộ) · đối chiếu ngẫu nhiên với API (학교 → trường học 學校, 가격 → giá cả, giá 價格) khớp
+- Vấn đề / ghi chú: nghĩa đơn vị đếm có phiên âm Latin do krdict ghi (접시 → "jeopsi, đĩa", 층 → "cheung, lớp, tầng") — để người duyệt quyết ở T1.7.
+- Tiếp theo: T1.7
 
 ### 2026-11-24 — T1.6 RomanizationService
 - Đã làm: `Domain/Hangul/HangulSyllable` (tách/ghép âm tiết theo công thức Unicode — dùng lại cho `HangulComposer` T3.3) và `RomanizationService.Romanize(text)` theo **Revised Romanization**: ghi theo cách đọc với biến âm giữa các âm tiết trong một từ — nối âm (kể cả phụ âm cuối kép, ㅎ câm), mũi hóa, ㄹ (ㄴ+ㄹ→ll, ㄹ+ㄴ→ll, ㅁㅇ/ㄱㅂ+ㄹ→ㄴ), bật hơi với ㅎ (cả hai chiều), vòm hóa; không ghi âm căng; biến âm không vượt qua khoảng trắng; ký tự khác giữ nguyên. Giới hạn (ghi trong XML doc): chèn ㄴ, ㄴ+ㄹ đọc ㄴㄴ trong từ ghép (신문로), ngoại lệ danh từ giữ "h" (묵호), 밟-. Importer chưa điền `romanization` (để null) — tính khi hiển thị bằng service.
@@ -141,7 +148,7 @@
 | ID | Mô tả   | Task liên quan | Trạng thái |
 | -- | --------- | --------------- | ------------ |
 | E1 | Docker Desktop (WSL 2) không phân giải DNS registry (`lookup …: no such host`), Windows thì bình thường. Nghi Cloudflare WARP. Cách thử: khởi động lại Docker Desktop; tắt WARP; hoặc Docker Desktop → Settings → Docker Engine thêm `"dns": ["1.1.1.1", "8.8.8.8"]` | T0.7 | Mở — CI job `docker` thay thế |
-| E2 | 2026-11-24: chạy import với 4 kết nối song song → sau 35 trang, krdict.korean.go.kr **timeout mọi kết nối** từ máy dev (cả trang chủ) — nghi IP bị chặn tạm vì gọi dồn dập. Đã sửa importer: mặc định 1 kết nối, nghỉ 300 ms/request, thử lại 5 lần chờ 5→120 giây. 35 trang đã cache trong `data-raw/krdict-cache/`. Chờ truy cập lại rồi chạy lại (tiếp tục từ cache). | T1.5 | Mở |
+| E2 | 2026-11-24: chạy import với 4 kết nối song song → sau 35 trang, krdict.korean.go.kr **timeout mọi kết nối** từ máy dev (cả trang chủ) — nghi IP bị chặn tạm vì gọi dồn dập. Đã sửa importer: mặc định 1 kết nối, nghỉ 300 ms/request, thử lại 5 lần chờ 5→120 giây. 35 trang đã cache trong `data-raw/krdict-cache/`. Chờ truy cập lại rồi chạy lại (tiếp tục từ cache). Lần 2 (qua Cloudflare WARP, tuần tự + nghỉ 300 ms): bị chặn lại sau ~54 trang → API không khả thi cho import hàng loạt. **Giải quyết:** chuyển sang file "사전 전체 내려받기" (LMF JSON) — import trên máy, không gọi krdict. | T1.5 | Đóng (2026-11-24) |
 
 ## ❓ Câu hỏi / việc cần xác minh
 

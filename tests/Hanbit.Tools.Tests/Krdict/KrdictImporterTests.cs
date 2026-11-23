@@ -10,120 +10,111 @@ namespace Hanbit.Tools.Tests.Krdict;
 
 public sealed class KrdictImporterTests : IDisposable
 {
+    private static readonly string Sample = Path.Combine(AppContext.BaseDirectory, "Fixtures", "krdict-lmf-sample.json");
     private readonly DirectoryInfo _temp = Directory.CreateTempSubdirectory("hanbit-importer-");
 
     public void Dispose() => _temp.Delete(recursive: true);
 
-    private static string Page(int total, params (string Code, string Word, string? Grade, string? TransWord)[] items)
+    [Fact]
+    public async Task ReadAsync_Sample_ReadsAllEntries()
     {
-        var xmlItems = string.Concat(items.Select(i => $"""
-            <item><target_code>{i.Code}</target_code><word>{i.Word}</word><sup_no>0</sup_no>
-              {(i.Grade is null ? "" : $"<word_grade>{i.Grade}</word_grade>")}<pos>명사</pos>
-              <link>https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo={i.Code}</link>
-              <sense><sense_order>1</sense_order><definition>정의</definition>
-                {(i.TransWord is null ? "" : $"<translation><trans_word><![CDATA[{i.TransWord}]]></trans_word></translation>")}
-              </sense></item>
-            """));
-        return $"<channel><total>{total}</total><start>1</start><num>100</num>{xmlItems}</channel>";
-    }
+        var entries = await KrdictLmfReader.ReadAsync(Sample, CancellationToken.None);
 
-    /// <summary>Nguồn giả: trả XML theo (âm tiết, trang); ghi lại các lần gọi.</summary>
-    private sealed class FakeSource(Dictionary<(char, int), string> pages) : IKrdictSearchSource
-    {
-        public List<(char Syllable, string Level, int Page)> Calls { get; } = [];
-
-        public Task<string> GetStartsWithPageAsync(char syllable, string level, int page, CancellationToken cancellationToken)
-        {
-            lock (Calls)
-            {
-                Calls.Add((syllable, level, page));
-            }
-
-            return Task.FromResult(pages.TryGetValue((syllable, page), out var xml) ? xml : Page(0));
-        }
+        entries.Count.ShouldBe(7);
     }
 
     [Fact]
-    public async Task ImportAsync_RealFixture_ImportsAllBeginnerWords()
+    public async Task ReadAsync_Entry_MapsLmfFeatures()
     {
-        var source = new FakeSource(new() { [('학', 1)] = KrdictXmlParserTests.Fixture("search-hak-level1.xml") });
+        var youth = (await KrdictLmfReader.ReadAsync(Sample, CancellationToken.None)).Single(e => e.TargetCode == "72119");
 
-        var (items, report) = await new KrdictImporter(source).ImportAsync(VocabGrade.Beginner, ['학'], 1, CancellationToken.None);
+        youth.Word.ShouldBe("청년");
+        youth.WordGrade.ShouldBe("초급");
+        youth.LexicalUnit.ShouldBe("단어");
+        youth.Pos.ShouldBe("명사");
+        youth.Origin.ShouldBe("靑年");
+        youth.Pronunciation.ShouldNotBeNullOrWhiteSpace();
+        youth.Link.ShouldBe("https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo=72119");
+        var sense = youth.Senses.ShouldHaveSingleItem();
+        sense.Order.ShouldBe(1);
+        sense.Definition.ShouldNotBeNullOrWhiteSpace();
+        sense.TransWord.ShouldNotBeNullOrWhiteSpace();
+    }
 
-        items.Count.ShouldBe(7);
-        items.ShouldContain(v => v.Ko == "학교" && v.Vi == "trường học" && v.Hanja == "學校");
-        items.ShouldAllBe(v => v.Grade == VocabGrade.Beginner && !v.Reviewed && v.Id.StartsWith("kd-"));
-        report.ImportedCount.ShouldBe(7);
+    [Fact]
+    public async Task ReadAsync_LemmaArrayWithVariants_UsesWrittenForm()
+    {
+        var chocolate = (await KrdictLmfReader.ReadAsync(Sample, CancellationToken.None)).Single(e => e.TargetCode == "72128");
+
+        chocolate.Word.ShouldBe("초콜릿");
+        chocolate.Pronunciation.ShouldBeNull(); // không có WordForm
+    }
+
+    [Fact]
+    public async Task ReadAsync_WordFormArray_JoinsPronunciations()
+    {
+        var entry = (await KrdictLmfReader.ReadAsync(Sample, CancellationToken.None)).Single(e => e.TargetCode == "91894");
+
+        entry.Word.ShouldBe("청소되다");
+        entry.Pronunciation.ShouldNotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task ReadAsync_NotLmf_ThrowsFormatException()
+    {
+        var path = Path.Combine(_temp.FullName, "khac.json");
+        await File.WriteAllTextAsync(path, """{ "foo": [] }""");
+
+        await Should.ThrowAsync<FormatException>(() => KrdictLmfReader.ReadAsync(path, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task ImportAsync_Sample_KeepsOnlyBeginnerWords()
+    {
+        var (items, report) = await KrdictImporter.ImportAsync(VocabGrade.Beginner, [Sample], CancellationToken.None);
+
+        items.Select(v => v.Ko).ShouldBe(["첫", "청년", "청소되다", "초콜릿"]);
+        items.ShouldAllBe(v => v.Grade == VocabGrade.Beginner && !v.Reviewed && v.Id.StartsWith("kd-") && v.Vi.Length > 0);
+        report.FilesRead.ShouldBe(1);
+        report.EntriesScanned.ShouldBe(7);
+        report.MatchingGrade.ShouldBe(5); // 4 단어 + 1 구
+        report.ExcludedNonWordUnits.ShouldBe(new Dictionary<string, int> { ["구"] = 1 });
+        report.ImportedCount.ShouldBe(4);
         report.SkippedWithoutVietnamese.ShouldBeEmpty();
-        source.Calls.ShouldHaveSingleItem().Level.ShouldBe("level1");
     }
 
     [Fact]
-    public async Task ImportAsync_TotalAbovePageSize_FetchesNextPages()
+    public async Task ImportAsync_DuplicateTargetCode_ImportedOnce()
     {
-        var source = new FakeSource(new()
-        {
-            [('가', 1)] = Page(150, ("1", "가게", "초급", "cửa hàng")),
-            [('가', 2)] = Page(150, ("2", "가격", "초급", "giá cả")),
-        });
+        var (items, _) = await KrdictImporter.ImportAsync(VocabGrade.Beginner, [Sample, Sample], CancellationToken.None);
 
-        var (items, report) = await new KrdictImporter(source).ImportAsync(VocabGrade.Beginner, ['가'], 1, CancellationToken.None);
-
-        items.Select(v => v.Id).ShouldBe(["kd-1", "kd-2"]);
-        report.PagesFetched.ShouldBe(2);
+        items.Count(v => v.Id == "kd-77610").ShouldBe(1);
+        items.Count.ShouldBe(4);
     }
 
     [Fact]
-    public async Task ImportAsync_DuplicateAcrossSyllables_KeptOnce_AndOtherGradesDropped()
+    public async Task ImportAsync_IntermediateGrade_SelectsOtherLevel()
     {
-        var source = new FakeSource(new()
-        {
-            [('가', 1)] = Page(2, ("1", "가게", "초급", "cửa hàng"), ("9", "가결", "고급", "thông qua")),
-            [('나', 1)] = Page(1, ("1", "가게", "초급", "cửa hàng")),
-        });
+        var (items, _) = await KrdictImporter.ImportAsync(VocabGrade.Intermediate, [Sample], CancellationToken.None);
 
-        var (items, _) = await new KrdictImporter(source).ImportAsync(VocabGrade.Beginner, ['가', '나'], 2, CancellationToken.None);
-
-        items.ShouldHaveSingleItem().Id.ShouldBe("kd-1");
-    }
-
-    [Fact]
-    public async Task ImportAsync_WordWithoutVietnamese_IsSkippedAndReported()
-    {
-        var source = new FakeSource(new() { [('가', 1)] = Page(2, ("1", "가게", "초급", "cửa hàng"), ("2", "가로", "초급", null)) });
-
-        var (items, report) = await new KrdictImporter(source).ImportAsync(VocabGrade.Beginner, ['가'], 1, CancellationToken.None);
-
-        items.ShouldHaveSingleItem();
-        report.SkippedWithoutVietnamese.ShouldBe(["가로 (kd-2)"]);
-    }
-
-    [Fact]
-    public async Task ImportAsync_SortsByKoreanWordThenCode()
-    {
-        var source = new FakeSource(new() { [('가', 1)] = Page(3, ("30", "나무", "초급", "cây"), ("20", "가게", "초급", "x"), ("10", "가게", "초급", "y")) });
-
-        var (items, _) = await new KrdictImporter(source).ImportAsync(VocabGrade.Beginner, ['가'], 1, CancellationToken.None);
-
-        items.Select(v => v.Id).ShouldBe(["kd-10", "kd-20", "kd-30"]);
+        items.ShouldHaveSingleItem().Ko.ShouldBe("첫가을");
     }
 
     [Fact]
     public async Task WriteAsync_Output_IsValidContentForValidator()
     {
-        var source = new FakeSource(new() { [('학', 1)] = KrdictXmlParserTests.Fixture("search-hak-level1.xml") });
-        var (items, _) = await new KrdictImporter(source).ImportAsync(VocabGrade.Beginner, ['학'], 1, CancellationToken.None);
-        var contentRoot = Path.Combine(_temp.FullName, "content");
-        File.Copy(Path.Combine(FindRepoRoot(), "content", "hangul.json"), Path.Combine(Directory.CreateDirectory(contentRoot).FullName, "hangul.json"));
+        var (items, _) = await KrdictImporter.ImportAsync(VocabGrade.Beginner, [Sample], CancellationToken.None);
+        var contentRoot = Directory.CreateDirectory(Path.Combine(_temp.FullName, "content")).FullName;
+        File.Copy(Path.Combine(FindRepoRoot(), "content", "hangul.json"), Path.Combine(contentRoot, "hangul.json"));
 
         await KrdictImporter.WriteAsync(Path.Combine(contentRoot, "vocab", "krdict-beginner.json"), items, CancellationToken.None);
 
         var validation = await new ContentValidationService().ValidateAsync(contentRoot, CancellationToken.None);
         validation.Issues.ShouldBeEmpty(string.Join(Environment.NewLine, validation.Issues));
         var json = await File.ReadAllTextAsync(Path.Combine(contentRoot, "vocab", "krdict-beginner.json"));
-        json.ShouldContain("\"ko\": \"학교\"");
+        json.ShouldContain("\"ko\": \"청년\"");
         json.ShouldNotContain("null");
-        JsonSerializer.Deserialize<List<VocabItem>>(json, ContentJson.Options).ShouldNotBeNull().Count.ShouldBe(7);
+        JsonSerializer.Deserialize<List<VocabItem>>(json, ContentJson.Options).ShouldNotBeNull().Count.ShouldBe(4);
     }
 
     [Theory]
@@ -140,13 +131,19 @@ public sealed class KrdictImporterTests : IDisposable
     }
 
     [Fact]
-    public void AllSyllables_CoversWholeHangulBlock()
+    public void ResolveInputFiles_Directory_ReturnsSortedJsonFiles()
     {
-        var syllables = KrdictImporter.AllSyllables().ToList();
+        File.WriteAllText(Path.Combine(_temp.FullName, "2_x.json"), "{}");
+        File.WriteAllText(Path.Combine(_temp.FullName, "1_x.json"), "{}");
+        File.WriteAllText(Path.Combine(_temp.FullName, "ghi-chu.txt"), "");
 
-        syllables.Count.ShouldBe(11172);
-        syllables[0].ShouldBe('가');
-        syllables[^1].ShouldBe('힣');
+        KrdictImporter.ResolveInputFiles(_temp.FullName).Select(Path.GetFileName).ShouldBe(["1_x.json", "2_x.json"]);
+    }
+
+    [Fact]
+    public void ResolveInputFiles_Missing_Throws()
+    {
+        Should.Throw<FileNotFoundException>(() => KrdictImporter.ResolveInputFiles(Path.Combine(_temp.FullName, "khong-co")));
     }
 
     private static string FindRepoRoot()
