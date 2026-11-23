@@ -8,7 +8,7 @@
 |---|---|
 | Giai đoạn | 0 — Khởi tạo solution |
 | Task đang làm | — |
-| Task tiếp theo | **T0.4** Tailwind v4 standalone CLI + vendor Alpine.js |
+| Task tiếp theo | **T0.5** Design tokens (màu light/dark, font) + trang `/styleguide` |
 | Việc song song (người dùng) | Đăng ký API key 한국어기초사전 + tải file dữ liệu (cần cho T1.5) |
 | Blocker | — |
 
@@ -23,6 +23,13 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D** |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-23 — T0.4 Tailwind v4 + Alpine.js
+- Đã làm: `src/Hanbit.Web/Tailwind.targets` (import trong csproj): tự tải Tailwind CLI **v4.3.5** standalone đúng OS/CPU (win-x64, linux-x64/arm64, macOS) vào `.tools/tailwindcss/<ver>/` (gitignored), **kiểm SHA-256** theo `sha256sums.txt` của release; build `Styles/input.css` → `wwwroot/css/app.css` trước mỗi build, incremental (bỏ qua khi View/JS/CSS không đổi), luôn `--minify` (chỉ minify ở Release thì bản Debug cũ lọt vào publish do incremental không phân biệt Configuration); đưa `app.css` vào static web assets bằng đường dẫn tương đối. `Styles/input.css`: `source(none)` + chỉ quét `Views/`, `TagHelpers/`, `wwwroot/js/`; `[x-cloak]`. Vendor **Alpine.js 3.17.5** (`wwwroot/lib/alpinejs/alpine.min.js`, ghi phiên bản trong `wwwroot/lib/README.md`), nạp `defer` + `asp-append-version` trong `_Layout`. Trang chủ tạm có demo Tailwind + `x-data` (thay ở T2.2). AGENT.md: sửa lệnh cài Playwright (không có `pwsh`), thêm ghi chú Tailwind/Alpine và lệnh lọc E2E.
+- File thay đổi: `src/Hanbit.Web/{Tailwind.targets, Hanbit.Web.csproj, Styles/input.css, Views/Shared/_Layout.cshtml, Views/Home/Index.cshtml, wwwroot/lib/**}`, `tests/Hanbit.Web.Tests/StaticAssetsTests.cs`, `tests/Hanbit.E2E/HomePageTests.cs`, `.gitignore`, `AGENT.md`
+- Kiểm tra: build ✅ (0 warning, cả Release từ trạng thái sạch) · format ✅ · test ✅ (11/11: E2E kiểm tra `font-bold` → `font-weight: 700` và click `x-data` hiện panel) · `dotnet publish` có `app.css` đã minify + bản nén `.gz/.br`
+- Vấn đề / ghi chú: lỗi tìm thấy trong lúc làm: thêm `app.css` vào `Content` bằng đường dẫn tuyệt đối → không có trong manifest static web assets → Production (`MapStaticAssets`) sẽ trả 404, Development thì vẫn chạy nên khó thấy. Đã sửa + test `EndpointsManifest_BuiltAsset_IsRegisteredForMapStaticAssets` (đã xác nhận test đỏ khi chưa sửa). Dockerfile (T0.7) cần mạng tới github.com để tải CLI lúc build.
+- Tiếp theo: T0.5
 
 ### 2026-11-23 — T0.3 Project test
 - Đã làm: `tests/Hanbit.Domain.Tests`, `Hanbit.Infrastructure.Tests` (test kiến trúc: assembly không tham chiếu sai hướng), `Hanbit.Web.Tests` (`WebApplicationFactory`: `/` trả 200 HTML `lang="vi"`, đường dẫn lạ trả 404), `Hanbit.E2E` (`WebServerFixture`: app chạy Kestrel cổng ngẫu nhiên qua `UseKestrel(0)` của .NET 10 + Chromium dùng chung; test mở trang chủ, kiểm tra title và chữ `한빛` có `lang="ko"`; `[Trait("Category","E2E")]`). Package: xunit 2.9.3 (template), Shouldly 4.3.0, Microsoft.AspNetCore.Mvc.Testing 10.0.12 (khớp runtime 10.0.12 của SDK 10.0.401; bản 11.0 chỉ hỗ trợ net11), Microsoft.Playwright 1.65.1. CI thêm bước cài Chromium (`--with-deps`). `Hanbit.Tools.Tests` để tới T1.3 (khi có tool).

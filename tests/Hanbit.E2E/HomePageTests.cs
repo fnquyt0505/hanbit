@@ -18,4 +18,30 @@ public class HomePageTests(WebServerFixture server)
         (await page.TitleAsync()).ShouldContain("Hanbit");
         (await page.Locator("[lang=ko]").First.InnerTextAsync()).ShouldBe("한빛");
     }
+
+    [Fact]
+    public async Task Open_HomePage_AppliesTailwindClasses()
+    {
+        var page = await server.Browser.NewPageAsync();
+        await page.GotoAsync(server.BaseUrl);
+
+        var fontWeight = await page.Locator("h1").EvaluateAsync<string>(
+            "el => getComputedStyle(el).fontWeight");
+
+        fontWeight.ShouldBe("700");
+    }
+
+    [Fact]
+    public async Task ClickToggle_AlpineComponent_ShowsPanel()
+    {
+        var page = await server.Browser.NewPageAsync();
+        await page.GotoAsync(server.BaseUrl);
+        var panel = page.GetByTestId("alpine-panel");
+        (await panel.IsVisibleAsync()).ShouldBeFalse();
+
+        await page.GetByTestId("alpine-toggle").ClickAsync();
+
+        await panel.WaitForAsync();
+        (await panel.IsVisibleAsync()).ShouldBeTrue();
+    }
 }
