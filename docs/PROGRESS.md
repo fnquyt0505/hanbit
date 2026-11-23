@@ -8,7 +8,7 @@
 |---|---|
 | Giai đoạn | 0 — Khởi tạo solution |
 | Task đang làm | — |
-| Task tiếp theo | **T0.5** Design tokens (màu light/dark, font) + trang `/styleguide` |
+| Task tiếp theo | **T0.6** UI cơ bản: Tag Helper `<hb-button>`, `<ko-text>`, partial `_Card`/`_Dialog`/`_ProgressBar`, toast |
 | Việc song song (người dùng) | Đăng ký API key 한국어기초사전 + tải file dữ liệu (cần cho T1.5) |
 | Blocker | — |
 
@@ -23,6 +23,13 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D** |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-23 — T0.5 Design tokens + /styleguide
+- Đã làm: `Styles/input.css`: 11 token màu đúng tên/giá trị DESIGN.md §2 (`--bg`, `--ink`…), dark theo `prefers-color-scheme` hoặc ép bằng `<html data-theme="light|dark">`; `@theme inline` map sang Tailwind (`bg-surface`, `text-ink-muted`, `border-border`…) và **tắt bảng màu mặc định** (`--color-*: initial`) → `bg-red-500` không sinh CSS; font `font-sans` (Be Vietnam Pro), `font-ko` (Pretendard → Noto Sans KR), `font-hangul` (Noto Serif KR), `text-hangul-display` (clamp 4–6rem); base: nền/chữ theo token, line-height 1.6/1.2, focus ring `--secondary`. Font: Google Fonts + Pretendard 1.3.9 qua jsDelivr. `wwwroot/js/theme.js` (component Alpine `themeSwitcher`: Hệ thống/Sáng/Tối), `styleguide.js` (`tokenValue` đọc giá trị thực của token). `StyleguideController` (`/styleguide`, noindex) + `StyleguideViewModel`. `_Layout`: section `Head` nạp module **trước** Alpine (để đăng ký component kịp `alpine:init`). E2E fixture `NewPageAsync(colorScheme)` chặn request ra ngoài (font CDN) → test không phụ thuộc mạng.
+- File thay đổi: `src/Hanbit.Web/{Styles/input.css, Views/Shared/_Layout.cshtml, Views/Styleguide/Index.cshtml, Views/Home/Index.cshtml, Controllers/StyleguideController.cs, Models/Styleguide/StyleguideViewModel.cs, wwwroot/js/theme.js, wwwroot/js/styleguide.js}`, `tests/Hanbit.Web.Tests/{StyleguideTests.cs, StaticAssetsTests.cs}`, `tests/Hanbit.E2E/{StyleguideTests.cs, WebServerFixture.cs, HomePageTests.cs}`
+- Kiểm tra: build ✅ (0 warning, `--no-incremental` Debug + Release) · format ✅ · test ✅ (20/20: nền sáng/tối theo hệ thống, nút chuyển Sáng↔Tối, 3 font, CSS không có màu mặc định)
+- Vấn đề / ghi chú: một lần build báo 1 warning không tái hiện được (nghi MSB3026: file DLL bị testhost lần trước giữ) — build lại sạch 0 warning. Lựa chọn sáng/tối **chưa được lưu** giữa các lần tải trang (xem câu hỏi 4–5).
+- Tiếp theo: T0.6
 
 ### 2026-11-23 — T0.4 Tailwind v4 + Alpine.js
 - Đã làm: `src/Hanbit.Web/Tailwind.targets` (import trong csproj): tự tải Tailwind CLI **v4.3.5** standalone đúng OS/CPU (win-x64, linux-x64/arm64, macOS) vào `.tools/tailwindcss/<ver>/` (gitignored), **kiểm SHA-256** theo `sha256sums.txt` của release; build `Styles/input.css` → `wwwroot/css/app.css` trước mỗi build, incremental (bỏ qua khi View/JS/CSS không đổi), luôn `--minify` (chỉ minify ở Release thì bản Debug cũ lọt vào publish do incremental không phân biệt Configuration); đưa `app.css` vào static web assets bằng đường dẫn tương đối. `Styles/input.css`: `source(none)` + chỉ quét `Views/`, `TagHelpers/`, `wwwroot/js/`; `[x-cloak]`. Vendor **Alpine.js 3.17.5** (`wwwroot/lib/alpinejs/alpine.min.js`, ghi phiên bản trong `wwwroot/lib/README.md`), nạp `defer` + `asp-append-version` trong `_Layout`. Trang chủ tạm có demo Tailwind + `x-data` (thay ở T2.2). AGENT.md: sửa lệnh cài Playwright (không có `pwsh`), thêm ghi chú Tailwind/Alpine và lệnh lọc E2E.
@@ -76,6 +83,9 @@
 1. Định dạng file tải về & mã ngôn ngữ tiếng Việt của krdict API → xác minh khi làm T1.5.
 2. Điều khoản bản quyền chính thức của krdict (CC BY-SA phiên bản nào, điều kiện ghi công) → xác minh trước T7.4.
 3. Ai duyệt nghĩa tiếng Việt (T1.7)? Mặc định: chủ dự án.
+4. **Tương phản màu (T0.5):** ở light mode `--success` (3.78:1), `--warning` (2.29:1), `--xp` (2.03:1) không đạt 4.5:1 khi làm **màu chữ** trên `--bg` (DESIGN.md §8). Hiện giữ nguyên token, ghi chú "chỉ dùng làm nền/viền/icon" trên `/styleguide`. Cần quyết: thêm token chữ đậm hơn (VD `--success-ink`) hay chấp nhận? Ngoài ra chữ trắng trên `--primary` ở dark mode cần kiểm tra khi làm `<hb-button>` (T0.6).
+5. **Lưu chế độ sáng/tối ở đâu?** RULES §5 chỉ cho dùng localStorage qua `progress-store.js` (có ở T5.3). Đề xuất: lưu trong `progress-store.js` khi có, kèm script nhỏ trong `<head>` đặt `data-theme` trước khi vẽ để tránh nháy màu.
+6. **Font qua CDN** (Google Fonts, jsDelivr): nhanh, có subset tiếng Hàn tự động; nhược điểm phụ thuộc bên thứ ba + cần mở CSP ở T7.3. Phương án khác: tự host (font Hàn rất nặng).
 
 ## 📝 Quyết định đã chốt
 

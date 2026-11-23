@@ -6,6 +6,103 @@
 @source "../TagHelpers";
 @source "../wwwroot/js";
 
+/* ───────────────────────── Design tokens (docs/DESIGN.md §2) ─────────────────────────
+   Màu chỉ khai báo ở đây. Chế độ: mặc định theo hệ thống (prefers-color-scheme),
+   ép bằng <html data-theme="light|dark">. */
+:root {
+  color-scheme: light;
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --ink: #1c1917;
+  --ink-muted: #6b645c;
+  --border: #e7e0d6;
+  --primary: #c8323c;
+  --secondary: #1f4e9a;
+  --success: #2f8f5b;
+  --warning: #d99a1e;
+  --danger: #c8323c;
+  --xp: #e8a317;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #14120f;
+    --surface: #1e1b17;
+    --ink: #f5f1ea;
+    --ink-muted: #a8a097;
+    --border: #2e2a25;
+    --primary: #e0565f;
+    --secondary: #5b8bd9;
+    --success: #4cb97e;
+    --warning: #f0b94a;
+    --danger: #e0565f;
+    --xp: #f3c04f;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14120f;
+  --surface: #1e1b17;
+  --ink: #f5f1ea;
+  --ink-muted: #a8a097;
+  --border: #2e2a25;
+  --primary: #e0565f;
+  --secondary: #5b8bd9;
+  --success: #4cb97e;
+  --warning: #f0b94a;
+  --danger: #e0565f;
+  --xp: #f3c04f;
+}
+
+/* Tailwind chỉ biết các màu token → bg-red-500 v.v. không sinh CSS (RULES §6: không hard-code màu). */
+@theme inline {
+  --color-*: initial;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-xp: var(--xp);
+
+  /* Typography (DESIGN.md §3) — font-sans (UI Việt), font-ko (chữ Hàn), font-hangul (Hangul hiển thị lớn) */
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-ko: "Pretendard Variable", "Pretendard", "Noto Sans KR", ui-sans-serif, sans-serif;
+  --font-hangul: "Noto Serif KR", ui-serif, serif;
+
+  /* xs…4xl dùng thang mặc định của Tailwind (trùng DESIGN.md); thêm cỡ Hangul hiển thị 4–6rem */
+  --text-hangul-display: clamp(4rem, 12vw, 6rem);
+  --text-hangul-display--line-height: 1.2;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.2;
+  }
+
+  /* Focus ring rõ ràng cho bàn phím (DESIGN.md §8) */
+  :focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+}
+
 /* Alpine.js: ẩn phần tử x-cloak cho tới khi Alpine khởi tạo xong */
 [x-cloak] {
   display: none !important;

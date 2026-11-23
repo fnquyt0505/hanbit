@@ -1,0 +1,88 @@
+@model Hanbit.Web.Models.Styleguide.StyleguideViewModel
+@{
+    ViewData["Title"] = "Styleguide";
+}
+
+@section Head {
+    <meta name="robots" content="noindex" />
+    <script type="module" src="~/js/styleguide.js" asp-append-version="true"></script>
+}
+
+<div class="mx-auto max-w-6xl space-y-12 p-4 sm:p-8">
+    <header class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold">Styleguide</h1>
+            <p class="text-ink-muted">Design tokens theo <code>docs/DESIGN.md</code>.</p>
+        </div>
+
+        <div x-data="themeSwitcher" role="radiogroup" aria-label="Chế độ giao diện"
+             class="inline-flex rounded-full border border-border bg-surface p-1">
+            <button type="button" role="radio" data-testid="theme-system"
+                    x-on:click="select('system')" x-bind:aria-checked="mode === 'system'"
+                    x-bind:class="mode === 'system' ? 'bg-secondary text-bg' : 'text-ink-muted'"
+                    class="rounded-full px-4 py-2 text-sm font-medium">Hệ thống</button>
+            <button type="button" role="radio" data-testid="theme-light"
+                    x-on:click="select('light')" x-bind:aria-checked="mode === 'light'"
+                    x-bind:class="mode === 'light' ? 'bg-secondary text-bg' : 'text-ink-muted'"
+                    class="rounded-full px-4 py-2 text-sm font-medium">Sáng</button>
+            <button type="button" role="radio" data-testid="theme-dark"
+                    x-on:click="select('dark')" x-bind:aria-checked="mode === 'dark'"
+                    x-bind:class="mode === 'dark' ? 'bg-secondary text-bg' : 'text-ink-muted'"
+                    class="rounded-full px-4 py-2 text-sm font-medium">Tối</button>
+        </div>
+    </header>
+
+    <section aria-labelledby="colors-heading" class="space-y-4">
+        <h2 id="colors-heading" class="text-2xl font-semibold">Màu sắc</h2>
+        <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach (var token in Model.Colors)
+            {
+                <li class="flex items-center gap-4 rounded-xl border border-border bg-surface p-4"
+                    data-token="@token.Name">
+                    <span class="size-12 shrink-0 rounded-xl border border-border"
+                          style="background-color: var(@token.Name)" aria-hidden="true"></span>
+                    <div class="min-w-0">
+                        <p class="font-mono text-sm font-semibold">@token.Name</p>
+                        <p class="text-sm text-ink-muted">@token.Usage</p>
+                        <p class="font-mono text-xs text-ink-muted" x-data="tokenValue('@token.Name')" x-text="value"></p>
+                        @if (!token.TextSafe)
+                        {
+                            <p class="text-xs text-ink-muted">Chỉ dùng làm nền/viền/icon, không làm màu chữ.</p>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    </section>
+
+    <section aria-labelledby="fonts-heading" class="space-y-6">
+        <h2 id="fonts-heading" class="text-2xl font-semibold">Typography</h2>
+
+        <div class="space-y-2 rounded-xl border border-border bg-surface p-4">
+            <p class="text-sm text-ink-muted"><code>font-sans</code> · Be Vietnam Pro: UI tiếng Việt</p>
+            <p class="text-2xl" data-testid="font-sans-sample">Học tiếng Hàn mỗi ngày, ổn định và vững chắc.</p>
+        </div>
+
+        <div class="space-y-2 rounded-xl border border-border bg-surface p-4">
+            <p class="text-sm text-ink-muted"><code>font-ko</code> · Pretendard → Noto Sans KR: chữ Hàn trong nội dung</p>
+            <p class="font-ko text-2xl" lang="ko" data-testid="font-ko-sample">한빛 가나다라마바사</p>
+        </div>
+
+        <div class="space-y-2 rounded-xl border border-border bg-surface p-4">
+            <p class="text-sm text-ink-muted"><code>font-hangul text-hangul-display</code> · Noto Serif KR: Hangul hiển thị lớn</p>
+            <p class="font-hangul text-hangul-display" lang="ko" data-testid="font-hangul-sample">한</p>
+        </div>
+
+        <div class="space-y-1 rounded-xl border border-border bg-surface p-4">
+            <p class="text-sm text-ink-muted">Thang chữ</p>
+            <p class="text-xs">text-xs · 0.75rem</p>
+            <p class="text-sm">text-sm · 0.875rem</p>
+            <p class="text-base">text-base · 1rem</p>
+            <p class="text-lg">text-lg · 1.125rem</p>
+            <p class="text-xl">text-xl · 1.25rem</p>
+            <p class="text-2xl">text-2xl · 1.5rem</p>
+            <p class="text-3xl">text-3xl · 1.875rem</p>
+            <p class="text-4xl">text-4xl · 2.25rem</p>
+        </div>
+    </section>
+</div>
