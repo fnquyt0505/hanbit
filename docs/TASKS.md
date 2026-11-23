@@ -16,7 +16,7 @@
 
 ## Giai đoạn 1 — Dữ liệu nội dung (한국어기초사전)
 
-- [ ] **T1.1** Records nội dung trong `Domain/Content` + `JsonSerializerOptions` (snake_case, polymorphic Exercise). DoD: test deserialize.
+- [x] **T1.1** Records nội dung trong `Domain/Content` + `JsonSerializerOptions` (snake_case, polymorphic Exercise). DoD: test deserialize.
 - [ ] **T1.2** `content/hangul.json` (40 chữ, tự biên soạn) + `content/LICENSE-DATA.md`. DoD: đủ 14 phụ âm, 5 phụ âm kép, 10 nguyên âm, 11 nguyên âm ghép.
 - [ ] **T1.3** FluentValidation validators + tool `Hanbit.ContentValidator`. DoD: báo lỗi rõ file/trường.
 - [ ] **T1.4** `IContentRepository` + `JsonContentRepository` (IMemoryCache, merge `vocab-reviews.json`). DoD: unit test.
