@@ -1,0 +1,17 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Không đặt secret ở đây (RULES §8). Secret (nếu có) khai báo trên dashboard Render.
+services:
+  - type: web
+    name: hanbit
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    # Chỉ deploy commit trên main khi các GitHub check (CI build-test) đã xanh
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
