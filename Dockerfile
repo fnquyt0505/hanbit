@@ -11,10 +11,12 @@ COPY src/Hanbit.Domain/Hanbit.Domain.csproj src/Hanbit.Domain/
 COPY src/Hanbit.Application/Hanbit.Application.csproj src/Hanbit.Application/
 COPY src/Hanbit.Infrastructure/Hanbit.Infrastructure.csproj src/Hanbit.Infrastructure/
 COPY src/Hanbit.Web/Hanbit.Web.csproj src/Hanbit.Web/Tailwind.targets src/Hanbit.Web/
-RUN dotnet restore src/Hanbit.Web/Hanbit.Web.csproj
+# -r linux-x64: cần cho ReadyToRun (biên dịch sẵn mã máy → khởi động nhanh hơn sau khi Render đánh thức — T7.6)
+RUN dotnet restore src/Hanbit.Web/Hanbit.Web.csproj -r linux-x64
 
 COPY src/ src/
-RUN dotnet publish src/Hanbit.Web/Hanbit.Web.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish src/Hanbit.Web/Hanbit.Web.csproj -c Release -o /app/publish --no-restore \
+    -r linux-x64 --self-contained false -p:PublishReadyToRun=true
 
 # ---------- runtime ----------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
