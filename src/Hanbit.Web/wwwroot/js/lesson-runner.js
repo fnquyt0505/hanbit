@@ -5,6 +5,28 @@ import { speak } from './speech.js';
 /** Loại bài tập màn học hỗ trợ hiển thị. */
 export const SUPPORTED_TYPES = ['multiple_choice', 'listen_choose', 'match_pairs', 'reorder', 'type_answer'];
 
+/** Ngưỡng "giỏi" của màn tổng kết. */
+export const GREAT_SCORE = 80;
+
+/**
+ * Tổng kết (T4.6): điểm %, số đúng, từ cần ôn lại (từ của bài sai — theo vocabId server trả khi chấm, không trùng).
+ * @param {{ correct: boolean, vocabId: string | null }[]} answers
+ * @param {{ id: string, ko: string, vi: string }[]} vocab
+ */
+export function summarize(answers, vocab) {
+  const total = answers.length;
+  const correct = answers.filter((a) => a.correct).length;
+  const wrongIds = [...new Set(answers.filter((a) => !a.correct && a.vocabId).map((a) => a.vocabId))];
+  const byId = new Map(vocab.map((v) => [v.id, v]));
+  return {
+    total,
+    correct,
+    score: total ? Math.round((correct / total) * 100) : 0,
+    wrongWords: wrongIds.map((id) => byId.get(id)).filter(Boolean),
+    wrongOther: answers.filter((a) => !a.correct && !a.vocabId).length,
+  };
+}
+
 document.addEventListener('alpine:init', () => {
   window.Alpine.data('lessonRunner', () => {
     const data = JSON.parse(document.getElementById('lesson-data').textContent);
@@ -13,6 +35,8 @@ document.addEventListener('alpine:init', () => {
     return {
       course: data.course,
       lesson: data.lesson,
+      nextSlug: data.nextSlug ?? null,
+      vocab: data.vocab,
       vocabCount: data.vocabCount,
       grammarCount: data.grammarCount,
       exercises,
@@ -22,7 +46,7 @@ document.addEventListener('alpine:init', () => {
       exIndex: 0,
       selected: null,
       result: null,
-      answers: [], // { exerciseId, correct }
+      answers: [], // { exerciseId, correct, vocabId }
       loading: false,
       error: null,
 
@@ -45,6 +69,18 @@ document.addEventListener('alpine:init', () => {
       },
       get correctCount() {
         return this.answers.filter((a) => a.correct).length;
+      },
+      get summary() {
+        return summarize(this.answers, this.vocab);
+      },
+      get isGreat() {
+        return this.summary.score >= GREAT_SCORE;
+      },
+      speakWord(ko) {
+        speak(ko).catch(() => window.Alpine.store('toast')?.show('Thiết bị chưa đọc được tiếng Hàn.', 'danger'));
+      },
+      restart() {
+        window.location.reload();
       },
 
       // ── Từ vựng & ngữ pháp ──
@@ -117,7 +153,7 @@ document.addEventListener('alpine:init', () => {
             throw new Error(String(response.status));
           }
           this.result = await response.json();
-          this.answers.push({ exerciseId: this.exercise.id, correct: this.result.correct });
+          this.answers.push({ exerciseId: this.exercise.id, correct: this.result.correct, vocabId: this.result.vocabId ?? null });
         } catch {
           this.selected = null;
           this.error = 'Không chấm được câu này. Bạn thử lại nhé.';

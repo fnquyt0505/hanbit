@@ -140,4 +140,5 @@ public sealed record AnswerDto(int? Index, IReadOnlyList<MatchPair>? Pairs, IRea
     };
 }
 
-public sealed record CheckExerciseResponse(bool Correct, string CorrectAnswer, string? ExplanationVi);
+/// <param name="VocabId">Từ vựng mà bài tập kiểm tra (bài sinh từ một từ) — cho danh sách "từ cần ôn lại"; null nếu không gắn với một từ.</param>
+public sealed record CheckExerciseResponse(bool Correct, string CorrectAnswer, string? ExplanationVi, string? VocabId = null);

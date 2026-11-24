@@ -50,7 +50,8 @@ public sealed class LessonsApiController(LessonService lessonService) : Controll
                 ModelState.AddModelError(nameof(request.Answer), "Dạng câu trả lời không khớp loại bài tập.");
                 return ValidationProblem(ModelState);
             default:
-                return new CheckExerciseResponse(result!.Correct, result.CorrectAnswer, result.ExplanationVi);
+                return new CheckExerciseResponse(result!.Correct, result.CorrectAnswer, result.ExplanationVi,
+                    Hanbit.Domain.Learning.ExerciseGenerator.VocabIdFor(request.ExerciseId));
         }
     }
 }

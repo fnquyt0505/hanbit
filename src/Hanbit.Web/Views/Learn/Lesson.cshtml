@@ -239,10 +239,48 @@
         </template>
     </section>
 
-    @* ───────── Kết thúc (chi tiết ở T4.6) ───────── *@
-    <section x-show="phase === 'done'" x-cloak class="mt-8 rounded-2xl border border-border bg-surface p-8 text-center" aria-labelledby="done-title" data-testid="lesson-done">
-        <h2 id="done-title" class="text-2xl font-bold">Hoàn thành bài học!</h2>
-        <p class="mt-2 text-ink-muted">Bạn đúng <span class="font-semibold text-ink" x-text="correctCount" data-testid="done-correct"></span>/<span x-text="answers.length"></span> bài tập.</p>
-        <div class="mt-6 flex justify-center"><hb-button href="@courseHref" size="lg" block="true">Về lộ trình</hb-button></div>
+    @* ───────── Tổng kết (T4.6) — XP/lưu tiến độ ở giai đoạn 5 ───────── *@
+    <section x-show="phase === 'done'" x-cloak class="mt-8 rounded-2xl border border-border bg-surface p-6 sm:p-8" aria-labelledby="done-title" data-testid="lesson-done">
+        <div class="text-center">
+            <p class="text-5xl" aria-hidden="true" x-text="isGreat ? '🎉' : '💪'"></p>
+            <h2 id="done-title" class="mt-3 text-2xl font-bold">
+                <span x-show="isGreat">Tuyệt! Bạn đã hoàn thành bài học</span>
+                <span x-show="!isGreat">Hoàn thành rồi! Ôn lại chút nữa nhé</span>
+            </h2>
+            <p class="mt-4 text-5xl font-bold" data-testid="done-score"><span x-text="summary.score"></span>%</p>
+            <p class="mt-1 text-ink-muted">Đúng <span class="font-semibold text-ink" x-text="summary.correct" data-testid="done-correct"></span>/<span x-text="summary.total" data-testid="done-total"></span> bài tập</p>
+        </div>
+
+        @* Từ cần ôn lại *@
+        <div class="mt-8" x-show="summary.wrongWords.length > 0" data-testid="wrong-words">
+            <h3 class="font-semibold">Từ cần ôn lại <span class="font-normal text-ink-muted">· <span x-text="summary.wrongWords.length"></span> từ</span></h3>
+            <ul class="mt-3 divide-y divide-border rounded-xl border border-border">
+                <template x-for="word in summary.wrongWords" x-bind:key="word.id">
+                    <li class="flex items-center gap-3 px-4 py-3" x-bind:data-vocab-id="word.id">
+                        <button type="button" class="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-border hover:border-secondary hover:text-secondary"
+                                x-on:click="speakWord(word.ko)" x-bind:aria-label="`Nghe: ${word.ko}`">
+                            <svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 5 6 9H3v6h3l5 4z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M18.5 5.5a9 9 0 0 1 0 13" />
+                            </svg>
+                        </button>
+                        <span lang="ko" class="font-ko text-lg font-semibold" x-text="word.ko"></span>
+                        <span class="text-ink-muted" x-text="word.vi"></span>
+                    </li>
+                </template>
+            </ul>
+        </div>
+        <p class="mt-4 text-sm text-ink-muted" x-show="summary.wrongOther > 0">
+            Có <span x-text="summary.wrongOther"></span> bài tập khác chưa đúng (ngữ pháp, sắp xếp, nối cặp…) — học lại bài để luyện thêm.
+        </p>
+        <p class="mt-8 text-center text-ink-muted" x-show="summary.total > 0 && summary.wrongWords.length === 0 && summary.wrongOther === 0">Bạn trả lời đúng tất cả! 🌟</p>
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <hb-button variant="outline" size="lg" block="true" x-on:click="restart()" data-testid="done-restart">Học lại</hb-button>
+            <template x-if="nextSlug">
+                <a x-bind:href="`/learn/${course}/${nextSlug}`" data-testid="done-next"
+                   class="inline-flex h-12 w-full items-center justify-center rounded-full bg-primary px-6 text-lg font-semibold text-bg hover:opacity-90 sm:w-auto">Bài tiếp theo</a>
+            </template>
+            <hb-button href="@courseHref" variant="outline" size="lg" block="true" data-testid="done-course">Về lộ trình</hb-button>
+        </div>
     </section>
 </div>

@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 4 — Bài học & bài tập |
+| Giai đoạn                     | 4 — Bài học & bài tập ✅ xong → tiếp theo 5 — Tiến độ chế độ khách (chờ người dùng) |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T4.6** Màn tổng kết: điểm, từ sai |
+| Task tiếp theo                 | **T5.1** `LearnerProgress` + `IClock` + `XpRules` + `StreakCalculator` |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T4.6 Màn tổng kết bài học
+- Đã làm: `ExerciseGenerator.VocabIdFor` (bài sinh 1 từ → id từ vựng; nối cặp/bài tự soạn → null); `POST /api/exercises/check` trả thêm `vocabId` (chỉ sau khi chấm — gửi trong đề sẽ lộ đáp án bài Việt→Hàn). Runner JSON thêm `nextSlug`. `lesson-runner.js`: `summarize(answers, vocab)` (điểm %, đúng/tổng, từ cần ôn lại không trùng, số bài sai khác), ngưỡng `GREAT_SCORE` 80%. Màn tổng kết: 🎉/💪 + lời nhắn theo điểm, % lớn, đúng x/y, danh sách **từ cần ôn lại** (nút nghe, chữ Hàn, nghĩa), số bài sai khác, nút Học lại / Bài tiếp theo / Về lộ trình. XP + lưu tiến độ ở giai đoạn 5.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 525/525 (Domain +7 `VocabIdFor`; Web +1 `vocabId` chỉ cho bài sinh 1 từ; E2E +1 `summarize` + màn tổng kết sau 14 bài: tổng, %, link bài tiếp theo/lộ trình) · ảnh chụp OK.
+- Vấn đề / ghi chú: **Giai đoạn 4 xong.**
+- Tiếp theo: (chờ người dùng) T5.1
 
 ### 2026-11-24 — T4.5 UI match_pairs, reorder, type_answer
 - Đã làm: `Learn/Lesson` + `lesson-runner.js` hỗ trợ đủ 5 loại. **Nối cặp**: chạm trái rồi phải, cặp đã nối hiện số thứ tự (không dùng thêm màu), chạm lại để gỡ, đủ cặp mới bật "Kiểm tra" → gửi `pairs`. **Sắp xếp**: chạm mảnh ở ngân hàng để thêm vào câu, chạm mảnh trong câu để trả lại, đủ mảnh mới kiểm tra → gửi `tokens`. **Gõ**: ô nhập `lang=ko` tự focus, tắt autocomplete/spellcheck, Enter để kiểm tra, ghi chú bàn phím 두벌식 → gửi `text`. Trạng thái reset khi sang bài.
