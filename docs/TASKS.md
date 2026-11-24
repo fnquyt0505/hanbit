@@ -67,7 +67,7 @@
 ## Giai đoạn 7 — Hoàn thiện & ra mắt MVP
 
 - [x] **T7.1** `/profile`: thống kê từ đã thuộc, lịch streak.
-- [ ] **T7.2** E2E 3 luồng: Hangul bài 1, 1 bài học, 1 phiên ôn tập.
+- [x] **T7.2** E2E 3 luồng: Hangul bài 1, 1 bài học, 1 phiên ôn tập.
 - [ ] **T7.3** Rate limiting cho `/api/*`, security headers, `Cache-Control` cho nội dung tĩnh.
 - [ ] **T7.4** Accessibility (axe), SEO meta, OG image, sitemap.
 - [ ] **T7.5** Kiểm tra điều khoản bản quyền krdict, trang ghi công, `LICENSE-DATA.md`.
