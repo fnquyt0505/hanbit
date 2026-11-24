@@ -29,6 +29,7 @@
 
 - [x] **T2.1** `_Layout.cshtml`: `_BottomNav` (mobile), `_Sidebar` (desktop), `_Footer` ghi công. 
 - [~] **T2.2** Trang chủ `/`: hero, 3 lợi ích, CTA "Bắt đầu miễn phí". DoD: responsive, Lighthouse ≥ 90. *(Code xong; chờ người dùng đo Lighthouse trên production.)*
+- [x] **T2.2a** Trang lỗi thân thiện: `UseStatusCodePagesWithReExecute("/loi/{0}")` (trừ `/api/*`) → trang 404/lỗi trong layout, giữ mã HTTP gốc, nút "Về trang chủ". DoD: test Web + E2E.
 - [ ] **T2.3** `/nguon-du-lieu`: ghi công 국립국어원 · 한국어기초사전, giấy phép, link gốc.
 - [ ] **T2.4** `/dashboard` với skeleton (dữ liệu điền bằng JS ở giai đoạn 5).
 

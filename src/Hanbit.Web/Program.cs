@@ -26,6 +26,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Lỗi 4xx/5xx không có nội dung (VD 404 do không khớp route) → hiển thị trang lỗi trong layout,
+// giữ nguyên mã lỗi. /api/* trả lỗi dạng API, không trả HTML.
+app.UseWhen(
+    context => !context.Request.Path.StartsWithSegments("/api"),
+    branch => branch.UseStatusCodePagesWithReExecute("/loi/{0}"));
+
 app.UseRouting();
 
 app.UseAuthorization();
