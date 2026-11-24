@@ -62,7 +62,7 @@ public sealed class AudioButtonTagHelper(HtmlEncoder htmlEncoder) : TagHelper
 
         output.Content.SetHtmlContent(
             Button("normal", "play(false)", $"Nghe: {Text}", SpeakerIcon, sizeClasses) +
-            (Slow ? Button("slow", "play(true)", $"Nghe chậm: {Text}", "<span aria-hidden=\"true\" class=\"text-xs font-semibold\">0.7×</span>", sizeClasses) : string.Empty));
+            (Slow ? Button("slow", "play(true)", $"Nghe chậm 0.7×: {Text}", "<span aria-hidden=\"true\" class=\"text-xs font-semibold\">0.7×</span>", sizeClasses) : string.Empty));
     }
 
     private string Button(string mode, string onClick, string label, string innerHtml, string sizeClasses) =>

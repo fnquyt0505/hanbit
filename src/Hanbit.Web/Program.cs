@@ -25,6 +25,7 @@ builder.Services.AddScoped<Hanbit.Application.Reviews.ReviewService>();
 
 // T7.3: rate limiting /api/*; HTML không mã hóa ký tự tiếng Việt/Hàn thành &#x…; (giảm dung lượng, dễ đọc).
 builder.Services.AddHttpHardening(builder.Configuration);
+builder.Services.Configure<SiteOptions>(builder.Configuration.GetSection(SiteOptions.SectionName));
 builder.Services.Configure<Microsoft.Extensions.WebEncoders.WebEncoderOptions>(options =>
     options.TextEncoderSettings = new System.Text.Encodings.Web.TextEncoderSettings(System.Text.Unicode.UnicodeRanges.All));
 

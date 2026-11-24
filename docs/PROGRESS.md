@@ -9,7 +9,7 @@
 | Giai đoạn                     | 7 — Hoàn thiện & ra mắt MVP |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T7.4** Accessibility (axe), SEO meta, OG image, sitemap |
+| Task tiếp theo                 | **T7.5** Kiểm tra điều khoản bản quyền krdict, trang ghi công, `LICENSE-DATA.md` |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T7.4 Accessibility (axe), SEO, OG image, sitemap
+- Đã làm: **axe** — thêm `Deque.AxeCore.Playwright` 4.14.0 (MPL-2.0, chỉ project E2E — người dùng duyệt); `AccessibilityTests` chạy WCAG 2.0/2.1 A+AA + best-practice trên 10 trang × sáng/tối + trạng thái tương tác (bài tập, phản hồi, quiz Hangul, thẻ đã lật), fail khi có lỗi serious/critical. Sửa lỗi axe tìm ra: link trong đoạn văn chỉ phân biệt bằng màu → **luôn gạch chân** (footer, nguồn krdict, breadcrumb, hồ sơ); nhãn không chứa chữ hiển thị → ô chữ Hangul "ㄱ g/k 기역 — bấm để nghe", nút chậm "Nghe chậm 0.7×: …". **SEO** — `Site:BaseUrl` (Production `https://hanbit.onrender.com`; Development lấy từ request): canonical (bỏ query), Open Graph (title/description/url/image 1200×630/locale vi_VN/site_name), `twitter:card`, `theme-color` sáng/tối, favicon SVG (`wwwroot/favicon.svg`), `noindex` cho dashboard/ôn tập/hồ sơ/styleguide/trang lỗi. `SeoController`: `/robots.txt` (chặn `/api/`, trỏ sitemap) + `/sitemap.xml` (13 URL công khai sinh từ nội dung). Ảnh OG `wwwroot/img/og-image.png` (chụp bằng Playwright từ HTML theo token màu + font Be Vietnam Pro/Noto Serif KR — OFL).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 702/702 (Web +11 SEO; E2E +21 axe).
+- Tiếp theo: T7.5
 
 ### 2026-11-24 — T7.3 Rate limiting, security headers, Cache-Control
 - Đã làm: `Hosting/HttpHardening.cs`: **rate limiting** `/api/*` (Fixed window theo IP, `RateLimit:ApiPermitPerMinute` — Production 120/phút, Development 100.000 để test; vượt → 429 `application/problem+json` tiếng Việt + `Retry-After`; trang không bị giới hạn; dùng `Microsoft.AspNetCore.RateLimiting` có sẵn). **Security headers** mọi phản hồi: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `COOP`; HTML thêm **CSP** (`default-src 'self'`; script `'self' 'unsafe-eval'` (Alpine bản chuẩn cần) + **SHA-256** của script theme nội tuyến — `Hosting/InlineScripts.cs`; style `'unsafe-inline'` + Google Fonts/jsDelivr; font CDN; `connect-src 'self'`; `object-src 'none'`; `frame-ancestors 'none'`). **Cache-Control**: file tĩnh có `?v=` (asp-append-version) → `public, max-age=31536000, immutable`; không `?v=` (module import) → `no-cache` + ETag; HTML → `no-cache`; API → `no-store`. **WebEncoderOptions** `UnicodeRanges.All`: HTML không còn `&#x…;` cho tiếng Việt/Hàn (đề xuất từ T0.6).

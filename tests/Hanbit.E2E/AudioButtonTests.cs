@@ -108,7 +108,7 @@ public class AudioButtonTests(WebServerFixture server)
     {
         var page = await OpenStyleguideAsync();
 
-        await page.GetByRole(AriaRole.Button, new() { Name = "Nghe chậm: 안녕하세요" }).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Nghe chậm 0.7×: 안녕하세요" }).ClickAsync();
         await page.WaitForFunctionAsync("() => window.__spoken.length === 1");
 
         (await SpokenJsonAsync(page)).ShouldContain("\"rate\":0.7");

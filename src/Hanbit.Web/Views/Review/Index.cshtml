@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Ôn tập";
+    ViewData["NoIndex"] = true;
     ViewData["Description"] = "Ôn từ vựng tiếng Hàn bằng flashcard lặp lại ngắt quãng — đúng lúc sắp quên.";
     var grades = new (string Key, string Label, string Classes)[]
     {
@@ -66,7 +67,7 @@
                     <template x-if="current.word.examples.length > 0">
                         <p class="mt-4"><span lang="ko" class="font-ko" x-text="current.word.examples[0].ko"></span><br /><span class="text-ink-muted" x-text="current.word.examples[0].vi"></span></p>
                     </template>
-                    <p class="mt-4 text-xs text-ink-muted">Nguồn: <a x-bind:href="current.word.sourceUrl" class="text-secondary hover:underline" rel="noopener"><span lang="ko" class="font-ko">한국어기초사전</span></a></p>
+                    <p class="mt-4 text-xs text-ink-muted">Nguồn: <a x-bind:href="current.word.sourceUrl" class="text-secondary underline underline-offset-2" rel="noopener"><span lang="ko" class="font-ko">한국어기초사전</span></a></p>
                 </div>
             </div>
 

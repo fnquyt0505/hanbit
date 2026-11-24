@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Hồ sơ";
+    ViewData["NoIndex"] = true;
     ViewData["Description"] = "Tiến độ học tiếng Hàn của bạn trên thiết bị này: số liệu, sao lưu và khôi phục tiến độ.";
 }
 
@@ -97,7 +98,7 @@
                 </ul>
             </div>
             <p class="mt-3 text-sm text-ink-muted" x-show="loaded && (stats?.words.length ?? 0) === 0" x-cloak>
-                Chưa có từ nào — <a href="/learn/beginner" class="text-secondary hover:underline">học bài đầu tiên</a> để bắt đầu.
+                Chưa có từ nào — <a href="/learn/beginner" class="text-secondary underline underline-offset-2">học bài đầu tiên</a> để bắt đầu.
             </p>
         </section>
     </div>

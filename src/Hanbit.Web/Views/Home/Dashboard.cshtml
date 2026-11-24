@@ -1,6 +1,7 @@
 @model DashboardViewModel
 @{
     ViewData["Title"] = "Tổng quan";
+    ViewData["NoIndex"] = true;
     ViewData["Description"] = "Tổng quan tiến độ học tiếng Hàn: chuỗi ngày học, XP, thẻ cần ôn và bài học tiếp theo.";
     var firstLessonHref = Model.Courses.Select(c => c.FirstLessonHref).FirstOrDefault(h => h is not null);
 }
