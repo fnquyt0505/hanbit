@@ -1,0 +1,28 @@
+@model Hanbit.Web.Models.Hangul.HangulIndexViewModel
+@{
+    ViewData["Title"] = "Bảng chữ cái Hangul";
+    ViewData["Description"] = "Học bảng chữ cái tiếng Hàn Hangul: 40 chữ gồm nguyên âm, phụ âm, nguyên âm ghép và phụ âm kép — bấm vào chữ để nghe phát âm.";
+}
+
+<div class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+    <h1 class="text-3xl font-bold">Bảng chữ cái <span lang="ko" class="font-ko">한글</span></h1>
+    <p class="mt-3 max-w-prose text-ink-muted">
+        Hangul có @Model.LetterCount chữ cái, chia thành 4 nhóm. Học lần lượt từ trên xuống — bấm vào một chữ để nghe cách đọc.
+    </p>
+
+    @foreach (var group in Model.Groups)
+    {
+        <section class="mt-10" aria-labelledby="group-@group.Info.Slug" data-group="@group.Info.Slug">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 id="group-@group.Info.Slug" class="text-xl font-bold">@group.Info.Title <span class="text-base font-normal text-ink-muted">· @group.Tiles.Count chữ</span></h2>
+            </div>
+            <p class="mt-1 text-ink-muted">@group.Info.Description</p>
+            <ul class="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-5 sm:gap-3 lg:grid-cols-7">
+                @foreach (var tile in group.Tiles)
+                {
+                    <li><partial name="_HangulTile" model="tile" /></li>
+                }
+            </ul>
+        </section>
+    }
+</div>
