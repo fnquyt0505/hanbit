@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Ôn tập";
+    ViewData["Description"] = "Ôn từ vựng tiếng Hàn bằng flashcard lặp lại ngắt quãng — đúng lúc sắp quên.";
+    var grades = new (string Key, string Label, string Classes)[]
+    {
+        ("again", "Quên", "border-danger text-danger"),
+        ("hard", "Khó", "border-warning text-warning-ink"),
+        ("good", "Được", "border-success text-success-ink"),
+        ("easy", "Dễ", "border-secondary text-secondary"),
+    };
+}
+
+@section Head {
+    <script type="module" src="~/js/review-session.js" asp-append-version="true"></script>
+}
+
+<div class="mx-auto max-w-2xl px-4 py-8 sm:py-12" x-data="reviewSession" x-on:keydown.window="onKey($event)" data-testid="review"
+     x-bind:data-status="status" data-status="loading">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <h1 class="text-3xl font-bold">Ôn tập</h1>
+        <p class="text-sm text-ink-muted" x-show="status === 'reviewing'" x-cloak>
+            Còn <span class="font-semibold text-ink" x-text="queue.length" data-testid="review-remaining"></span> thẻ · đã ôn <span x-text="reviewed"></span>
+        </p>
+    </div>
+
+    @* Đang tải *@
+    <div x-show="status === 'loading'" class="mt-8 h-72 animate-pulse rounded-2xl border border-border bg-surface" aria-busy="true" aria-label="Đang tải thẻ"></div>
+
+    @* Không có thẻ *@
+    <section x-show="status === 'empty'" x-cloak class="mt-8 rounded-2xl border border-border bg-surface p-8 text-center" data-testid="review-empty">
+        <p class="text-5xl" aria-hidden="true">🌱</p>
+        <h2 class="mt-3 text-xl font-bold">Chưa có thẻ cần ôn</h2>
+        <p class="mt-2 text-ink-muted">Học bài mới để thêm từ vào hàng ôn tập — thẻ sẽ đến hạn đúng lúc bạn sắp quên.</p>
+        <div class="mt-6 flex justify-center"><hb-button href="/learn/beginner" size="lg" block="true">Học bài mới</hb-button></div>
+    </section>
+
+    @* Lỗi *@
+    <section x-show="status === 'error'" x-cloak class="mt-8 rounded-2xl border border-border bg-surface p-8 text-center" role="alert">
+        <p class="font-semibold">Không tải được thẻ ôn tập.</p>
+        <div class="mt-4 flex justify-center"><hb-button variant="outline" x-on:click="loadDue()">Thử lại</hb-button></div>
+    </section>
+
+    @* Flashcard (DESIGN.md §5): lật bằng click/Space; mặt sau hiện nút đánh giá *@
+    <template x-if="status === 'reviewing' && current">
+        <div class="mt-6">
+            <div class="min-h-72 rounded-2xl border border-border bg-surface p-6 sm:p-8" data-testid="flashcard"
+                 x-bind:data-item-id="current.card.itemId" x-bind:data-flipped="flipped.toString()">
+                @* Mặt trước *@
+                <div class="flex flex-col items-center text-center">
+                    <p lang="ko" class="font-ko text-5xl font-bold sm:text-6xl" x-text="current.word.ko" data-testid="flashcard-ko"></p>
+                    <button type="button" x-on:click="listen()" x-bind:aria-label="`Nghe: ${current.word.ko}`"
+                            class="mt-4 inline-flex size-11 items-center justify-center rounded-full border border-border hover:border-secondary hover:text-secondary">
+                        <svg aria-hidden="true" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 5 6 9H3v6h3l5 4z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M18.5 5.5a9 9 0 0 1 0 13" />
+                        </svg>
+                    </button>
+                </div>
+
+                @* Mặt sau: lật 3D ≤ 300ms, giảm chuyển động → chỉ hiện ra *@
+                <div x-show="flipped" class="mt-6 border-t border-border pt-6 text-center motion-safe:animate-flip-in" data-testid="flashcard-back">
+                    <p class="text-2xl font-semibold" x-text="current.word.vi" data-testid="flashcard-vi"></p>
+                    <p class="mt-1 text-sm text-ink-muted">
+                        <span class="italic" x-text="current.word.romanization"></span> · <span x-text="current.word.pos"></span>
+                        <template x-if="current.word.hanja"><span> · <span lang="zh-Hant" x-text="current.word.hanja"></span></span></template>
+                    </p>
+                    <template x-if="current.word.examples.length > 0">
+                        <p class="mt-4"><span lang="ko" class="font-ko" x-text="current.word.examples[0].ko"></span><br /><span class="text-ink-muted" x-text="current.word.examples[0].vi"></span></p>
+                    </template>
+                    <p class="mt-4 text-xs text-ink-muted">Nguồn: <a x-bind:href="current.word.sourceUrl" class="text-secondary hover:underline" rel="noopener"><span lang="ko" class="font-ko">한국어기초사전</span></a></p>
+                </div>
+            </div>
+
+            <div class="mt-6" x-show="!flipped">
+                <hb-button size="lg" block="true" x-on:click="flip()" data-testid="flip">Lật thẻ <kbd class="ms-2 hidden rounded border border-bg/40 px-1.5 text-sm sm:inline">Space</kbd></hb-button>
+            </div>
+
+            @* GradeButtons (DESIGN.md §5): 4 mức + khoảng ôn tiếp theo, phím 1–4 *@
+            <div x-show="flipped" class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4" role="group" aria-label="Bạn nhớ từ này thế nào?" data-testid="grades">
+                @for (var i = 0; i < grades.Length; i++)
+                {
+                    var (key, label, classes) = grades[i];
+                    <button type="button" x-on:click="grade('@key')" x-bind:disabled="grading" data-grade="@key"
+                            class="flex min-h-16 flex-col items-center justify-center rounded-xl border-2 bg-surface px-2 py-2 font-semibold transition duration-150 ease-out hover:bg-bg disabled:opacity-50 @classes">
+                        <span>@label <kbd class="ms-1 hidden text-xs font-normal text-ink-muted sm:inline">@(i + 1)</kbd></span>
+                        <span class="text-xs font-normal text-ink-muted" x-text="label(current.previews['@key'])"></span>
+                    </button>
+                }
+            </div>
+            <p x-show="error" x-text="error" role="alert" class="mt-3 text-danger"></p>
+        </div>
+    </template>
+
+    @* Kết thúc phiên *@
+    <section x-show="status === 'done'" x-cloak class="mt-8 rounded-2xl border border-border bg-surface p-8 text-center" data-testid="review-done">
+        <p class="text-5xl" aria-hidden="true">🎉</p>
+        <h2 class="mt-3 text-2xl font-bold">Xong phiên ôn tập!</h2>
+        <p class="mt-2 text-ink-muted">Bạn đã ôn <span class="font-semibold text-ink" x-text="reviewed" data-testid="review-count"></span> lượt.</p>
+        <div class="mt-4 flex flex-wrap justify-center gap-3">
+            <span class="rounded-full border border-xp px-3 py-1 font-semibold text-xp-ink" data-testid="review-xp">+<span x-text="xp"></span> XP</span>
+            <span class="rounded-full border border-border px-3 py-1 font-semibold" x-show="streak">🔥 <span x-text="streak?.current"></span> ngày liên tiếp</span>
+        </div>
+        <p class="mt-4 text-sm text-ink-muted" x-show="total > reviewed">Còn thẻ đến hạn khác — ôn tiếp nhé.</p>
+        <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            <hb-button variant="outline" size="lg" block="true" x-on:click="loadDue()" data-testid="review-again">Ôn tiếp</hb-button>
+            <hb-button href="/dashboard" size="lg" block="true">Về tổng quan</hb-button>
+        </div>
+    </section>
+</div>

@@ -9,7 +9,7 @@
 | Giai đoạn                     | 6 — Ôn tập SRS |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T6.3** `/review` + `review-session.js` (flashcard lật, 4 nút, phím 1–4 / Space) |
+| Task tiếp theo                 | **T6.4** Dashboard hiển thị số thẻ đến hạn |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T6.3 Trang /review + review-session.js
+- Đã làm: `ReviewController` (`/review`) + `Views/Review/Index`: trạng thái đang tải / chưa có thẻ (CTA học bài mới) / lỗi (thử lại) / đang ôn / xong. Flashcard: mặt trước chữ Hàn + nút nghe; bấm "Lật thẻ" hoặc **Space** → mặt sau (nghĩa, romanization, từ loại, Hán tự, ví dụ, nguồn krdict) với hiệu ứng lật 3D 280ms chỉ khi `motion-safe` (`--animate-flip-in` trong `Styles/input.css`). GradeButtons 4 mức + khoảng ôn (`intervalLabel`: Ngay / n ngày / tháng / năm), **phím 1–4** chỉ sau khi lật. `review-session.js` (Alpine `reviewSession`): tải thẻ đến hạn (tối đa 50), chấm qua API, "Quên" → đưa thẻ đã lập lịch lại xuống cuối phiên (previews từ server), tổng kết lượt ôn + XP + streak, "Ôn tiếp". `progress-store.js`: `mergeReviewResult`/`applyReviewResult`. `POST /api/reviews/grade` trả thêm `previews`.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 633/633 (Web +2; E2E +5: trạng thái trống, Space lật + nhãn khoảng ôn, phiên đủ với phím 1/3 + nút, thẻ Quên quay lại cuối → localStorage: 4 XP, 4 lượt ôn, không còn thẻ đến hạn; phím đánh giá bị bỏ qua khi chưa lật; không cuộn ngang 320px) · ảnh chụp OK.
+- Vấn đề / ghi chú: màu 4 nút đánh giá — câu hỏi 13.
+- Tiếp theo: T6.4
 
 ### 2026-11-24 — T6.2 API ôn tập
 - Đã làm: Application `Reviews/ReviewService`: `DueAsync` (thẻ từ vựng đến hạn ≤ hiện tại, bỏ trùng, sớm nhất trước, chỉ từ còn trong nội dung + đã duyệt, giới hạn 1–200 (mặc định 50), `Total` = tổng đến hạn; kèm `PreviewIntervals`), `Grade` (`Sm2Scheduler.Schedule` + 1 XP + 1 lượt ôn hôm nay giờ VN + streak). `ReviewsApiController`: `POST /api/reviews/due` `{ cards, limit }` → `{ total, items[{ card, word (VocabDto), previews{again,hard,good,easy} }], today }`; `POST /api/reviews/grade` `{ card, grade, activity }` → `{ card, activity, xp, streak }` (thiếu thẻ/mức sai → 400).
@@ -327,6 +333,7 @@
 10. ~~Duyệt nội dung AI soạn ở T1.8~~ → người dùng duyệt theo đề xuất (2026-11-24): `grammar/beginner.json` + 5 bài `courses/beginner/lessons/`, comment đầu file đổi thành "người dùng đã duyệt".
 11. ~~Lighthouse trang chủ (DoD T2.2)~~ → đã đo (2026-11-24, Mobile, production): 95 · 96 · 100 · 100.
 12. ~~Nghe thử phát âm (DoD T3.1)~~ → người dùng trả lời (2026-11-24): giọng trên máy tính khó nghe, không tự nhiên → ưu tiên giọng Natural/Online (Edge SunHi Natural, Google), lỗi mạng thì về giọng cục bộ; phụ âm cơ bản + phụ âm kép đọc **ghép với ㅏ** (ㄱ → 가, ㄲ → 까) thay cho tên chữ. Android/Safari chưa kiểm — giọng TTS vẫn phụ thuộc thiết bị; giải pháp lâu dài: MP3 tạo trước (Backlog).
+13. **Màu nút đánh giá ôn tập (T6.3):** 4 nút Quên/Khó/Được/Dễ dùng 4 màu ngữ nghĩa (danger/warning/success/secondary) — lệch quy tắc DESIGN.md §2 "không quá 1 màu nhấn trên một màn hình" nhưng giúp phân biệt nhanh (giống các app flashcard). Giữ hay đổi sang viền trung tính + chỉ màu chữ?
 
 
 
