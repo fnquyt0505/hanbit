@@ -14,4 +14,17 @@ public sealed class HangulController(IContentRepository contentRepository) : Con
         var letters = await contentRepository.GetHangulAsync(cancellationToken);
         return View(HangulIndexViewModel.Create(letters));
     }
+
+    /// <summary>Học từng chữ của một nhóm + quiz 10 câu. Nhóm không tồn tại → 404 (trang lỗi thân thiện).</summary>
+    [HttpGet("{group}")]
+    public async Task<IActionResult> Group(string group, CancellationToken cancellationToken)
+    {
+        if (HangulGroupInfo.FindBySlug(group) is not { } info)
+        {
+            return NotFound();
+        }
+
+        var letters = await contentRepository.GetHangulAsync(cancellationToken);
+        return View(HangulGroupPageViewModel.Create(info, letters));
+    }
 }

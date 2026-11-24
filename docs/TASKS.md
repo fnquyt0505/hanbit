@@ -38,7 +38,7 @@
 - [~] **T3.1** `speech.js` (speak, tốc độ thường/chậm, kiểm tra giọng `ko-KR`) + Tag Helper `<audio-button>`. DoD: test thủ công Chrome/Safari/Android. *(Code xong; chờ người dùng nghe thử trên thiết bị — câu hỏi 12.)*
 - [x] **T3.2** `/hangul`: lưới chữ theo nhóm (partial `_HangulTile`).
 - [x] **T3.3** `HangulComposer` (Domain, công thức Unicode) + `GET /api/hangul/compose` + bảng ghép âm (Alpine). DoD: unit test + integration test API.
-- [ ] **T3.4** `/hangul/{group}`: học từng chữ + quiz 10 câu (`hangul-quiz.js`, chấm qua API).
+- [x] **T3.4** `/hangul/{group}`: học từng chữ + quiz 10 câu (`hangul-quiz.js`, chấm qua API).
 
 ## Giai đoạn 4 — Bài học & bài tập
 
