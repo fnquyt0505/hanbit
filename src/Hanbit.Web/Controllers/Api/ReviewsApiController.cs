@@ -23,7 +23,8 @@ public sealed record GradeReviewRequest(ReviewCard? Card, ReviewGrade? Grade, IR
 
 /// <param name="Card">Thẻ sau khi lập lịch — ghi đè vào localStorage.</param>
 /// <param name="Activity">Hoạt động mới — thay danh sách cũ.</param>
-public sealed record GradeReviewResponse(ReviewCard Card, IReadOnlyList<DailyActivity> Activity, int Xp, Streak Streak);
+/// <param name="Previews">Khoảng ôn của từng mức cho thẻ MỚI (dùng khi thẻ "Quên" được ôn lại trong phiên).</param>
+public sealed record GradeReviewResponse(ReviewCard Card, IReadOnlyList<DailyActivity> Activity, int Xp, Streak Streak, IReadOnlyDictionary<string, int> Previews);
 
 /// <summary>API ôn tập SRS stateless (ARCHITECTURE §4 — "Ôn tập").</summary>
 [ApiController]
@@ -48,10 +49,13 @@ public sealed class ReviewsApiController(ReviewService reviewService, IClock clo
             items.Select(i => new DueReviewDto(
                     i.Card,
                     VocabDto.From(i.Word),
-                    i.Previews.ToDictionary(p => p.Key.ToString().ToLowerInvariant(), p => p.Value)))
+                    PreviewDto(i.Previews)))
                 .ToList(),
             clock.Today);
     }
+
+    private static Dictionary<string, int> PreviewDto(IReadOnlyDictionary<ReviewGrade, int> previews) =>
+        previews.ToDictionary(p => p.Key.ToString().ToLowerInvariant(), p => p.Value);
 
     [HttpPost("grade")]
     [ProducesResponseType<GradeReviewResponse>(StatusCodes.Status200OK)]
@@ -67,6 +71,7 @@ public sealed class ReviewsApiController(ReviewService reviewService, IClock clo
         }
 
         var result = reviewService.Grade(request.Card, request.Grade.Value, activity);
-        return new GradeReviewResponse(result.Card, result.Activity, result.Xp, result.Streak);
+        return new GradeReviewResponse(result.Card, result.Activity, result.Xp, result.Streak,
+            PreviewDto(Sm2Scheduler.PreviewIntervals(result.Card, clock.UtcNow)));
     }
 }

@@ -137,3 +137,37 @@ public class ReviewsApiTests(WebApplicationFactory<Program> factory)
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 }
+
+/// <summary>T6.3: trang /review + previews trong phản hồi chấm thẻ.</summary>
+public class ReviewPageTests(WebApplicationFactory<Program> factory)
+    : IClassFixture<WebApplicationFactory<Program>>
+{
+    [Fact]
+    public async Task ReviewPage_RendersSessionShell_AndMarksNavCurrent()
+    {
+        using var client = factory.CreateClient();
+
+        var html = await client.GetStringAsync("/review");
+
+        html.ShouldContain("x-data=\"reviewSession\"");
+        html.ShouldContain("/js/review-session.js");
+        html.ShouldContain("href=\"/review\" aria-current=\"page\"");
+        foreach (var grade in new[] { "again", "hard", "good", "easy" })
+        {
+            html.ShouldContain($"data-grade=\"{grade}\"");
+        }
+    }
+
+    [Fact]
+    public async Task Grade_Again_ReturnsPreviewsForRelearning()
+    {
+        using var client = factory.CreateClient();
+        var card = new ReviewCard("kd-1", ItemType.Vocab, 2.5, 10, 4, DateTimeOffset.UtcNow, null);
+
+        using var response = await client.PostAsJsonAsync("/api/reviews/grade",
+            new GradeReviewRequest(card, ReviewGrade.Again, []), TestJson.Options);
+
+        var result = await response.Content.ReadFromJsonAsync<GradeReviewResponse>(TestJson.Options);
+        result!.Previews.ShouldBe(new Dictionary<string, int> { ["again"] = 0, ["hard"] = 1, ["good"] = 1, ["easy"] = 3 });
+    }
+}

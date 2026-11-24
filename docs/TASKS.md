@@ -61,7 +61,7 @@
 
 - [x] **T6.1** `Sm2Scheduler` thuần + test 4 grade và biên.
 - [x] **T6.2** `POST /api/reviews/due`, `POST /api/reviews/grade`. DoD: integration test.
-- [ ] **T6.3** `/review` + `review-session.js`: flashcard lật, 4 nút đánh giá, phím 1–4 / Space.
+- [x] **T6.3** `/review` + `review-session.js`: flashcard lật, 4 nút đánh giá, phím 1–4 / Space.
 - [ ] **T6.4** Dashboard hiển thị số thẻ đến hạn.
 
 ## Giai đoạn 7 — Hoàn thiện & ra mắt MVP

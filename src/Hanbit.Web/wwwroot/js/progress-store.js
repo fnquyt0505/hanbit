@@ -207,3 +207,22 @@ export function clearProgress() {
   lastIssue = null;
   return save(emptyProgress());
 }
+
+// ── Ôn tập (T6.3) ──
+
+/** Gộp kết quả POST /api/reviews/grade: ghi đè thẻ, thay hoạt động, cộng XP. Hàm thuần. */
+export function mergeReviewResult(progress, result) {
+  return {
+    ...progress,
+    cards: { ...progress.cards, [result.card.itemId]: result.card },
+    activity: result.activity ?? progress.activity,
+    totalXp: progress.totalXp + Math.max(0, result.xp ?? 0),
+  };
+}
+
+/** Gộp + lưu kết quả chấm một thẻ. */
+export function applyReviewResult(result) {
+  const next = mergeReviewResult(load(), result);
+  save(next);
+  return next;
+}
