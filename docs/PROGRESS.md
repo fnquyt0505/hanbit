@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 2 — Layout & điều hướng                                                                                                   |
+| Giai đoạn                     | 3 — Hangul & âm thanh                                                                                                     |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T2.4** `/dashboard` với skeleton |
+| Task tiếp theo                 | **T3.1** `speech.js` + Tag Helper `<audio-button>` |
 | Việc song song (người dùng) | Duyệt ngữ pháp + bài tập AI soạn ở T1.8 (câu hỏi 10) · (tùy chọn) sửa nghĩa krdict chưa tự nhiên (câu hỏi 9) |
 | Blocker                         | —                                                                                                                           |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T2.4 /dashboard (skeleton)
+- Đã làm: `HomeController.Dashboard` (`GET /dashboard`, nhận `IContentRepository` qua primary constructor) + `DashboardViewModel`/`DashboardCourse` (khóa học từ `content/`: tiêu đề, mô tả, số bài, link bài đầu). `Views/Home/Dashboard.cshtml`: StreakBadge (ngọn lửa + số ngày), 4 ô số liệu (chuỗi ngày, XP hôm nay, thẻ cần ôn, từ đã học), thẻ "Tiếp tục học" (người học mới → "Học Hangul" `/hangul`; có tiến độ → bài kế tiếp), thẻ "Ôn tập", danh sách khóa học. Số liệu tiến độ render **skeleton** (`animate-pulse`, `aria-busy="true"`), `wwwroot/js/dashboard.js` (Alpine `dashboard`) điền trạng thái người học mới — giai đoạn 5 thay bằng `progress-store.js` (không đọc localStorage trực tiếp). Không có JS → skeleton giữ nguyên.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 323/323 (Web +4: skeleton/aria-busy, khóa học, `aria-current` mục Tổng quan, module nạp trước Alpine; E2E +3: Alpine thay skeleton bằng số 0 + CTA `/hangul`, sidebar → dashboard, không cuộn ngang 320px) · ảnh chụp desktop + mobile tắt JS OK.
+- Tiếp theo: T3.1 (giai đoạn 2 hoàn tất)
 
 ### 2026-11-24 — T2.3 Trang /nguon-du-lieu
 - Đã làm: `CreditsController` (`[Route("nguon-du-lieu")]`) + `Views/Credits/Index.cshtml`: khối ghi công *한국어기초사전 © 국립국어원, CC BY-SA 2.0 KR*; bảng nguồn (link krdict), tác giả (국립국어원, link korean.go.kr), giấy phép (link CC BY-SA 2.0 KR, `rel="license"`), phần Hanbit dùng (từ vựng 초급, không dùng tệp đa phương tiện), phần đã thay đổi (lọc, chuẩn hóa, romanization, duyệt/sửa nghĩa) + cam kết chia sẻ dữ liệu dẫn xuất cùng giấy phép; nội dung tự biên soạn (© Hanbit, giữ mọi quyền; phần chữ chép nguyên văn từ krdict vẫn CC BY-SA); phần mềm & phông chữ (Alpine.js/Tailwind MIT, Be Vietnam Pro/Noto/Pretendard OFL 1.1). Nội dung khớp `content/LICENSE-DATA.md`.

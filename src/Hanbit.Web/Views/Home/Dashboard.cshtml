@@ -1,0 +1,108 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Tổng quan";
+    ViewData["Description"] = "Tổng quan tiến độ học tiếng Hàn: chuỗi ngày học, XP, thẻ cần ôn và bài học tiếp theo.";
+    var firstLessonHref = Model.Courses.Select(c => c.FirstLessonHref).FirstOrDefault(h => h is not null);
+}
+
+@section Head {
+    <script type="module" src="~/js/dashboard.js" asp-append-version="true"></script>
+}
+
+@* Số liệu tiến độ nằm ở localStorage → render skeleton, Alpine (dashboard.js) điền sau. Không có JS: skeleton giữ nguyên. *@
+<div class="mx-auto max-w-6xl px-4 py-8 sm:py-12" x-data="dashboard" data-testid="dashboard"
+     aria-busy="true" x-bind:aria-busy="(!loaded).toString()">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold sm:text-3xl">Chào bạn 👋</h1>
+            <p class="mt-1 text-ink-muted" x-show="!loaded || isNewLearner">Hôm nay mình bắt đầu từ đâu nhé?</p>
+            <p class="mt-1 text-ink-muted" x-show="loaded && !isNewLearner" x-cloak>Tiếp tục giữ chuỗi ngày học nhé!</p>
+        </div>
+
+        @* StreakBadge (DESIGN.md §5): ngọn lửa + số ngày *@
+        <div class="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2" data-testid="streak-badge">
+            <svg class="size-5 text-primary" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                <path d="M12 2c.6 3.2 3.9 5.2 3.9 9.4A3.9 3.9 0 0 1 12 15.3a3.9 3.9 0 0 1-3.9-3.9c0-1.6.7-2.8 1.6-3.8.1 1.6.9 2.7 2 2.9-.4-2.8-.2-5.6.3-8.5ZM6 13.5a6 6 0 0 0 12 0c0-.9-.1-1.7-.4-2.5.3 3-2 6.3-5.6 6.3S6.1 14 6.4 11A6 6 0 0 0 6 13.5Z" />
+            </svg>
+            <span x-show="!loaded" class="inline-block h-5 w-16 animate-pulse rounded bg-border" aria-hidden="true"></span>
+            <span x-show="loaded" x-cloak class="font-semibold"><span x-text="summary.streakDays" data-testid="streak-days"></span> ngày</span>
+        </div>
+    </div>
+
+    @* Số liệu nhanh *@
+    <section class="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label="Số liệu học tập">
+        @foreach (var (label, field, testId) in new[]
+        {
+            ("Chuỗi ngày học", "streakDays", "stat-streak"),
+            ("XP hôm nay", "xpToday", "stat-xp"),
+            ("Thẻ cần ôn", "dueCards", "stat-due"),
+            ("Từ đã học", "learnedWords", "stat-words"),
+        })
+        {
+            <div class="rounded-xl border border-border bg-surface p-4" data-testid="@testId">
+                <p class="text-sm text-ink-muted">@label</p>
+                <span x-show="!loaded" class="mt-2 block h-8 w-12 animate-pulse rounded bg-border" aria-hidden="true" data-skeleton></span>
+                <p x-show="loaded" x-cloak class="mt-1 text-2xl font-bold" x-text="@($"summary.{field}")"></p>
+            </div>
+        }
+    </section>
+
+    <div class="mt-8 grid gap-4 lg:grid-cols-2">
+        @* Tiếp tục học *@
+        <section class="rounded-xl border border-border bg-surface p-6" aria-labelledby="continue-title" data-testid="continue-card">
+            <h2 id="continue-title" class="text-lg font-semibold">Tiếp tục học</h2>
+            <div x-show="!loaded" aria-hidden="true">
+                <span class="mt-3 block h-5 w-2/3 animate-pulse rounded bg-border"></span>
+                <span class="mt-6 block h-12 w-full animate-pulse rounded-full bg-border sm:w-40"></span>
+            </div>
+            <template x-if="loaded && isNewLearner">
+                <div>
+                    <p class="mt-2 text-ink-muted">Bắt đầu với bảng chữ cái Hangul — 40 chữ, có phát âm.</p>
+                    <div class="mt-6"><hb-button href="/hangul" size="lg" block="true" data-testid="continue-cta">Học Hangul</hb-button></div>
+                </div>
+            </template>
+            <template x-if="loaded && !isNewLearner">
+                <div>
+                    <p class="mt-2 text-ink-muted" x-text="summary.nextLesson?.title ?? 'Bài học tiếp theo'"></p>
+                    <div class="mt-6">
+                        <a x-bind:href="summary.nextLesson?.href ?? '@(firstLessonHref ?? "/learn/beginner")'" data-testid="continue-cta"
+                           class="inline-flex h-12 w-full items-center justify-center rounded-full bg-primary px-6 text-lg font-semibold text-bg hover:opacity-90 sm:w-auto">Tiếp tục</a>
+                    </div>
+                </div>
+            </template>
+        </section>
+
+        @* Ôn tập *@
+        <section class="rounded-xl border border-border bg-surface p-6" aria-labelledby="review-title" data-testid="review-card">
+            <h2 id="review-title" class="text-lg font-semibold">Ôn tập</h2>
+            <span x-show="!loaded" class="mt-3 block h-5 w-1/2 animate-pulse rounded bg-border" aria-hidden="true"></span>
+            <p x-show="loaded && summary.dueCards === 0" x-cloak class="mt-2 text-ink-muted">Chưa có thẻ cần ôn. Học bài mới để thêm thẻ vào hàng ôn tập.</p>
+            <p x-show="loaded && summary.dueCards > 0" x-cloak class="mt-2 text-ink-muted">Hôm nay ôn <span class="font-semibold text-ink" x-text="summary.dueCards"></span> thẻ nhé.</p>
+            <div class="mt-6"><hb-button href="/review" variant="outline" size="lg" block="true">Ôn tập</hb-button></div>
+        </section>
+    </div>
+
+    @* Khóa học — dữ liệu server (content/) *@
+    <section class="mt-10" aria-labelledby="courses-title">
+        <h2 id="courses-title" class="text-xl font-bold">Khóa học</h2>
+        @if (Model.Courses.Count == 0)
+        {
+            <p class="mt-3 text-ink-muted">Chưa có khóa học nào.</p>
+        }
+        else
+        {
+            <ul class="mt-4 grid gap-4 md:grid-cols-2" data-testid="course-list">
+                @foreach (var course in Model.Courses)
+                {
+                    <li>
+                        <a href="@course.Href" class="block h-full rounded-xl border border-border bg-surface p-5 hover:border-secondary" data-course="@course.Slug">
+                            <p class="font-semibold">@course.Title</p>
+                            <p class="mt-1 text-sm text-ink-muted">@course.LessonCount bài học</p>
+                            <p class="mt-2 text-ink-muted">@course.Description</p>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>

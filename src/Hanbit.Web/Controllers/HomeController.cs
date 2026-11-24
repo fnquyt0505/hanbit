@@ -1,16 +1,32 @@
 using System.Diagnostics;
 
+using Hanbit.Application.Abstractions;
 using Hanbit.Web.Models;
 
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hanbit.Web.Controllers;
 
-public class HomeController : Controller
+public class HomeController(IContentRepository contentRepository) : Controller
 {
     public IActionResult Index()
     {
         return View();
+    }
+
+    [HttpGet("/dashboard")]
+    public async Task<IActionResult> Dashboard(CancellationToken cancellationToken)
+    {
+        var courses = await contentRepository.GetCoursesAsync(cancellationToken);
+        var model = new DashboardViewModel(courses
+            .Select(c =>
+            {
+                var first = c.Lessons.OrderBy(l => l.Order).FirstOrDefault();
+                return new DashboardCourse(c.Slug, c.Title, c.Description, c.Lessons.Count,
+                    first is null ? null : $"/learn/{c.Slug}/{first.Slug}");
+            })
+            .ToList());
+        return View(model);
     }
 
     /// <summary>
