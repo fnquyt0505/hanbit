@@ -14,6 +14,7 @@
     @* Module đăng ký component Alpine phải nạp TRƯỚC alpine.min.js (cùng là defer → chạy theo thứ tự). *@
     <script type="module" src="~/js/theme.js" asp-append-version="true"></script>
     <script type="module" src="~/js/ui.js" asp-append-version="true"></script>
+    <script type="module" src="~/js/audio-button.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Head", required: false)
     <script defer src="~/lib/alpinejs/alpine.min.js" asp-append-version="true"></script>
 </head>
