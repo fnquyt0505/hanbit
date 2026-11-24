@@ -1,15 +1,70 @@
 @{
-    ViewData["Title"] = "Trang chủ";
+    ViewData["Title"] = "Học tiếng Hàn cho người Việt";
+    ViewData["Description"] = "Học tiếng Hàn miễn phí từ bảng chữ Hangul đến sơ cấp: giải thích bằng tiếng Việt, có phát âm, ôn tập đúng lúc. Không cần đăng ký.";
 }
 
-@* Trang chủ tạm thời — thay bằng trang chủ thật ở T2.2. Màu/font theo design tokens ở T0.5. *@
-<section class="mx-auto max-w-xl p-4" x-data="{ open: false }">
-    <h1 class="text-2xl font-bold">Hanbit <span lang="ko" class="font-ko">한빛</span></h1>
-    <p class="mt-2">Học tiếng Hàn cho người Việt.</p>
+<div class="mx-auto max-w-6xl px-4 py-10 sm:py-16">
+    @* Hero *@
+    <section class="grid items-center gap-10 lg:grid-cols-2" aria-labelledby="hero-title" data-testid="hero">
+        <div>
+            <p class="text-sm font-semibold text-secondary">Miễn phí · Không cần đăng ký</p>
+            <h1 id="hero-title" class="mt-3 text-3xl font-bold sm:text-4xl">
+                Học tiếng Hàn mỗi ngày,<br class="hidden sm:inline" /> nhớ lâu hơn
+            </h1>
+            <p class="mt-4 max-w-prose text-lg text-ink-muted">
+                Bắt đầu từ bảng chữ Hangul, học từ vựng và ngữ pháp sơ cấp được giải thích bằng tiếng Việt,
+                rồi ôn lại đúng lúc sắp quên.
+            </p>
+            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                <hb-button href="/hangul" size="lg" block="true" data-testid="cta-start">Bắt đầu miễn phí</hb-button>
+                <hb-button href="/learn/beginner" variant="outline" size="lg" block="true">Xem lộ trình</hb-button>
+            </div>
+        </div>
 
-    <button type="button" class="mt-4 rounded-lg border border-border px-4 py-2"
-            x-on:click="open = !open" x-bind:aria-expanded="open" data-testid="alpine-toggle">
-        Kiểm tra Alpine.js
-    </button>
-    <p class="mt-2" x-show="open" x-cloak data-testid="alpine-panel">Alpine.js đang hoạt động.</p>
-</section>
+        @* Thẻ minh họa: chữ Hàn là nhân vật chính (DESIGN.md §1) *@
+        <div class="mx-auto w-full max-w-sm rounded-2xl border border-border bg-surface p-8 text-center shadow-sm" aria-hidden="true">
+            <p lang="ko" class="font-hangul text-5xl sm:text-6xl">안녕하세요</p>
+            <p class="mt-2 text-sm italic text-ink-muted">annyeonghaseyo</p>
+            <p class="mt-4 text-xl font-semibold">Xin chào</p>
+        </div>
+    </section>
+
+    @* 3 lợi ích *@
+    <section class="mt-16 sm:mt-24" aria-labelledby="benefits-title">
+        <h2 id="benefits-title" class="text-2xl font-bold">Vì sao học với Hanbit?</h2>
+        <ul class="mt-6 grid gap-4 md:grid-cols-3" data-testid="benefits">
+            <li class="rounded-xl border border-border bg-surface p-6">
+                <span lang="ko" class="font-ko inline-flex size-12 items-center justify-center rounded-full bg-bg text-2xl font-bold text-secondary" aria-hidden="true">한</span>
+                <h3 class="mt-4 text-lg font-semibold">Hangul từ con số 0</h3>
+                <p class="mt-2 text-ink-muted">40 chữ cái chia nhóm, nghe phát âm từng chữ và tự ghép âm tiết ngay trên trình duyệt.</p>
+            </li>
+            <li class="rounded-xl border border-border bg-surface p-6">
+                <span class="inline-flex size-12 items-center justify-center rounded-full bg-bg text-secondary" aria-hidden="true">
+                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                        <path d="M4 19.5V5a2 2 0 0 1 2-2h14v15H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2h14" />
+                    </svg>
+                </span>
+                <h3 class="mt-4 text-lg font-semibold">Giải thích bằng tiếng Việt</h3>
+                <p class="mt-2 text-ink-muted">Ngữ pháp viết cho người Việt; từ vựng sơ cấp lấy từ <span lang="ko" class="font-ko">한국어기초사전</span>, nghĩa được duyệt trước khi vào bài.</p>
+            </li>
+            <li class="rounded-xl border border-border bg-surface p-6">
+                <span class="inline-flex size-12 items-center justify-center rounded-full bg-bg text-secondary" aria-hidden="true">
+                    <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                        <path d="M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.2L3 16M3 21v-5h5" />
+                    </svg>
+                </span>
+                <h3 class="mt-4 text-lg font-semibold">Ôn đúng lúc sắp quên</h3>
+                <p class="mt-2 text-ink-muted">Flashcard lặp lại ngắt quãng: từ khó gặp lại sớm, từ đã thuộc giãn dần — mỗi ngày chỉ vài phút.</p>
+            </li>
+        </ul>
+    </section>
+
+    @* CTA cuối trang *@
+    <section class="mt-16 rounded-2xl border border-border bg-surface p-8 text-center sm:mt-24" aria-labelledby="cta-title">
+        <h2 id="cta-title" class="text-2xl font-bold">Sẵn sàng viết chữ Hàn đầu tiên?</h2>
+        <p class="mt-2 text-ink-muted">Tiến độ được lưu ngay trên trình duyệt của bạn.</p>
+        <div class="mt-6 flex justify-center">
+            <hb-button href="/hangul" size="lg" block="true">Bắt đầu miễn phí</hb-button>
+        </div>
+    </section>
+</div>

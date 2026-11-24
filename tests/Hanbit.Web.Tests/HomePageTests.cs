@@ -23,6 +23,31 @@ public class HomePageTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
+    public async Task Get_Root_HasHeroThreeBenefitsAndStartCta()
+    {
+        using var client = factory.CreateClient();
+
+        var html = await client.GetStringAsync("/");
+
+        html.ShouldContain("data-testid=\"hero\"");
+        html.Split("<h1").Length.ShouldBe(2);
+        var benefits = html[html.IndexOf("data-testid=\"benefits\"", StringComparison.Ordinal)..];
+        benefits[..benefits.IndexOf("</ul>", StringComparison.Ordinal)].Split("<li").Length.ShouldBe(4);
+        html.ShouldContain("data-testid=\"cta-start\"");
+        html.ShouldContain("href=\"/hangul\"");
+    }
+
+    [Fact]
+    public async Task Get_Root_HasMetaDescription()
+    {
+        using var client = factory.CreateClient();
+
+        var html = await client.GetStringAsync("/");
+
+        html.ShouldContain("<meta name=\"description\" content=\"");
+    }
+
+    [Fact]
     public async Task Get_UnknownPath_ReturnsNotFound()
     {
         using var client = factory.CreateClient();
