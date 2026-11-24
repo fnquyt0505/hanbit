@@ -19,9 +19,15 @@ public sealed class WebServerFixture : IAsyncLifetime
     public IBrowser Browser => _browser ?? throw new InvalidOperationException("Fixture chưa khởi tạo.");
 
     /// <summary>Trang mới; chặn mọi request ra ngoài server test (font CDN…) để test không phụ thuộc mạng.</summary>
-    public async Task<IPage> NewPageAsync(ColorScheme colorScheme = ColorScheme.Light)
+    public async Task<IPage> NewPageAsync(ColorScheme colorScheme = ColorScheme.Light, ViewportSize? viewport = null)
     {
-        var page = await Browser.NewPageAsync(new BrowserNewPageOptions { ColorScheme = colorScheme });
+        var options = new BrowserNewPageOptions { ColorScheme = colorScheme };
+        if (viewport is not null)
+        {
+            options.ViewportSize = viewport;
+        }
+
+        var page = await Browser.NewPageAsync(options);
         await page.RouteAsync("**/*", route =>
             route.Request.Url.StartsWith(BaseUrl, StringComparison.Ordinal) ? route.ContinueAsync() : route.AbortAsync());
         return page;

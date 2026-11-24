@@ -1,6 +1,6 @@
 @* Vùng hiển thị toast (Alpine store "toast" trong wwwroot/js/ui.js). Đặt 1 lần trong _Layout. *@
 <div x-data role="status" aria-live="polite"
-     class="pointer-events-none fixed inset-x-0 bottom-20 z-50 flex flex-col items-center gap-2 px-4 sm:bottom-6">
+     class="pointer-events-none fixed inset-x-0 bottom-20 z-50 flex flex-col items-center gap-2 px-4 lg:bottom-6">
     <template x-for="item in $store.toast.items" x-bind:key="item.id">
         <div data-testid="toast" x-bind:data-kind="item.kind"
              class="pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-ink shadow-sm">

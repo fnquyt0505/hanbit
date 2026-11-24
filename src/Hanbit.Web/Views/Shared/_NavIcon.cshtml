@@ -1,0 +1,28 @@
+@model NavIcon
+@* Icon điều hướng 24×24, nét theo currentColor; chỉ trang trí (nhãn chữ nằm cạnh) → aria-hidden. *@
+@if (Model == NavIcon.Hangul)
+{
+    <span aria-hidden="true" lang="ko" class="font-ko inline-flex size-6 items-center justify-center text-lg font-bold leading-none">한</span>
+}
+else
+{
+    <svg aria-hidden="true" focusable="false" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        @switch (Model)
+        {
+            case NavIcon.Dashboard:
+                <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+                break;
+            case NavIcon.Learn:
+                <path d="M4 19.5V5a2 2 0 0 1 2-2h14v15H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2h14" />
+                break;
+            case NavIcon.Review:
+                <path d="M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.2L3 16M3 21v-5h5" />
+                break;
+            case NavIcon.Profile:
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21a8 8 0 0 1 16 0" />
+                break;
+        }
+    </svg>
+}

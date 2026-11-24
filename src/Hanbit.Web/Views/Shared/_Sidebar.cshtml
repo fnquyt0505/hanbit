@@ -1,0 +1,24 @@
+@* Điều hướng desktop (≥ 1024px, DESIGN.md §4). Mobile/tablet dùng _BottomNav. *@
+@{
+    var path = Context.Request.Path;
+}
+<aside class="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border bg-surface lg:flex" data-testid="sidebar">
+    <a href="/" class="flex items-baseline gap-2 px-6 py-5 text-xl font-bold">
+        Hanbit <span lang="ko" class="font-ko text-ink-muted">한빛</span>
+    </a>
+    <nav aria-label="Điều hướng chính" class="flex-1 px-3">
+        <ul class="flex flex-col gap-1">
+            @foreach (var item in MainNavigation.Items)
+            {
+                var active = item.IsActive(path);
+                <li>
+                    <a href="@item.Href" aria-current="@(active ? "page" : null)"
+                       class="flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium transition-colors @(active ? "bg-bg text-primary" : "text-ink-muted hover:bg-bg hover:text-ink")">
+                        <partial name="_NavIcon" model="item.Icon" />
+                        <span>@item.Label</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+</aside>
