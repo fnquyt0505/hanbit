@@ -7,7 +7,7 @@
 }
 <button type="button" x-data="@($"audioButton({args})")" x-on:click="play()"
         data-letter-id="@Model.Id" data-state="new" data-testid="hangul-tile"
-        aria-label="@($"{Model.Char} — {Model.Romanization}. Bấm để nghe")"
+        aria-label="@($"{Model.Char} {Model.Romanization}{(Model.NameKo is null ? "" : " " + Model.NameKo)} — bấm để nghe")"
         x-bind:class="{ 'border-secondary': playing }" x-bind:aria-busy="(!!playing).toString()"
         class="flex aspect-square w-full flex-col items-center justify-center rounded-xl border border-border bg-surface p-2 transition duration-150 ease-out hover:border-secondary">
     <span lang="ko" class="font-hangul text-4xl leading-none sm:text-5xl" aria-hidden="true">@Model.Char</span>

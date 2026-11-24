@@ -37,7 +37,7 @@ public class AudioButtonTagHelperTests
 
         html.Split("<button").Length.ShouldBe(3);
         html.ShouldContain("x-on:click=\"play(true)\"");
-        html.ShouldContain("aria-label=\"Nghe chậm: 안녕하세요\"");
+        html.ShouldContain("aria-label=\"Nghe chậm 0.7×: 안녕하세요\"");
         html.ShouldContain("0.7×");
     }
 

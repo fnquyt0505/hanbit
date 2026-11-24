@@ -3,8 +3,37 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Hanbit</title>
-    <meta name="description" content="@(ViewData["Description"] as string ?? "Hanbit (한빛) — web học tiếng Hàn miễn phí cho người Việt.")" />
+    @{
+        // SEO (T7.4): canonical/Open Graph dùng URL gốc công khai (Site:BaseUrl), bỏ query string.
+        var siteBase = Context.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<Hanbit.Web.Hosting.SiteOptions>>().Value.ResolveBaseUrl(Context.Request);
+        var pageTitle = $"{ViewData["Title"]} - Hanbit";
+        var pageDescription = ViewData["Description"] as string ?? "Hanbit (한빛) — web học tiếng Hàn miễn phí cho người Việt.";
+        var canonical = siteBase + Context.Request.Path;
+    }
+    <title>@pageTitle</title>
+    <meta name="description" content="@pageDescription" />
+    @if (ViewData["NoIndex"] is true)
+    {
+        <meta name="robots" content="noindex" />
+    }
+    else
+    {
+        <link rel="canonical" href="@canonical" />
+    }
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Hanbit (한빛)" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:title" content="@pageTitle" />
+    <meta property="og:description" content="@pageDescription" />
+    <meta property="og:url" content="@canonical" />
+    <meta property="og:image" content="@(siteBase)/img/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Hanbit 한빛 — Học tiếng Hàn cho người Việt" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14120f" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
     @* Áp chế độ sáng/tối đã lưu TRƯỚC khi vẽ (tránh nháy). Chỉ ĐỌC khóa do progress-store.js ghi — ngoại lệ đã chốt 2026-11-23. *@
     <script>@Html.Raw(Hanbit.Web.Hosting.InlineScripts.ThemeInit)</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
