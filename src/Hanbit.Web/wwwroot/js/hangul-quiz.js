@@ -1,5 +1,6 @@
 // Trang /hangul/{group} (T3.4): học từng chữ (stepper) → quiz 10 câu, đề + chấm qua API (đáp án không nằm trong HTML/JSON đề).
 import { speak } from './speech.js';
+import { applyLessonResult, load } from './progress-store.js';
 
 document.addEventListener('alpine:init', () => {
   window.Alpine.data('hangulLesson', ({ group, letterCount }) => ({
@@ -12,6 +13,9 @@ document.addEventListener('alpine:init', () => {
     selected: null,
     result: null, // { correct, correctAnswer, letter, romanization }
     score: 0,
+    answers: [], // { kind, prompt, answer } — gửi lại server chấm khi hoàn thành
+    completion: null,
+    saved: null, // null | 'saving' | 'saved' | 'failed'
     loading: false,
     error: null,
 
@@ -51,6 +55,9 @@ document.addEventListener('alpine:init', () => {
         this.questions = body.questions;
         this.current = 0;
         this.score = 0;
+        this.answers = [];
+        this.completion = null;
+        this.saved = null;
         this.selected = null;
         this.result = null;
         this.phase = 'quiz';
@@ -83,6 +90,7 @@ document.addEventListener('alpine:init', () => {
           throw new Error(String(response.status));
         }
         this.result = await response.json();
+        this.answers.push({ kind: q.kind, prompt: q.prompt, answer: choice });
         if (this.result.correct) {
           this.score++;
         }
@@ -97,6 +105,7 @@ document.addEventListener('alpine:init', () => {
     continueQuiz() {
       if (this.current + 1 >= this.questions.length) {
         this.phase = 'done';
+        this.saveProgress();
         return;
       }
       this.current++;
@@ -126,6 +135,32 @@ document.addEventListener('alpine:init', () => {
         return 'correct';
       }
       return choice === this.selected ? 'wrong' : 'idle';
+    },
+
+    // Lưu tiến độ (T5.4): server chấm lại + tính XP/streak, progress-store lưu.
+    async saveProgress() {
+      this.saved = 'saving';
+      const progress = load();
+      try {
+        const response = await fetch('/api/hangul/quiz/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            group,
+            answers: this.answers,
+            previous: progress.lessons[`hangul/${group}`] ?? null,
+            activity: progress.activity,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(String(response.status));
+        }
+        this.completion = await response.json();
+        applyLessonResult(this.completion);
+        this.saved = 'saved';
+      } catch {
+        this.saved = 'failed';
+      }
     },
 
     restart() {

@@ -40,7 +40,9 @@ public class LayoutTests(WebApplicationFactory<Program> factory)
 
         foreach (var item in MainNavigation.Items)
         {
-            html.Split($"href=\"{item.Href}\"").Length.ShouldBe(3, item.Href);
+            // StreakBadge (sidebar + header mobile) cũng là link tới /dashboard → thêm 2 lần.
+            var expected = 2 + (item.Href == "/dashboard" ? 2 : 0);
+            html.Split($"href=\"{item.Href}\"").Length.ShouldBe(expected + 1, item.Href);
         }
     }
 

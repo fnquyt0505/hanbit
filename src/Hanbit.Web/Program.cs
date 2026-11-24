@@ -18,6 +18,7 @@ builder.Services.PostConfigure<ContentOptions>(options =>
 builder.Services.AddInfrastructure();
 builder.Services.AddScoped<Hanbit.Application.Lessons.LessonService>();
 builder.Services.AddScoped<Hanbit.Application.Lessons.SubmitLessonHandler>();
+builder.Services.AddScoped<Hanbit.Application.Progress.ProgressService>();
 
 var app = builder.Build();
 

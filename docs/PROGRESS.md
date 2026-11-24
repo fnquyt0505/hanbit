@@ -9,7 +9,7 @@
 | Giai đoạn                     | 5 — Tiến độ chế độ khách |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T5.4** Dashboard, CourseMap, StreakBadge đọc tiến độ thật |
+| Task tiếp theo                 | **T5.5** Xuất/nhập JSON ở `/profile` + `POST /api/progress/validate` (tạm dừng theo yêu cầu người dùng) |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T5.4 Dashboard, CourseMap, StreakBadge đọc tiến độ thật
+- Đã làm: Domain `ProgressSummaries.Summarize` (streak, XP hôm nay, tổng XP, thẻ đến hạn, số từ đã học, số bài/nhóm hoàn thành) + `LessonCompletion.CompleteHangulQuiz` (XP 5 + 1/câu đúng, không tạo thẻ). Application `Progress/ProgressService` (tóm tắt + bài kế tiếp = bài đầu chưa xong; chấm lại quiz Hangul). API `POST /api/progress/summary` (+ `isNewLearner`, `nextLesson`, `today`) và `POST /api/hangul/quiz/complete` (key `hangul/{nhóm}`, cùng dạng phản hồi hoàn thành bài). JS: `progress-summary.js` (store Alpine `progress`, gọi tóm tắt 1 lần/trang, làm mới khi tiến độ đổi); `dashboard.js` đọc store (người học mới → Học Hangul, đã học → bài kế tiếp); partial `_StreakBadge` (🔥 n, link /dashboard) ở sidebar + header mobile; quiz Hangul gửi kết quả → lưu, hiện +XP + chuỗi ngày. CourseMap đọc tiến độ từ T5.3.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Domain +3; Web +7 integration đồng hồ cố định; E2E +2: quiz Hangul → +XP → dashboard streak 1, XP hôm nay ≥ 5, CTA bài 1, badge sidebar 1; người mới → badge 0, CTA Hangul).
+- Tiếp theo: (tạm dừng theo yêu cầu người dùng) T5.5
 
 ### 2026-11-24 — T5.3 progress-store.js
 - Đã làm: `wwwroot/js/progress-store.js` — nơi duy nhất chạm localStorage: `load` (khóa `hanbit.progress.v1`; kiểm tra cấu trúc; JSON hỏng / khác SchemaVersion → cất bản gốc vào `hanbit.progress.backup.<thời điểm>`, dùng tiến độ trống, `issue()` = corrupt/version), `save` (localStorage bị chặn/đầy → giữ trong bộ nhớ trang, `issue()` = unavailable; phát sự kiện `hanbit:progress-changed`), `mergeLessonResult`/`applyLessonResult` (bản ghi bài, upsert thẻ theo itemId, thay hoạt động, cộng XP), `completedLessons`, `lessonContext`, `loadSettings`/`saveSettings` (`hanbit.settings.v1`). `ui.js` báo toast khi dữ liệu bị làm mới / không lưu được. Màn học: kết thúc → `POST /complete` với mọi câu trả lời + phần tiến độ liên quan → lưu; màn tổng kết hiện **+XP** và **🔥 chuỗi ngày**, lỗi → nút "Lưu lại". CourseMap đọc bài đã hoàn thành → mở khóa bài sau. Theme sáng/tối lưu qua store + script `<head>` chỉ đọc để áp trước khi vẽ (ngoại lệ đã chốt).

@@ -1,0 +1,10 @@
+@* StreakBadge nhỏ trên thanh điều hướng (DESIGN.md §5): ngọn lửa + số ngày, đọc store "progress" (progress-summary.js).
+   Ẩn tới khi có số liệu từ server. *@
+<a href="/dashboard" x-data x-show="$store.progress.loaded && $store.progress.summary" x-cloak data-streak-badge
+   x-bind:aria-label="`Chuỗi ${$store.progress.summary?.streak.current ?? 0} ngày học liên tiếp — xem tổng quan`"
+   class="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 text-sm font-semibold hover:border-secondary">
+    <svg class="size-4 text-primary" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+        <path d="M12 2c.6 3.2 3.9 5.2 3.9 9.4A3.9 3.9 0 0 1 12 15.3a3.9 3.9 0 0 1-3.9-3.9c0-1.6.7-2.8 1.6-3.8.1 1.6.9 2.7 2 2.9-.4-2.8-.2-5.6.3-8.5ZM6 13.5a6 6 0 0 0 12 0c0-.9-.1-1.7-.4-2.5.3 3-2 6.3-5.6 6.3S6.1 14 6.4 11A6 6 0 0 0 6 13.5Z" />
+    </svg>
+    <span x-text="$store.progress.summary?.streak.current ?? 0"></span>
+</a>

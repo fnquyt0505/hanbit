@@ -142,6 +142,16 @@
         </h2>
         <p class="mt-2 text-ink-muted" x-show="score >= questions.length * 0.8">Tuyệt! Bạn đã nhớ nhóm chữ này.</p>
         <p class="mt-2 text-ink-muted" x-show="score < questions.length * 0.8">Ôn lại các chữ rồi thử lại nhé — lần sau sẽ tốt hơn.</p>
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-3" aria-live="polite">
+            <span x-show="saved === 'saving'" class="text-sm text-ink-muted">Đang lưu tiến độ…</span>
+            <template x-if="saved === 'saved' && completion">
+                <span class="inline-flex flex-wrap items-center justify-center gap-3">
+                    <span class="rounded-full border border-xp px-3 py-1 font-semibold text-xp-ink" data-testid="quiz-xp">+<span x-text="completion.xp"></span> XP</span>
+                    <span class="rounded-full border border-border px-3 py-1 font-semibold">🔥 <span x-text="completion.streak.current"></span> ngày liên tiếp</span>
+                </span>
+            </template>
+            <span x-show="saved === 'failed'" class="text-sm text-danger">Chưa lưu được tiến độ. <button type="button" class="font-semibold underline" x-on:click="saveProgress()">Lưu lại</button></span>
+        </div>
         <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <hb-button variant="outline" size="lg" block="true" x-on:click="restart()" data-testid="quiz-restart">Làm lại</hb-button>
             @if (Model.Next is not null)
