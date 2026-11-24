@@ -9,7 +9,7 @@
 | Giai đoạn                     | 6 — Ôn tập SRS |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T6.2** `POST /api/reviews/due`, `POST /api/reviews/grade` |
+| Task tiếp theo                 | **T6.3** `/review` + `review-session.js` (flashcard lật, 4 nút, phím 1–4 / Space) |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T6.2 API ôn tập
+- Đã làm: Application `Reviews/ReviewService`: `DueAsync` (thẻ từ vựng đến hạn ≤ hiện tại, bỏ trùng, sớm nhất trước, chỉ từ còn trong nội dung + đã duyệt, giới hạn 1–200 (mặc định 50), `Total` = tổng đến hạn; kèm `PreviewIntervals`), `Grade` (`Sm2Scheduler.Schedule` + 1 XP + 1 lượt ôn hôm nay giờ VN + streak). `ReviewsApiController`: `POST /api/reviews/due` `{ cards, limit }` → `{ total, items[{ card, word (VocabDto), previews{again,hard,good,easy} }], today }`; `POST /api/reviews/grade` `{ card, grade, activity }` → `{ card, activity, xp, streak }` (thiếu thẻ/mức sai → 400).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Web +8 integration: lọc + sắp xếp + nội dung từ + preview, giới hạn/total, rỗng, Good lập lịch + XP/lượt ôn/streak, chuỗi "again", 400).
+- Tiếp theo: T6.3
 
 ### 2026-11-24 — T6.1 Sm2Scheduler
 - Đã làm: Domain `Srs/Sm2Scheduler`: `ReviewGrade` (Again 0 / Hard 1 / Good 2 / Easy 3), `Schedule(card, grade, now)` thuần theo quy ước ở Quyết định, `PreviewIntervals` (khoảng ôn của từng mức — cho nút đánh giá). Ease làm tròn 2 chữ số, NaN → mặc định 2,5.

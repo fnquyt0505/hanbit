@@ -20,6 +20,7 @@ builder.Services.AddScoped<Hanbit.Application.Lessons.LessonService>();
 builder.Services.AddScoped<Hanbit.Application.Lessons.SubmitLessonHandler>();
 builder.Services.AddScoped<Hanbit.Application.Progress.ProgressService>();
 builder.Services.AddScoped<Hanbit.Application.Progress.ProgressImporter>();
+builder.Services.AddScoped<Hanbit.Application.Reviews.ReviewService>();
 
 var app = builder.Build();
 
