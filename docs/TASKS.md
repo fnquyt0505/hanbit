@@ -55,7 +55,7 @@
 - [x] **T5.2** `SubmitLessonHandler` + `POST /api/lessons/{c}/{l}/complete` (trả LessonRecord, card mới, activity, XP). DoD: integration test.
 - [x] **T5.3** `progress-store.js`: load/save localStorage, xử lý JSON hỏng/khác version, merge kết quả từ API. DoD: E2E reload trang vẫn giữ tiến độ.
 - [x] **T5.4** Dashboard, CourseMap, StreakBadge đọc tiến độ thật.
-- [ ] **T5.5** Xuất/nhập JSON ở `/profile` + `POST /api/progress/validate` (validate + migrate). DoD: E2E xuất → xóa → nhập → khôi phục đúng.
+- [x] **T5.5** Xuất/nhập JSON ở `/profile` + `POST /api/progress/validate` (validate + migrate). DoD: E2E xuất → xóa → nhập → khôi phục đúng.
 
 ## Giai đoạn 6 — Ôn tập SRS
 

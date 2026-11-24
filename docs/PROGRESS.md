@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 5 — Tiến độ chế độ khách |
+| Giai đoạn                     | 5 — Tiến độ chế độ khách ✅ xong → tiếp theo 6 — Ôn tập SRS (chờ người dùng) |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T5.5** Xuất/nhập JSON ở `/profile` + `POST /api/progress/validate` (tạm dừng theo yêu cầu người dùng) |
+| Task tiếp theo                 | **T6.1** `Sm2Scheduler` thuần + test 4 grade và biên |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T5.5 Xuất/nhập tiến độ + POST /api/progress/validate
+- Đã làm: Domain `ProgressSanitizer` (kẹp giới hạn thay vì từ chối: ease 1,3–5, interval 0–3650, lặp 0–1000, điểm 0–100, XP ≥ 0, ngày tương lai → hiện tại; bỏ key bài sai mẫu `khóa/bài`, thẻ rỗng/trùng, key thẻ = itemId; hoạt động gộp trùng ngày, bỏ ngày tương lai/quá 365 ngày; trả cảnh báo tiếng Việt). Application `ProgressImporter` (kiểm tra `schemaVersion` → chuỗi migrate theo phiên bản (schema 1 là bản đầu, chưa có bước) → đọc `LearnerProgress` → làm sạch; schema mới hơn/thiếu/sai kiểu → lỗi). API `POST /api/progress/validate` (thân = file sao lưu, ≤ 5 MB) → `{ progress, warnings }` hoặc 400. `progress-store.js`: `backupFileName` (`hanbit-backup-YYYYMMDD.json`), `exportJson`, `replaceProgress`, `clearProgress`. Trang `/profile` (`ProfileController` + `profile.js`): số liệu (XP, bài xong, từ đã học), Xuất tiến độ (tải file), Nhập tiến độ (server kiểm tra → khung xác nhận so sánh hiện tại/tệp + cảnh báo → Khôi phục/Hủy), Xóa tiến độ có xác nhận.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 601/601 (Domain +8 sanitizer; Web +9: hợp lệ giữ nguyên, kẹp giá trị + cảnh báo, schema 99/thiếu/không phải object/sai kiểu/không phải JSON → 400, trang /profile; E2E +3: **xuất → xóa → nhập → khôi phục đúng** + lộ trình vẫn ✓, tệp sai → báo lỗi không ghi đè, tệp bị sửa → cảnh báo rồi kẹp) · ảnh chụp OK.
+- Vấn đề / ghi chú: **Giai đoạn 5 xong.**
+- Tiếp theo: (chờ người dùng) T6.1
 
 ### 2026-11-24 — T5.4 Dashboard, CourseMap, StreakBadge đọc tiến độ thật
 - Đã làm: Domain `ProgressSummaries.Summarize` (streak, XP hôm nay, tổng XP, thẻ đến hạn, số từ đã học, số bài/nhóm hoàn thành) + `LessonCompletion.CompleteHangulQuiz` (XP 5 + 1/câu đúng, không tạo thẻ). Application `Progress/ProgressService` (tóm tắt + bài kế tiếp = bài đầu chưa xong; chấm lại quiz Hangul). API `POST /api/progress/summary` (+ `isNewLearner`, `nextLesson`, `today`) và `POST /api/hangul/quiz/complete` (key `hangul/{nhóm}`, cùng dạng phản hồi hoàn thành bài). JS: `progress-summary.js` (store Alpine `progress`, gọi tóm tắt 1 lần/trang, làm mới khi tiến độ đổi); `dashboard.js` đọc store (người học mới → Học Hangul, đã học → bài kế tiếp); partial `_StreakBadge` (🔥 n, link /dashboard) ở sidebar + header mobile; quiz Hangul gửi kết quả → lưu, hiện +XP + chuỗi ngày. CourseMap đọc tiến độ từ T5.3.

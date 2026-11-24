@@ -179,3 +179,31 @@ export function saveSettings(patch) {
   }
   return next;
 }
+
+// ── Sao lưu / khôi phục (T5.5) ──
+
+/** Tên file sao lưu: hanbit-backup-YYYYMMDD.json (ARCHITECTURE §6). */
+export function backupFileName(date = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `hanbit-backup-${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}.json`;
+}
+
+/** Nội dung file sao lưu (JSON thụt lề cho dễ đọc). */
+export function exportJson(progress = load()) {
+  return JSON.stringify(progress, null, 2);
+}
+
+/** Thay toàn bộ tiến độ bằng bản đã được server kiểm tra (POST /api/progress/validate). */
+export function replaceProgress(progress) {
+  if (!isValidProgress(progress)) {
+    throw new Error('Tiến độ không hợp lệ.');
+  }
+  lastIssue = null;
+  return save(progress);
+}
+
+/** Xóa tiến độ (bắt đầu lại từ đầu). */
+export function clearProgress() {
+  lastIssue = null;
+  return save(emptyProgress());
+}
