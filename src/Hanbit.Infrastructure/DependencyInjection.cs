@@ -15,6 +15,8 @@ public static class DependencyInjection
         services.AddMemoryCache();
         services.AddOptions<ContentOptions>();
         services.AddSingleton<IContentRepository, JsonContentRepository>();
+        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<IClock, SystemClock>();
         return services;
     }
 }

@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 4 — Bài học & bài tập ✅ xong → tiếp theo 5 — Tiến độ chế độ khách (chờ người dùng) |
+| Giai đoạn                     | 5 — Tiến độ chế độ khách |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T5.1** `LearnerProgress` + `IClock` + `XpRules` + `StreakCalculator` |
+| Task tiếp theo                 | **T5.2** `SubmitLessonHandler` + `POST /api/lessons/{c}/{l}/complete` |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T5.1 Model tiến độ + IClock + XpRules + StreakCalculator
+- Đã làm: Domain `Progress/`: `LearnerProgress` (SchemaVersion 1, `Empty`, `LessonKey`), `LessonRecord`/`LessonStatus`, `ReviewCard` (giới hạn ease 1.3–5, interval ≤ 3650), `ItemType`, `DailyActivity`; `XpRules` (theo quyết định người dùng); `StreakCalculator` (`Calculate` → current/longest/activeToday — hôm nay chưa học vẫn giữ chuỗi từ hôm qua; `AddActivity` cộng dồn theo ngày, giữ 365 ngày); `VietnamTime` (Asia/Ho_Chi_Minh, thiếu dữ liệu múi giờ → UTC+7 cố định). Application `IClock` (`Today` theo giờ VN); Infrastructure `SystemClock` (TimeProvider) đăng ký DI.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Domain +24: XP, streak gồm khoảng trống/ngày 0 XP/ngày tương lai, cắt 365 ngày, qua nửa đêm giờ VN; Infrastructure +1 SystemClock).
+- Tiếp theo: T5.2
 
 ### 2026-11-24 — T4.6 Màn tổng kết bài học
 - Đã làm: `ExerciseGenerator.VocabIdFor` (bài sinh 1 từ → id từ vựng; nối cặp/bài tự soạn → null); `POST /api/exercises/check` trả thêm `vocabId` (chỉ sau khi chấm — gửi trong đề sẽ lộ đáp án bài Việt→Hàn). Runner JSON thêm `nextSlug`. `lesson-runner.js`: `summarize(answers, vocab)` (điểm %, đúng/tổng, từ cần ôn lại không trùng, số bài sai khác), ngưỡng `GREAT_SCORE` 80%. Màn tổng kết: 🎉/💪 + lời nhắn theo điểm, % lớn, đúng x/y, danh sách **từ cần ôn lại** (nút nghe, chữ Hàn, nghĩa), số bài sai khác, nút Học lại / Bài tiếp theo / Về lộ trình. XP + lưu tiến độ ở giai đoạn 5.
@@ -321,6 +326,7 @@
 | 2026-11-24      | `content/hangul.json` đã duyệt (AI biên soạn, người dùng duyệt)                                                                           | Gợi ý đọc chỉ là phụ — người học nghe audio thật                             |
 | 2026-11-24      | Nội dung tự biên soạn (`hangul.json`, `grammar/`, `courses/`): **giữ mọi quyền**                                                  | Có thể mở giấy phép sau; CC thì không rút lại được                           |
 | 2026-11-24      | Phát âm chữ cái: phụ âm (cơ bản + kép) đọc ghép với ㅏ (ㄱ → 가), nguyên âm đọc với ㅇ câm (ㅏ → 아); `speech.js` ưu tiên giọng Natural/Online/Google, lỗi → giọng cục bộ | Người dùng: giọng máy tính khó nghe; chỉ cần ghép phụ âm với ㅏ (câu hỏi 12) |
+| 2026-11-24      | XP theo số câu đúng: bài học 10 + 1/câu đúng, quiz Hangul 5 + 1/câu đúng, ôn thẻ 1/thẻ, học lại vẫn được XP · streak: ngày có ≥ 1 XP (giờ Việt Nam) · mở khóa bài sau khi **hoàn thành** bài trước (không cần điểm) · hoàn thành bài → **mọi từ** thành thẻ SRS (từ sai đến hạn hôm nay, từ đúng ngày mai) | Người dùng chọn phương án đề xuất (giai đoạn 5) |
 
 ---
 
