@@ -1,0 +1,80 @@
+@{
+    ViewData["Title"] = "Hồ sơ";
+    ViewData["Description"] = "Tiến độ học tiếng Hàn của bạn trên thiết bị này: số liệu, sao lưu và khôi phục tiến độ.";
+}
+
+@section Head {
+    <script type="module" src="~/js/profile.js" asp-append-version="true"></script>
+}
+
+<div class="mx-auto max-w-2xl px-4 py-8 sm:py-12" data-testid="profile">
+    <h1 class="text-3xl font-bold">Hồ sơ</h1>
+    <p class="mt-2 text-ink-muted">Bạn đang học ở <strong>chế độ khách</strong>: tiến độ chỉ lưu trên trình duyệt của thiết bị này.</p>
+
+    @* Số liệu (store "progress" — server tính) *@
+    <section class="mt-8 grid grid-cols-3 gap-3" aria-label="Số liệu" x-data>
+        @foreach (var (label, expr, testId) in new[]
+        {
+            ("Tổng XP", "$store.progress.summary?.totalXp ?? 0", "profile-xp"),
+            ("Bài đã xong", "$store.progress.summary?.completedLessons ?? 0", "profile-lessons"),
+            ("Từ đã học", "$store.progress.summary?.learnedWords ?? 0", "profile-words"),
+        })
+        {
+            <div class="rounded-xl border border-border bg-surface p-4">
+                <p class="text-sm text-ink-muted">@label</p>
+                <span x-show="!$store.progress.loaded" class="mt-2 block h-8 w-12 animate-pulse rounded bg-border" aria-hidden="true"></span>
+                <p x-show="$store.progress.loaded" x-cloak class="mt-1 text-2xl font-bold" x-text="@expr" data-testid="@testId"></p>
+            </div>
+        }
+    </section>
+
+    @* Sao lưu & khôi phục *@
+    <section class="mt-8 rounded-2xl border border-border bg-surface p-6" aria-labelledby="backup-title" x-data="progressBackup" data-testid="backup">
+        <h2 id="backup-title" class="text-xl font-bold">Sao lưu &amp; khôi phục</h2>
+        <p class="mt-2 text-ink-muted">Xuất tiến độ ra tệp <code>.json</code> để không bị mất khi xóa dữ liệu trình duyệt, hoặc để chuyển sang máy khác.</p>
+
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+            <hb-button size="lg" block="true" x-on:click="exportFile()" data-testid="export">Xuất tiến độ</hb-button>
+            <label class="inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-full border border-border bg-surface px-6 text-lg font-semibold hover:border-secondary sm:w-auto"
+                   x-bind:class="{ 'opacity-50 pointer-events-none': busy }">
+                <input type="file" accept="application/json,.json" class="sr-only" x-on:change="importFile($event)" data-testid="import-input" />
+                <span x-text="busy ? 'Đang kiểm tra…' : 'Nhập tiến độ'">Nhập tiến độ</span>
+            </label>
+        </div>
+
+        <p x-show="error" x-cloak x-text="error" role="alert" class="mt-4 text-danger" data-testid="import-error"></p>
+
+        @* Xác nhận ghi đè *@
+        <template x-if="pending">
+            <div class="mt-5 rounded-xl border-2 border-secondary p-4" role="alertdialog" aria-labelledby="confirm-title" data-testid="import-confirm">
+                <h3 id="confirm-title" class="font-semibold">Khôi phục từ <span x-text="pending.fileName"></span>?</h3>
+                <p class="mt-2 text-sm">
+                    Tiến độ hiện tại (<span x-text="pending.current.lessons"></span> bài, <span x-text="pending.current.xp"></span> XP)
+                    sẽ được <strong>thay bằng</strong> tiến độ trong tệp (<span x-text="pending.incoming.lessons"></span> bài,
+                    <span x-text="pending.incoming.cards"></span> thẻ, <span x-text="pending.incoming.xp"></span> XP).
+                </p>
+                <ul x-show="pending.warnings.length > 0" class="mt-2 list-disc pl-5 text-sm text-warning-ink" data-testid="import-warnings">
+                    <template x-for="warning in pending.warnings" x-bind:key="warning"><li x-text="warning"></li></template>
+                </ul>
+                <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+                    <hb-button x-on:click="confirmImport()" data-testid="import-apply">Khôi phục</hb-button>
+                    <hb-button variant="outline" x-on:click="cancelImport()">Hủy</hb-button>
+                </div>
+            </div>
+        </template>
+
+        @* Xóa tiến độ *@
+        <div class="mt-8 border-t border-border pt-5">
+            <h3 class="font-semibold">Bắt đầu lại</h3>
+            <p class="mt-1 text-sm text-ink-muted">Xóa toàn bộ tiến độ trên thiết bị này. Nên xuất tệp sao lưu trước.</p>
+            <div class="mt-3" x-show="!confirmClear">
+                <hb-button variant="outline" x-on:click="confirmClear = true" data-testid="clear">Xóa tiến độ</hb-button>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center gap-2" x-show="confirmClear" x-cloak role="alertdialog" aria-label="Xác nhận xóa tiến độ">
+                <span class="text-sm font-semibold text-danger">Xóa hết tiến độ? Không thể hoàn tác.</span>
+                <hb-button size="sm" x-on:click="clearAll()" data-testid="clear-confirm">Xóa</hb-button>
+                <hb-button size="sm" variant="outline" x-on:click="confirmClear = false">Hủy</hb-button>
+            </div>
+        </div>
+    </section>
+</div>

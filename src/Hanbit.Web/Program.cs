@@ -19,6 +19,7 @@ builder.Services.AddInfrastructure();
 builder.Services.AddScoped<Hanbit.Application.Lessons.LessonService>();
 builder.Services.AddScoped<Hanbit.Application.Lessons.SubmitLessonHandler>();
 builder.Services.AddScoped<Hanbit.Application.Progress.ProgressService>();
+builder.Services.AddScoped<Hanbit.Application.Progress.ProgressImporter>();
 
 var app = builder.Build();
 
