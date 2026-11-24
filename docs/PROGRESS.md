@@ -6,11 +6,11 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 7 — Hoàn thiện & ra mắt MVP |
+| Giai đoạn                     | 7 — Hoàn thiện & ra mắt MVP ✅ (MVP xong) → giai đoạn 8 (P1) chờ người dùng |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T7.6** chờ người dùng (câu hỏi 14) · MVP xong phần code |
-| Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
+| Task tiếp theo                 | (P1) **T8.1** PostgreSQL + EF Core — chờ người dùng quyết |
+| Việc song song (người dùng) | Tạo monitor UptimeRobot cho `/health` (câu hỏi 14) · (tùy chọn) thêm `docker` làm required check trong ruleset `main-protection` |
 | Blocker                         | —                                                                                                                                                        |
 
 ## 💻 Môi trường máy dev
@@ -372,8 +372,8 @@
 10. ~~Duyệt nội dung AI soạn ở T1.8~~ → người dùng duyệt theo đề xuất (2026-11-24): `grammar/beginner.json` + 5 bài `courses/beginner/lessons/`, comment đầu file đổi thành "người dùng đã duyệt".
 11. ~~Lighthouse trang chủ (DoD T2.2)~~ → đã đo (2026-11-24, Mobile, production): 95 · 96 · 100 · 100.
 12. ~~Nghe thử phát âm (DoD T3.1)~~ → người dùng trả lời (2026-11-24): giọng trên máy tính khó nghe, không tự nhiên → ưu tiên giọng Natural/Online (Edge SunHi Natural, Google), lỗi mạng thì về giọng cục bộ; phụ âm cơ bản + phụ âm kép đọc **ghép với ㅏ** (ㄱ → 가, ㄲ → 까) thay cho tên chữ. Android/Safari chưa kiểm — giọng TTS vẫn phụ thuộc thiết bị; giải pháp lâu dài: MP3 tạo trước (Backlog).
-13. **Màu nút đánh giá ôn tập (T6.3):** 4 nút Quên/Khó/Được/Dễ dùng 4 màu ngữ nghĩa (danger/warning/success/secondary) — lệch quy tắc DESIGN.md §2 "không quá 1 màu nhấn trên một màn hình" nhưng giúp phân biệt nhanh (giống các app flashcard). Giữ hay đổi sang viền trung tính + chỉ màu chữ?
-14. **Cold start Render free (T7.6):** instance ngủ sau ~15 phút không có truy cập; lần mở đầu tiên sau đó phải chờ Render khởi động lại container (thường 30–60 s — phần lớn do hạ tầng, app chỉ chiếm vài giây). Cần: (a) đo trên điện thoại 4G: mở https://hanbit.onrender.com sau ≥ 20 phút không ai truy cập, ghi số giây tới khi thấy trang; (b) chọn: giữ nguyên (miễn phí) · nâng gói Render Starter (~7 USD/tháng, không ngủ) · dùng dịch vụ ping định kỳ (VD UptimeRobot 10 phút/lần — 1 instance chạy liên tục ≈ 744 giờ/tháng, vừa hạn mức 750 giờ free).
+13. ~~Màu nút đánh giá ôn tập (T6.3)~~ → người dùng chốt (2026-11-24): **giữ 4 màu** ngữ nghĩa (ngoại lệ có chủ đích của quy tắc 1 màu nhấn).
+14. ~~Cold start Render free (T7.6)~~ → người dùng chốt (2026-11-24): **UptimeRobot** ping `https://hanbit.onrender.com/health` mỗi 5 phút để instance không ngủ (1 instance chạy liên tục ≈ 744 giờ/tháng, trong hạn mức 750 giờ free của Render — nếu tạo thêm dịch vụ free khác thì hạn mức dùng chung). Người dùng tự tạo monitor.
 
 
 
@@ -407,6 +407,7 @@
 | 2026-11-24      | XP theo số câu đúng: bài học 10 + 1/câu đúng, quiz Hangul 5 + 1/câu đúng, ôn thẻ 1/thẻ, học lại vẫn được XP · streak: ngày có ≥ 1 XP (giờ Việt Nam) · mở khóa bài sau khi **hoàn thành** bài trước (không cần điểm) · hoàn thành bài → **mọi từ** thành thẻ SRS (từ sai đến hạn hôm nay, từ đúng ngày mai) | Người dùng chọn phương án đề xuất (giai đoạn 5) |
 | 2026-11-24      | SM-2 rút gọn: Again → lặp 0, đến hạn ngay (ôn lại trong phiên), ease −0,20 · Hard 1 → 1 → ×1,2, ease −0,15 · Good 1 → 3 → ×ease · Easy 3 → 6 → ×ease×1,3, ease +0,15 · ease 1,3–5, khoảng ≤ 3650 ngày, đến hạn 00:00 giờ VN | AI chọn theo SM-2 phổ biến (ARCHITECTURE §7 chỉ nêu khung); hằng số trong `Sm2Scheduler` |
 | 2026-11-24      | Giai đoạn 7: thêm `Deque.AxeCore.Playwright` (chỉ project E2E) cho T7.4 · giữ domain `hanbit.onrender.com` · "đã thuộc" = thẻ có khoảng ôn ≥ 21 ngày | Người dùng chọn (axe, domain); ngưỡng 21 ngày AI chọn theo Anki "mature" |
+| 2026-11-24      | Nút đánh giá ôn tập giữ 4 màu ngữ nghĩa (ngoại lệ DESIGN §2) · chống cold start bằng UptimeRobot ping `/health` mỗi 5 phút (không nâng gói Render) | Người dùng chọn (câu hỏi 13, 14) |
 
 ---
 
