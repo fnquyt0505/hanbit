@@ -23,7 +23,7 @@ public class HangulPageTests(WebServerFixture server)
         """;
 
     [Theory]
-    [InlineData("c-giyeok", "기역")]
+    [InlineData("c-giyeok", "가")]
     [InlineData("v-a", "아")]
     public async Task ClickTile_SpeaksLetterSound(string letterId, string expected)
     {

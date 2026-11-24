@@ -10,7 +10,7 @@
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
 | Task tiếp theo                 | **T4.1** `/learn/{course}`: View Component `CourseMap` |
-| Việc song song (người dùng) | Nghe thử phát âm T3.1 (câu hỏi 12) · Duyệt ngữ pháp + bài tập AI soạn ở T1.8 (câu hỏi 10) · (tùy chọn) sửa nghĩa krdict (câu hỏi 9) |
+| Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
 ## 💻 Môi trường máy dev
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — Theo phản hồi người dùng: câu hỏi 9, 10, 12
+- Đã làm: (9) sửa `vi` 6 từ trong `vocab-reviews.json` theo đề xuất (PR #30, test gộp nghĩa). (10) đánh dấu ngữ pháp + bài tập T1.8 đã duyệt. (12) Domain `HangulSyllable.ConsonantSyllable` + `HangulPronunciation`: phụ âm đọc ghép ㅏ (ㄱ → 가, ㄲ → 까) — áp dụng cho ô chữ, thẻ học, câu nghe trong quiz; `speech.js`: `voiceScore` ưu tiên giọng Natural/Neural, Online, Google; giọng online lỗi → đọc lại bằng giọng cục bộ. T3.1 đóng.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 450/450 (Domain +10 ConsonantSyllable; E2E +2: chọn SunHi Natural thay Heami, lỗi mạng → Heami không hiện toast).
+- Tiếp theo: (chờ người dùng) T4.1
 
 ### 2026-11-24 — T3.4 /hangul/{group}: học từng chữ + quiz 10 câu
 - Đã làm: Domain `HangulPronunciation.SpeakText` (chuyển từ Web — dùng chung) + `HangulQuiz` (`Generate(letters, seed, 10)`: mỗi chữ ra trước khi lặp, 3 dạng xoay vòng `CharToRomanization` / `RomanizationToChar` / `ListenToChar`, 4 lựa chọn khác nhau trong nhóm; `Check` stateless tìm chữ theo prompt + dạng). API: `GET /api/hangul/quiz/{group}?seed=` (câu hỏi **không có đáp án**, dạng kebab-case; nhóm lạ → 404), `POST /api/hangul/quiz/check` `{ group, kind, prompt, answer }` → `{ correct, correctAnswer, letter, romanization }` (sai dữ liệu → 400 ValidationProblem). `HangulController.Group` (`/hangul/{group}`, nhóm lạ → 404 thân thiện) + `HangulGroupPageViewModel`/`HangulLetterCard`. View `Hangul/Group`: stepper thẻ chữ (chữ lớn, `<audio-button>` thường/chậm, romanization, tên chữ, cách đọc `vi_hint`, ví dụ có nút nghe), quiz (thanh tiến độ, 3 dạng câu, đúng/sai có icon ✓/✗ + "Gần đúng rồi! Đáp án là …", câu nghe tự đọc), màn kết quả (x/10, Làm lại, Học tiếp nhóm sau). `wwwroot/js/hangul-quiz.js` (Alpine `hangulLesson`). `/hangul` thêm nút "Học nhóm này".
@@ -254,7 +259,7 @@
 9. ~~Nghĩa duyệt hàng loạt chưa tự nhiên (T1.7/T1.8)~~ → người dùng chọn làm theo đề xuất (2026-11-24): sửa `vi` trong `vocab-reviews.json` cho 저 (tôi (khiêm nhường); em, con, cháu), 안녕히 (một cách an lành (안녕히 가세요/계세요: tạm biệt)), 다니다 (bỏ lỗi gõ "l"), 나라 (bỏ trùng + dấu chấm), 반갑다 (vui mừng (được gặp)), 경찰 (cảnh sát).
 10. ~~Duyệt nội dung AI soạn ở T1.8~~ → người dùng duyệt theo đề xuất (2026-11-24): `grammar/beginner.json` + 5 bài `courses/beginner/lessons/`, comment đầu file đổi thành "người dùng đã duyệt".
 11. ~~Lighthouse trang chủ (DoD T2.2)~~ → đã đo (2026-11-24, Mobile, production): 95 · 96 · 100 · 100.
-12. **Nghe thử phát âm (DoD T3.1):** mở https://hanbit.onrender.com/styleguide → mục `<audio-button>` trên **Chrome/Edge (máy tính)**, **điện thoại Android (Chrome)** và nếu có **iPhone/iPad (Safari)**: bấm loa (tốc độ thường) và nút `0.7×` (chậm) cho 안녕하세요, 감사합니다; ghi lại dòng "Giọng đọc tiếng Hàn trên thiết bị này". Báo: thiết bị nào đọc được / không, giọng có tự nhiên không. Trả lời: -giọng đọc trên máy tính khó nghe và không tự nhiên lắm. - ở phần phụ âm cơ bản và phụ âm ghép chỉ cần ghép với nguyên âm a là được.
+12. ~~Nghe thử phát âm (DoD T3.1)~~ → người dùng trả lời (2026-11-24): giọng trên máy tính khó nghe, không tự nhiên → ưu tiên giọng Natural/Online (Edge SunHi Natural, Google), lỗi mạng thì về giọng cục bộ; phụ âm cơ bản + phụ âm kép đọc **ghép với ㅏ** (ㄱ → 가, ㄲ → 까) thay cho tên chữ. Android/Safari chưa kiểm — giọng TTS vẫn phụ thuộc thiết bị; giải pháp lâu dài: MP3 tạo trước (Backlog).
 
 
 
@@ -284,6 +289,7 @@
 | 2026-11-24      | Đợt duyệt 1 = bộ chủ đề A (150 từ): 인사하기, 감사하기, 사과하기, 소개하기(자기소개), 개인 정보 교환하기, 소개하기(가족 소개), 요일 표현하기 | Chọn theo chủ đề tình huống của krdict (dữ liệu thật); khớp 5 bài đầu T1.8 |
 | 2026-11-24      | `content/hangul.json` đã duyệt (AI biên soạn, người dùng duyệt)                                                                           | Gợi ý đọc chỉ là phụ — người học nghe audio thật                             |
 | 2026-11-24      | Nội dung tự biên soạn (`hangul.json`, `grammar/`, `courses/`): **giữ mọi quyền**                                                  | Có thể mở giấy phép sau; CC thì không rút lại được                           |
+| 2026-11-24      | Phát âm chữ cái: phụ âm (cơ bản + kép) đọc ghép với ㅏ (ㄱ → 가), nguyên âm đọc với ㅇ câm (ㅏ → 아); `speech.js` ưu tiên giọng Natural/Online/Google, lỗi → giọng cục bộ | Người dùng: giọng máy tính khó nghe; chỉ cần ghép phụ âm với ㅏ (câu hỏi 12) |
 
 ---
 

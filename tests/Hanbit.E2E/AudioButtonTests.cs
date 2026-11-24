@@ -21,6 +21,10 @@ public class AudioButtonTests(WebServerFixture server)
             addEventListener() {}, removeEventListener() {},
             cancel() {},
             speak(u) {
+              if (u.voice?.name === window.__failVoice) { // giả lập giọng online lỗi mạng
+                setTimeout(() => u.onerror?.({ error: 'network' }), 10);
+                return;
+              }
               window.__spoken.push({ text: u.text, lang: u.lang, rate: u.rate, voice: u.voice?.name });
               setTimeout(() => u.onend?.(), 50);
             },
@@ -31,12 +35,25 @@ public class AudioButtonTests(WebServerFixture server)
         })();
         """;
 
-    private async Task<IPage> OpenStyleguideAsync(bool noKoreanVoice = false)
+    private const string WindowsVoices = """
+        window.__fakeVoices = [
+          { name: 'Microsoft Heami - Korean (Korean)', lang: 'ko-KR', localService: true },
+          { name: 'Microsoft SunHi Online (Natural) - Korean (Korean)', lang: 'ko-KR', localService: false },
+          { name: 'Microsoft Aria Online (Natural) - English', lang: 'en-US', localService: false },
+        ];
+        """;
+
+    private async Task<IPage> OpenStyleguideAsync(bool noKoreanVoice = false, string? setupScript = null)
     {
         var page = await server.NewPageAsync();
         if (noKoreanVoice)
         {
             await page.AddInitScriptAsync("window.__noKoreanVoice = true;");
+        }
+
+        if (setupScript is not null)
+        {
+            await page.AddInitScriptAsync(setupScript);
         }
 
         await page.AddInitScriptAsync(FakeSpeechScript);
@@ -60,6 +77,30 @@ public class AudioButtonTests(WebServerFixture server)
         spoken.ShouldContain("\"lang\":\"ko-KR\"");
         spoken.ShouldContain("\"rate\":1");
         spoken.ShouldContain("\"voice\":\"Fake Korean\"");
+    }
+
+    [Fact]
+    public async Task PrefersNaturalOnlineVoice_OverOldLocalVoice()
+    {
+        var page = await OpenStyleguideAsync(setupScript: WindowsVoices);
+
+        await page.GetByRole(AriaRole.Button, new() { Name = "Nghe: 안녕하세요" }).ClickAsync();
+        await page.WaitForFunctionAsync("() => window.__spoken.length === 1");
+
+        (await SpokenJsonAsync(page)).ShouldContain("SunHi Online (Natural)");
+    }
+
+    [Fact]
+    public async Task OnlineVoiceFails_FallsBackToLocalVoice()
+    {
+        var page = await OpenStyleguideAsync(
+            setupScript: WindowsVoices + "window.__failVoice = 'Microsoft SunHi Online (Natural) - Korean (Korean)';");
+
+        await page.GetByRole(AriaRole.Button, new() { Name = "Nghe: 안녕하세요" }).ClickAsync();
+        await page.WaitForFunctionAsync("() => window.__spoken.length === 1");
+
+        (await SpokenJsonAsync(page)).ShouldContain("Microsoft Heami");
+        (await page.GetByTestId("toast").CountAsync()).ShouldBe(0);
     }
 
     [Fact]

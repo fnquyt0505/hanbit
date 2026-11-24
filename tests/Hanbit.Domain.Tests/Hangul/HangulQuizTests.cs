@@ -80,7 +80,7 @@ public class HangulQuizTests
         var listen = HangulQuiz.Generate(Doubles, 11).First(q => q.Kind == HangulQuizKind.ListenToChar);
         var letter = Doubles.Single(l => l.Char == listen.Answer);
 
-        listen.Prompt.ShouldBe(letter.NameKo);
+        listen.Prompt.ShouldBe(HangulSyllable.ConsonantSyllable(letter.Char[0]).ToString());
     }
 
     [Fact]

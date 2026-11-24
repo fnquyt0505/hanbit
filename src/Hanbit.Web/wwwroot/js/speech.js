@@ -44,13 +44,30 @@ export function loadVoices() {
   return voicesPromise;
 }
 
-/** Giọng tiếng Hàn tốt nhất: ưu tiên đúng ko-KR, giọng cục bộ (offline) trước. */
+const isKorean = (v) => (v.lang ?? '').replace('_', '-').toLowerCase().startsWith('ko');
+
+/**
+ * Điểm chất lượng giọng: giọng neural/online (Edge "Microsoft SunHi Online (Natural)", Chrome "Google 한국의")
+ * tự nhiên hơn hẳn giọng offline cũ của Windows (VD "Microsoft Heami") — người dùng báo giọng máy tính khó nghe (câu hỏi 12).
+ */
+export function voiceScore(voice) {
+  const name = voice.name ?? '';
+  let score = 0;
+  if ((voice.lang ?? '').replace('_', '-') === LANG) score += 10;
+  if (/natural|neural/i.test(name)) score += 8;
+  if (/online/i.test(name)) score += 4;
+  if (/google/i.test(name)) score += 3;
+  return score;
+}
+
+/** Giọng tiếng Hàn tốt nhất theo <see cref="voiceScore"/> (cùng điểm → giữ thứ tự trình duyệt trả về). */
 export function pickKoreanVoice(voices) {
-  const korean = voices.filter((v) => (v.lang ?? '').replace('_', '-').toLowerCase().startsWith('ko'));
-  return korean.find((v) => v.lang.replace('_', '-') === LANG && v.localService)
-    ?? korean.find((v) => v.lang.replace('_', '-') === LANG)
-    ?? korean[0]
-    ?? null;
+  return voices.filter(isKorean).reduce((best, v) => (!best || voiceScore(v) > voiceScore(best) ? v : best), null);
+}
+
+/** Giọng Hàn cục bộ (dùng được khi mất mạng) — dự phòng khi giọng online lỗi. */
+function pickLocalKoreanVoice(voices) {
+  return pickKoreanVoice(voices.filter((v) => v.localService));
 }
 
 /**
@@ -90,7 +107,8 @@ function playAudio(url, rate) {
  */
 export async function speak(text, { slow = false, audioUrl = null } = {}) {
   const rate = slow ? RATES.slow : RATES.normal;
-  const voice = isSupported() ? pickKoreanVoice(await loadVoices()) : null;
+  const voices = isSupported() ? await loadVoices() : [];
+  const voice = pickKoreanVoice(voices);
 
   if (!voice) {
     if (audioUrl) {
@@ -101,9 +119,21 @@ export async function speak(text, { slow = false, audioUrl = null } = {}) {
       : new SpeechError('unsupported', 'Trình duyệt không hỗ trợ phát âm.');
   }
 
-  const synth = window.speechSynthesis;
-  synth.cancel(); // dừng câu đang đọc (bấm liên tiếp)
+  window.speechSynthesis.cancel(); // dừng câu đang đọc (bấm liên tiếp)
 
+  try {
+    await utter(text, voice, rate);
+  } catch (error) {
+    // Giọng online (Natural/Google) lỗi, VD mất mạng → đọc lại bằng giọng cục bộ nếu có.
+    const local = voice.localService ? null : pickLocalKoreanVoice(voices);
+    if (!local) {
+      throw error;
+    }
+    await utter(text, local, rate);
+  }
+}
+
+function utter(text, voice, rate) {
   return new Promise((resolve, reject) => {
     const utterance = new window.SpeechSynthesisUtterance(text);
     utterance.lang = LANG;
@@ -118,7 +148,7 @@ export async function speak(text, { slow = false, audioUrl = null } = {}) {
         reject(new SpeechError('failed', 'Không phát âm được.'));
       }
     };
-    synth.speak(utterance);
+    window.speechSynthesis.speak(utterance);
   });
 }
 
