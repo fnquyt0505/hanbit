@@ -1,0 +1,19 @@
+@using System.Text.Json
+@model Hanbit.Web.Models.Hangul.HangulTileViewModel
+@* HangulTile (DESIGN.md §5): ô vuông chữ cái lớn + romanization, bấm để nghe.
+   data-state: new | learning | mastered — JS điền theo tiến độ ở giai đoạn 5. *@
+@{
+    var args = JsonSerializer.Serialize(new { text = Model.SpeakText, audio = Model.Audio });
+}
+<button type="button" x-data="@($"audioButton({args})")" x-on:click="play()"
+        data-letter-id="@Model.Id" data-state="new" data-testid="hangul-tile"
+        aria-label="@($"{Model.Char} — {Model.Romanization}. Bấm để nghe")"
+        x-bind:class="{ 'border-secondary': playing }" x-bind:aria-busy="(!!playing).toString()"
+        class="flex aspect-square w-full flex-col items-center justify-center rounded-xl border border-border bg-surface p-2 transition duration-150 ease-out hover:border-secondary">
+    <span lang="ko" class="font-hangul text-4xl leading-none sm:text-5xl" aria-hidden="true">@Model.Char</span>
+    <span class="mt-2 text-sm italic text-ink-muted" aria-hidden="true">@Model.Romanization</span>
+    @if (Model.NameKo is not null)
+    {
+        <span lang="ko" class="font-ko text-xs text-ink-muted" aria-hidden="true">@Model.NameKo</span>
+    }
+</button>

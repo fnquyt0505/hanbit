@@ -9,7 +9,7 @@
 | Giai đoạn                     | 3 — Hangul & âm thanh                                                                                                     |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T3.2** `/hangul`: lưới chữ theo nhóm |
+| Task tiếp theo                 | **T3.3** `HangulComposer` + `GET /api/hangul/compose` + bảng ghép âm |
 | Việc song song (người dùng) | Nghe thử phát âm T3.1 (câu hỏi 12) · Duyệt ngữ pháp + bài tập AI soạn ở T1.8 (câu hỏi 10) · (tùy chọn) sửa nghĩa krdict (câu hỏi 9) |
 | Blocker                         | —                                                                                                                           |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T3.2 Trang /hangul
+- Đã làm: `HangulController` (`GET /hangul`, đọc qua `IContentRepository`) + `Models/Hangul/HangulViewModels.cs`: `HangulGroupInfo` (4 nhóm theo thứ tự học **nguyên âm cơ bản → phụ âm cơ bản → nguyên âm ghép → phụ âm kép**, slug `nguyen-am`/`phu-am`/`nguyen-am-ghep`/`phu-am-kep` cho T3.4), `HangulTileViewModel` (chữ được đọc: phụ âm → tên chữ `name_ko` VD 기역; nguyên âm → âm tiết ㅇ câm VD 아). Domain: `HangulSyllable.VowelSyllable` + `SilentInitial`. Partial `_HangulTile` (ô vuông, chữ lớn Noto Serif KR, romanization, tên chữ; bấm để nghe qua Alpine `audioButton`; `data-letter-id`, `data-state="new"` chờ tiến độ giai đoạn 5). View `Hangul/Index` (lưới 4/5/7 cột).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 365/365 (Domain +18 `HangulSyllable`; Web +8: 4 nhóm đúng thứ tự, 40 ô, `aria-current`, chữ được đọc theo loại; E2E +5: bấm ㄱ → 기역, ㅏ → 아, CTA trang chủ → /hangul, ô ≥ 44px và không cuộn ngang 320/390px). Test trang lỗi T2.2a đổi sang đường dẫn `/trang-chua-co`.
+- Vấn đề / ghi chú: thứ tự nhóm do AI chọn (nguyên âm trước — phổ biến trong giáo trình), đổi được trong `HangulGroupInfo.All`.
+- Tiếp theo: T3.3
 
 ### 2026-11-24 — T3.1 speech.js + `<audio-button>` (chờ nghe thử trên thiết bị)
 - Đã làm: `wwwroot/js/speech.js` (module thuần): `isSupported`, `loadVoices` (chờ `voiceschanged` tối đa 1,5 s — Chrome/Android nạp giọng bất đồng bộ), `pickKoreanVoice` (ưu tiên `ko-KR` cục bộ), `speechStatus` (`ok`/`no-voice`/`unsupported`), `speak(text, { slow, audioUrl })` (rate 1 / 0.7, `cancel()` câu đang đọc, bỏ qua lỗi `interrupted`/`canceled`, không có giọng Hàn → MP3 dự phòng nếu có, ngược lại `SpeechError` có mã), `stop`. `wwwroot/js/audio-button.js` (Alpine `audioButton`: trạng thái đang phát theo lượt, lỗi → toast tiếng Việt hướng dẫn cài giọng). Tag Helper `<audio-button text audio slow size>` → nút loa + nút `0.7×`, `aria-label` "Nghe: …"/"Nghe chậm: …", `aria-busy` khi đang đọc. Nạp `audio-button.js` trong `_Layout`. Demo + dòng trạng thái giọng đọc trên `/styleguide`.

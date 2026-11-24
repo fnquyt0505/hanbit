@@ -11,7 +11,7 @@ public class StatusCodePageTests(WebApplicationFactory<Program> factory)
     : IClassFixture<WebApplicationFactory<Program>>
 {
     [Theory]
-    [InlineData("/hangul")]
+    [InlineData("/trang-chua-co")]
     [InlineData("/khong-ton-tai/abc")]
     public async Task UnknownPage_Returns404_WithFriendlyPageInLayout(string path)
     {

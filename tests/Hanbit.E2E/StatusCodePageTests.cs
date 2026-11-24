@@ -12,7 +12,7 @@ public class StatusCodePageTests(WebServerFixture server)
     {
         var page = await server.NewPageAsync();
 
-        var response = await page.GotoAsync($"{server.BaseUrl}/hangul");
+        var response = await page.GotoAsync($"{server.BaseUrl}/trang-chua-co");
 
         response.ShouldNotBeNull();
         response.Status.ShouldBe(404);
@@ -23,12 +23,11 @@ public class StatusCodePageTests(WebServerFixture server)
     }
 
     [Fact]
-    public async Task ClickStartCta_ThenBackHome()
+    public async Task MissingPage_BackHomeButton_OpensHome()
     {
         var page = await server.NewPageAsync();
-        await page.GotoAsync(server.BaseUrl);
+        await page.GotoAsync($"{server.BaseUrl}/trang-chua-co");
 
-        await page.GetByTestId("cta-start").ClickAsync();
         await page.GetByTestId("status-page").WaitForAsync();
         await page.GetByTestId("status-home").ClickAsync();
         await page.GetByTestId("hero").WaitForAsync();

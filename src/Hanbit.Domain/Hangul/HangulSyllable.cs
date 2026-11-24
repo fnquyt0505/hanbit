@@ -21,7 +21,25 @@ public readonly record struct HangulSyllable(int Initial, int Medial, int Final)
     /// <summary>Phụ âm cuối theo chỉ số (vị trí 0 = không có, dùng '\0').</summary>
     public const string Finals = "\0ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ";
 
+    /// <summary>Chỉ số của ㅇ trong <see cref="Initials"/> — phụ âm đầu câm.</summary>
+    public const int SilentInitial = 11;
+
     public static bool IsSyllable(char c) => c is >= First and <= Last;
+
+    /// <summary>
+    /// Âm tiết đọc một nguyên âm đứng một mình: ㅇ câm + nguyên âm, VD ㅏ → 아, ㅘ → 와.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Không phải nguyên âm (chữ cái tương thích).</exception>
+    public static char VowelSyllable(char vowel)
+    {
+        var medial = Medials.IndexOf(vowel, StringComparison.Ordinal);
+        if (medial < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(vowel), vowel, "Không phải nguyên âm Hangul (ㅏ…ㅣ).");
+        }
+
+        return new HangulSyllable(SilentInitial, medial, 0).Compose();
+    }
 
     public static HangulSyllable Decompose(char syllable)
     {
