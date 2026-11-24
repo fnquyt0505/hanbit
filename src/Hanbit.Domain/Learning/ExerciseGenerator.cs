@@ -67,6 +67,17 @@ public static class ExerciseGenerator
         return exercises;
     }
 
+    private static readonly string[] SingleWordPrefixes = [$"{IdPrefix}nghia-", $"{IdPrefix}tu-", $"{IdPrefix}nghe-"];
+
+    /// <summary>
+    /// Id từ vựng mà bài sinh kiểm tra (VD <c>gen-tu-kd-123</c> → <c>kd-123</c>); bài nối cặp / bài tự soạn → null.
+    /// Dùng cho danh sách "từ cần ôn lại" — chỉ trả về SAU khi chấm (gửi trước sẽ lộ đáp án bài Việt→Hàn).
+    /// </summary>
+    public static string? VocabIdFor(string exerciseId) =>
+        SingleWordPrefixes.FirstOrDefault(p => exerciseId.StartsWith(p, StringComparison.Ordinal)) is { } prefix
+            ? exerciseId[prefix.Length..]
+            : null;
+
     /// <summary>Nghĩa ngắn để làm lựa chọn: phần trước dấu ";" đầu tiên (nghĩa thứ nhất).</summary>
     public static string ShortMeaning(string vi)
     {

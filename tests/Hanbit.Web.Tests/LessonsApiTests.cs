@@ -139,6 +139,21 @@ public class LessonsApiTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
+    public async Task Check_ReturnsVocabIdOnlyForSingleWordGeneratedExercises()
+    {
+        using var client = factory.CreateClient();
+        var lesson = await client.GetFromJsonAsync<LessonDto>(Lesson);
+        var generated = lesson!.Exercises.First(e => e.Id.StartsWith("gen-nghia-"));
+
+        var genResult = await CheckAsync(client, Request(generated.Id, Index(0)));
+        var authoredResult = await CheckAsync(client, Request("nghia-gamsahamnida", Index(0)));
+
+        genResult.VocabId.ShouldBe(generated.Id["gen-nghia-".Length..]);
+        lesson.Vocab.Select(v => v.Id).ShouldContain(genResult.VocabId!);
+        authoredResult.VocabId.ShouldBeNull();
+    }
+
+    [Fact]
     public async Task Check_UnknownExercise_Returns404()
     {
         using var client = factory.CreateClient();

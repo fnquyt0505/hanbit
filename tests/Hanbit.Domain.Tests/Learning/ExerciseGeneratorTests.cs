@@ -115,6 +115,28 @@ public class ExerciseGeneratorTests
     }
 
     [Theory]
+    [InlineData("gen-nghia-kd-123", "kd-123")]
+    [InlineData("gen-tu-kd-44487", "kd-44487")]
+    [InlineData("gen-nghe-kd-1", "kd-1")]
+    [InlineData("gen-noi-cap", null)]
+    [InlineData("nghia-gamsahamnida", null)]
+    public void VocabIdFor_ExtractsWordFromSingleWordGeneratedIds(string exerciseId, string? expected)
+    {
+        ExerciseGenerator.VocabIdFor(exerciseId).ShouldBe(expected);
+    }
+
+    [Fact]
+    public void VocabIdFor_EveryGeneratedChoiceExercise_PointsToItsWord()
+    {
+        foreach (var exercise in ExerciseGenerator.Generate("beginner", "gia-dinh", Family).Where(e => e is not MatchPairsExercise))
+        {
+            var id = ExerciseGenerator.VocabIdFor(exercise.Id);
+            id.ShouldNotBeNull(exercise.Id);
+            Family.Select(f => f.Id).ShouldContain(id);
+        }
+    }
+
+    [Theory]
     [InlineData("cha, ba, bố; ba…, bố…; cha đẻ", "cha, ba, bố")]
     [InlineData("gia đình", "gia đình")]
     [InlineData(" anh ; em ", "anh")]

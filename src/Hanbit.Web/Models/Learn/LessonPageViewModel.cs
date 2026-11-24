@@ -20,6 +20,7 @@ public sealed record LessonPageViewModel(string CourseTitle, LessonDto Lesson)
         {
             course = Lesson.Course,
             lesson = Lesson.Slug,
+            nextSlug = Lesson.NextSlug,
             vocabCount = Lesson.Vocab.Count,
             grammarCount = Lesson.Grammar.Count,
             exercises = Lesson.Exercises,

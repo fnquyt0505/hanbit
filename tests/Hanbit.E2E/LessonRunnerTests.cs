@@ -144,6 +144,31 @@ public class LessonRunnerTests(WebServerFixture server)
         await page.GetByTestId("lesson-done").WaitForAsync();
         int.Parse(await page.GetByTestId("done-correct").InnerTextAsync(), System.Globalization.CultureInfo.InvariantCulture)
             .ShouldBeInRange(0, total);
+        (await page.GetByTestId("done-total").InnerTextAsync()).ShouldBe("14");
+        (await page.GetByTestId("done-score").InnerTextAsync()).ShouldEndWith("%");
+        (await page.GetByTestId("done-next").GetAttributeAsync("href")).ShouldBe("/learn/beginner/gioi-thieu");
+        (await page.GetByTestId("done-course").GetAttributeAsync("href")).ShouldBe("/learn/beginner");
+    }
+
+    [Fact]
+    public async Task Summarize_ComputesScoreAndUniqueWrongWords()
+    {
+        var page = await OpenLessonAsync(server);
+
+        var json = await page.EvaluateAsync<string>("""
+            async () => {
+              const m = await import('/js/lesson-runner.js');
+              const vocab = [{ id: 'kd-1', ko: '가족', vi: 'gia đình' }, { id: 'kd-2', ko: '형', vi: 'anh' }];
+              return JSON.stringify(m.summarize([
+                { correct: true, vocabId: 'kd-1' },
+                { correct: false, vocabId: 'kd-2' },
+                { correct: false, vocabId: 'kd-2' },
+                { correct: false, vocabId: null },
+              ], vocab));
+            }
+            """);
+
+        json.ShouldBe("{\"total\":4,\"correct\":1,\"score\":25,\"wrongWords\":[{\"id\":\"kd-2\",\"ko\":\"형\",\"vi\":\"anh\"}],\"wrongOther\":1}");
     }
 
     [Fact]
