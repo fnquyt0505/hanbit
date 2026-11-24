@@ -25,6 +25,12 @@
 
 ## ✅ Đã hoàn thành
 
+### 2026-11-24 — T2.2a Trang lỗi thân thiện (thêm theo yêu cầu người dùng)
+- Lý do: người dùng bấm CTA → `/hangul` gặp trang 404 trống của trình duyệt (mất menu, không có đường về) — nhiều link điều hướng còn 404 tới các giai đoạn sau.
+- Đã làm: `Program.cs` thêm `UseStatusCodePagesWithReExecute("/loi/{0}")` qua `UseWhen` (bỏ qua `/api/*` để API sau này trả lỗi dạng JSON). `HomeController.StatusCodePage` (`[Route("/loi/{statusCode:int}")]`, giữ mã gốc; truy cập trực tiếp mã ngoài 400–599 → 404, `no-store`) + `StatusCodeViewModel` + `Views/Home/StatusCode.cshtml` (trong layout: "Không tìm thấy trang — Trang này chưa có hoặc đang được xây dựng…", nút "Về trang chủ"). `Error.cshtml` (500) đổi sang cùng kiểu.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 307/307 (Web +7: 404 có layout/footer, `/api` không trả HTML, mã trực tiếp, trang có thật vẫn 200; E2E +2: 404 có CSS, CTA → 404 → về trang chủ).
+- Tiếp theo: chờ điểm Lighthouse (câu hỏi 11) → đóng T2.2 → T2.3
+
 ### 2026-11-24 — T2.2 Trang chủ (chờ đo Lighthouse)
 - Đã làm: `Views/Home/Index.cshtml` — hero (tiêu đề, mô tả, CTA "Bắt đầu miễn phí" → `/hangul` theo user flow PRD §6, nút phụ "Xem lộ trình" → `/learn/beginner`, thẻ minh họa 안녕하세요), 3 lợi ích (Hangul từ con số 0 · Giải thích bằng tiếng Việt · Ôn đúng lúc sắp quên), CTA cuối trang. `_Layout` thêm `<meta name="description">` (đặt qua `ViewData["Description"]`). Bỏ khối thử Alpine tạm thời (Alpine vẫn được E2E kiểm qua bộ chuyển theme ở `/styleguide`).
 - Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ Web 44/44, E2E 25/25 (CTA mobile full-width & cao ≥ 48px, không cuộn ngang ở 320/390/1280px) · ảnh chụp mobile/desktop OK.
