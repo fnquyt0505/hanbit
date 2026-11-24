@@ -53,11 +53,11 @@ public partial class HangulPageTests(WebApplicationFactory<Program> factory)
     }
 
     [Theory]
-    [InlineData(HangulType.Consonant, "ㄱ", "기역", "기역")]
-    [InlineData(HangulType.DoubleConsonant, "ㄲ", "쌍기역", "쌍기역")]
+    [InlineData(HangulType.Consonant, "ㄱ", "기역", "가")]
+    [InlineData(HangulType.DoubleConsonant, "ㄲ", "쌍기역", "까")]
     [InlineData(HangulType.Vowel, "ㅏ", null, "아")]
     [InlineData(HangulType.CompoundVowel, "ㅘ", null, "와")]
-    public void SpeakText_ConsonantUsesName_VowelUsesSilentIeung(HangulType type, string letterChar, string? nameKo, string expected)
+    public void SpeakText_ConsonantWithA_VowelWithSilentIeung(HangulType type, string letterChar, string? nameKo, string expected)
     {
         var letter = new HangulLetter("x", letterChar, type, "r", "hint", [], NameKo: nameKo);
 

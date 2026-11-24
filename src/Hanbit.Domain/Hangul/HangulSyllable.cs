@@ -26,6 +26,24 @@ public readonly record struct HangulSyllable(int Initial, int Medial, int Final)
 
     public static bool IsSyllable(char c) => c is >= First and <= Last;
 
+    /// <summary>Chỉ số của ㅏ trong <see cref="Medials"/>.</summary>
+    public const int VowelA = 0;
+
+    /// <summary>
+    /// Âm tiết đọc một phụ âm đầu: phụ âm + ㅏ, VD ㄱ → 가, ㄲ → 까 (người dùng chốt 2026-11-24, câu hỏi 12).
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Không phải phụ âm đầu (chữ cái tương thích).</exception>
+    public static char ConsonantSyllable(char consonant)
+    {
+        var initial = Initials.IndexOf(consonant, StringComparison.Ordinal);
+        if (initial < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(consonant), consonant, "Không phải phụ âm đầu Hangul (ㄱ…ㅎ).");
+        }
+
+        return new HangulSyllable(initial, VowelA, 0).Compose();
+    }
+
     /// <summary>
     /// Âm tiết đọc một nguyên âm đứng một mình: ㅇ câm + nguyên âm, VD ㅏ → 아, ㅘ → 와.
     /// </summary>

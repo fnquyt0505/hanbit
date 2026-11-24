@@ -33,6 +33,28 @@ public class HangulSyllableTests
     }
 
     [Theory]
+    [InlineData('ㄱ', '가')]
+    [InlineData('ㄴ', '나')]
+    [InlineData('ㅇ', '아')]
+    [InlineData('ㅎ', '하')]
+    [InlineData('ㄲ', '까')]
+    [InlineData('ㄸ', '따')]
+    [InlineData('ㅉ', '짜')]
+    public void ConsonantSyllable_CombinesWithA(char consonant, char expected)
+    {
+        HangulSyllable.ConsonantSyllable(consonant).ShouldBe(expected);
+    }
+
+    [Theory]
+    [InlineData('ㅏ')]
+    [InlineData('ㄳ')]
+    [InlineData('가')]
+    public void ConsonantSyllable_NotAnInitialConsonant_Throws(char notConsonant)
+    {
+        Should.Throw<ArgumentOutOfRangeException>(() => HangulSyllable.ConsonantSyllable(notConsonant));
+    }
+
+    [Theory]
     [InlineData('가', 'ㄱ', 'ㅏ', '\0')]
     [InlineData('한', 'ㅎ', 'ㅏ', 'ㄴ')]
     [InlineData('빛', 'ㅂ', 'ㅣ', 'ㅊ')]
