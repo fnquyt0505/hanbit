@@ -9,7 +9,7 @@
 | Giai đoạn                     | 5 — Tiến độ chế độ khách |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T5.3** `progress-store.js` (localStorage, JSON hỏng/khác version, merge kết quả API) |
+| Task tiếp theo                 | **T5.4** Dashboard, CourseMap, StreakBadge đọc tiến độ thật |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T5.3 progress-store.js
+- Đã làm: `wwwroot/js/progress-store.js` — nơi duy nhất chạm localStorage: `load` (khóa `hanbit.progress.v1`; kiểm tra cấu trúc; JSON hỏng / khác SchemaVersion → cất bản gốc vào `hanbit.progress.backup.<thời điểm>`, dùng tiến độ trống, `issue()` = corrupt/version), `save` (localStorage bị chặn/đầy → giữ trong bộ nhớ trang, `issue()` = unavailable; phát sự kiện `hanbit:progress-changed`), `mergeLessonResult`/`applyLessonResult` (bản ghi bài, upsert thẻ theo itemId, thay hoạt động, cộng XP), `completedLessons`, `lessonContext`, `loadSettings`/`saveSettings` (`hanbit.settings.v1`). `ui.js` báo toast khi dữ liệu bị làm mới / không lưu được. Màn học: kết thúc → `POST /complete` với mọi câu trả lời + phần tiến độ liên quan → lưu; màn tổng kết hiện **+XP** và **🔥 chuỗi ngày**, lỗi → nút "Lưu lại". CourseMap đọc bài đã hoàn thành → mở khóa bài sau. Theme sáng/tối lưu qua store + script `<head>` chỉ đọc để áp trước khi vẽ (ngoại lệ đã chốt).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (E2E +5: học xong → localStorage có bài hoàn thành, 14 thẻ, XP → **reload** lộ trình: bài 1 ✓, bài 2 mở, bài 3 khóa; JSON hỏng + version 99 → toast, sao lưu bản gốc, trang vẫn chạy; `mergeLessonResult`; theme giữ sau reload).
+- Tiếp theo: T5.4
 
 ### 2026-11-24 — T5.2 SubmitLessonHandler + POST /api/lessons/{c}/{l}/complete
 - Đã làm: Domain `LessonCompletion.Complete` (điểm %, giữ điểm cao nhất, XP theo `XpRules`, mọi từ của bài thành thẻ — từ sai đến hạn ngay, từ khác 00:00 ngày mai giờ VN; thẻ đã có không bị đặt lại, thẻ của từ sai được đưa về hạn ngay; cộng hoạt động + tính streak). Application `SubmitLessonHandler` **chấm lại mọi câu trả lời ở server** (bài thiếu câu trả lời = sai), "hôm nay" qua `IClock`. Endpoint `POST /api/lessons/{c}/{l}/complete` `{ answers[{exerciseId, answer}], previous, cards, activity }` → `{ lessonKey, lessonRecord, newCards, activity, xp, streak, correct, total, score, today }`; giới hạn kích thước (≤ 200 câu, ≤ 20.000 thẻ, ≤ 396 ngày) → 400; bài lạ → 404. MVC JSON: enum chuỗi camelCase.

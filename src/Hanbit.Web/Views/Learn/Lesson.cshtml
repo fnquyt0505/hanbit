@@ -249,6 +249,19 @@
             </h2>
             <p class="mt-4 text-5xl font-bold" data-testid="done-score"><span x-text="summary.score"></span>%</p>
             <p class="mt-1 text-ink-muted">Đúng <span class="font-semibold text-ink" x-text="summary.correct" data-testid="done-correct"></span>/<span x-text="summary.total" data-testid="done-total"></span> bài tập</p>
+            <div class="mt-4 flex flex-wrap items-center justify-center gap-3" aria-live="polite" data-testid="done-progress">
+                <span x-show="saved === 'saving'" class="text-sm text-ink-muted">Đang lưu tiến độ…</span>
+                <template x-if="saved === 'saved' && completion">
+                    <span class="inline-flex flex-wrap items-center justify-center gap-3">
+                        <span class="rounded-full border border-xp px-3 py-1 font-semibold text-xp-ink" data-testid="done-xp">+<span x-text="completion.xp"></span> XP</span>
+                        <span class="rounded-full border border-border px-3 py-1 font-semibold" data-testid="done-streak">🔥 <span x-text="completion.streak.current"></span> ngày liên tiếp</span>
+                    </span>
+                </template>
+                <span x-show="saved === 'failed'" class="inline-flex items-center gap-2 text-sm text-danger">
+                    Chưa lưu được tiến độ.
+                    <button type="button" class="font-semibold underline" x-on:click="saveProgress()" data-testid="done-retry">Lưu lại</button>
+                </span>
+            </div>
         </div>
 
         @* Từ cần ôn lại *@
