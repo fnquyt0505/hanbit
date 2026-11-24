@@ -122,3 +122,36 @@ public class ProgressApiTests(WebApplicationFactory<Program> factory)
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 }
+
+/// <summary>T7.1: POST /api/progress/stats.</summary>
+public class ProgressStatsApiTests(WebApplicationFactory<Program> factory)
+    : IClassFixture<WebApplicationFactory<Program>>
+{
+    [Fact]
+    public async Task Stats_ReturnsWordStatusesCalendarAndStreak()
+    {
+        using var client = factory.CreateClient();
+        var now = DateTimeOffset.UtcNow;
+        var today = Hanbit.Domain.Progress.VietnamTime.ToDate(now);
+        var request = new ProgressStatsRequest(
+            [
+                new ReviewCard("kd-44487", ItemType.Vocab, 2.6, 30, 5, now.AddDays(30), now),  // 가족 — đã thuộc
+                new ReviewCard("kd-17298", ItemType.Vocab, 2.5, 3, 2, now.AddDays(3), now),   // 안녕 — đang học
+                new ReviewCard("kd-1", ItemType.Vocab, 2.5, 3, 2, now.AddDays(3), now),        // không có trong nội dung
+            ],
+            [new DailyActivity(today, 30, 5)]);
+
+        using var response = await client.PostAsJsonAsync("/api/progress/stats", request, TestJson.Options);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var stats = (await response.Content.ReadFromJsonAsync<ProgressStatsResponse>(TestJson.Options))!;
+        stats.MasteredWords.ShouldBe(1);
+        stats.LearningWords.ShouldBe(2);
+        stats.TotalReviews.ShouldBe(5);
+        stats.Streak.Current.ShouldBe(1);
+        stats.Calendar[^1].Date.ShouldBe(today);
+        stats.Words.Select(w => (w.Ko, w.Status)).ShouldBe([("가족", WordStatus.Mastered), ("안녕", WordStatus.Learning)]);
+
+        (await response.Content.ReadAsStringAsync()).ShouldContain("\"status\":\"mastered\"");
+    }
+}

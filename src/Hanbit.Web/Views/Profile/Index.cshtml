@@ -28,6 +28,80 @@
         }
     </section>
 
+    @* Thống kê chi tiết (T7.1) — server tính qua POST /api/progress/stats *@
+    <div x-data="profileStats" data-testid="profile-stats" x-bind:aria-busy="(!loaded).toString()" aria-busy="true">
+        <section class="mt-8" aria-labelledby="streak-title">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 id="streak-title" class="text-xl font-bold">Lịch học</h2>
+                <p class="text-sm text-ink-muted" x-show="stats" x-cloak>
+                    🔥 Hiện tại <span class="font-semibold text-ink" x-text="stats?.streak.current" data-testid="stat-streak-current"></span> ngày ·
+                    dài nhất <span class="font-semibold text-ink" x-text="stats?.streak.longest" data-testid="stat-streak-longest"></span> ngày
+                </p>
+            </div>
+            <div x-show="!loaded" class="mt-3 h-32 animate-pulse rounded-xl bg-border" aria-hidden="true"></div>
+            <div x-show="stats" x-cloak class="mt-3 overflow-x-auto rounded-xl border border-border bg-surface p-3">
+                @* 7 hàng (T2 → CN), mỗi cột một tuần; chỉ dùng một màu nhấn với 4 mức đậm nhạt (DESIGN.md §2) *@
+                <div class="grid w-max grid-flow-col grid-rows-7 gap-1" role="img" data-testid="streak-calendar"
+                     x-bind:aria-label="`Lịch học ${stats?.calendar.length ?? 0} ngày gần nhất, ${stats?.activeDays ?? 0} ngày có học`">
+                    <template x-for="day in stats?.calendar ?? []" x-bind:key="day.date">
+                        <span class="size-3.5 rounded-sm sm:size-4" x-bind:title="dayTitle(day)" x-bind:data-level="day.level"
+                              x-bind:class="{
+                                  'bg-border': day.level === 0,
+                                  'bg-secondary/25': day.level === 1,
+                                  'bg-secondary/50': day.level === 2,
+                                  'bg-secondary/75': day.level === 3,
+                                  'bg-secondary': day.level === 4,
+                              }"></span>
+                    </template>
+                </div>
+                <div class="mt-2 flex items-center justify-end gap-1 text-xs text-ink-muted" aria-hidden="true">
+                    Ít <span class="size-3 rounded-sm bg-border"></span><span class="size-3 rounded-sm bg-secondary/25"></span><span class="size-3 rounded-sm bg-secondary/50"></span><span class="size-3 rounded-sm bg-secondary/75"></span><span class="size-3 rounded-sm bg-secondary"></span> Nhiều
+                </div>
+            </div>
+            <p class="mt-2 text-sm text-ink-muted" x-show="stats" x-cloak>
+                <span x-text="stats?.activeDays"></span> ngày có học · <span x-text="stats?.totalReviews" data-testid="stat-total-reviews"></span> lượt ôn thẻ
+            </p>
+        </section>
+
+        <section class="mt-8" aria-labelledby="words-title">
+            <h2 id="words-title" class="text-xl font-bold">Từ vựng</h2>
+            <div class="mt-3 grid grid-cols-2 gap-3">
+                <div class="rounded-xl border border-border bg-surface p-4">
+                    <p class="text-sm text-ink-muted">Đã thuộc <span class="text-xs">(ôn cách ≥ 21 ngày)</span></p>
+                    <p class="mt-1 text-2xl font-bold" x-text="stats?.masteredWords ?? 0" data-testid="stat-mastered">0</p>
+                </div>
+                <div class="rounded-xl border border-border bg-surface p-4">
+                    <p class="text-sm text-ink-muted">Đang học</p>
+                    <p class="mt-1 text-2xl font-bold" x-text="stats?.learningWords ?? 0" data-testid="stat-learning">0</p>
+                </div>
+            </div>
+
+            <div x-show="(stats?.words.length ?? 0) > 0" x-cloak class="mt-4">
+                <div class="flex gap-2" role="group" aria-label="Lọc từ">
+                    @foreach (var (key, label) in new[] { ("all", "Tất cả"), ("mastered", "Đã thuộc"), ("learning", "Đang học") })
+                    {
+                        <button type="button" x-on:click="filter = '@key'" x-bind:aria-pressed="(filter === '@key').toString()" data-filter="@key"
+                                class="rounded-full border border-border px-3 py-1 text-sm aria-pressed:border-secondary aria-pressed:bg-secondary aria-pressed:text-bg">@label</button>
+                    }
+                </div>
+                <ul class="mt-3 divide-y divide-border rounded-xl border border-border bg-surface" data-testid="word-list">
+                    <template x-for="word in words" x-bind:key="word.id">
+                        <li class="flex items-center gap-3 px-4 py-2.5" x-bind:data-vocab-id="word.id">
+                            <span lang="ko" class="font-ko w-20 shrink-0 text-lg font-semibold" x-text="word.ko"></span>
+                            <span class="min-w-0 flex-1 truncate text-ink-muted" x-text="word.vi"></span>
+                            <span class="shrink-0 rounded-full border px-2 py-0.5 text-xs font-semibold"
+                                  x-bind:class="word.status === 'mastered' ? 'border-success text-success-ink' : 'border-border text-ink-muted'"
+                                  x-text="word.status === 'mastered' ? 'Đã thuộc' : `Ôn ${shortDate(word.dueAt)}`"></span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+            <p class="mt-3 text-sm text-ink-muted" x-show="loaded && (stats?.words.length ?? 0) === 0" x-cloak>
+                Chưa có từ nào — <a href="/learn/beginner" class="text-secondary hover:underline">học bài đầu tiên</a> để bắt đầu.
+            </p>
+        </section>
+    </div>
+
     @* Sao lưu & khôi phục *@
     <section class="mt-8 rounded-2xl border border-border bg-surface p-6" aria-labelledby="backup-title" x-data="progressBackup" data-testid="backup">
         <h2 id="backup-title" class="text-xl font-bold">Sao lưu &amp; khôi phục</h2>

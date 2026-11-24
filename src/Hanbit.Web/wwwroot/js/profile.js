@@ -1,6 +1,6 @@
 // Trang /profile (T5.5): xuất / nhập / xóa tiến độ. Nhập: server kiểm tra + migrate + làm sạch (POST /api/progress/validate)
 // rồi người dùng xác nhận mới ghi đè. Ghi/đọc localStorage chỉ qua progress-store.js.
-import { backupFileName, clearProgress, exportJson, load, replaceProgress } from './progress-store.js';
+import { backupFileName, clearProgress, CHANGED_EVENT, exportJson, load, replaceProgress } from './progress-store.js';
 
 /** Thống kê ngắn của một bản tiến độ (hiển thị khi xác nhận ghi đè). */
 export function describe(progress) {
@@ -86,5 +86,59 @@ document.addEventListener('alpine:init', () => {
       this.confirmClear = false;
       window.Alpine.store('toast').show('Đã xóa tiến độ trên thiết bị này.', 'info');
     },
+  }));
+});
+
+// ── Thống kê (T7.1): server tính (POST /api/progress/stats), JS hiển thị ──
+
+/** Nhãn ngày dd/mm cho ngày ôn tiếp theo. */
+export function shortDate(iso) {
+  const d = new Date(iso);
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+document.addEventListener('alpine:init', () => {
+  window.Alpine.data('profileStats', () => ({
+    loaded: false,
+    error: false,
+    stats: null,
+    filter: 'all', // all | mastered | learning
+
+    async init() {
+      await this.refresh();
+      window.addEventListener(CHANGED_EVENT, () => this.refresh());
+    },
+
+    async refresh() {
+      try {
+        const progress = load();
+        const response = await fetch('/api/progress/stats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cards: Object.values(progress.cards), activity: progress.activity }),
+        });
+        if (!response.ok) {
+          throw new Error(String(response.status));
+        }
+        this.stats = await response.json();
+        this.error = false;
+      } catch {
+        this.error = true;
+      } finally {
+        this.loaded = true;
+      }
+    },
+
+    get words() {
+      const all = this.stats?.words ?? [];
+      return this.filter === 'all' ? all : all.filter((w) => w.status === this.filter);
+    },
+
+    dayTitle(day) {
+      const [y, m, d] = day.date.split('-');
+      return `${d}/${m}/${y}: ${day.xp} XP, ${day.reviews} lượt ôn`;
+    },
+
+    shortDate,
   }));
 });
