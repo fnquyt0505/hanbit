@@ -9,7 +9,7 @@
 | Giai đoạn                     | 4 — Bài học & bài tập |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T4.2** `ExerciseGenerator` + `AnswerChecker` (Domain) |
+| Task tiếp theo                 | **T4.3** `GET /api/lessons/{c}/{l}` + `POST /api/exercises/check` |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T4.2 ExerciseGenerator + AnswerChecker (Domain/Learning)
+- Đã làm: `TextNormalizer` (NFC → gộp khoảng trắng → bỏ dấu câu hai đầu → chữ thường). `AnswerChecker.Check(exercise, answer)` cho 5 loại (`ChoiceAnswer` / `PairsAnswer` (mọi thứ tự) / `OrderAnswer` (so chuỗi ghép) / `TextAnswer` (so với `accepted_answers` sau chuẩn hóa)) → `CheckResult(correct, correctAnswer hiển thị, explanation)`; sai loại câu trả lời → null. `ExerciseGenerator.Generate(course, lesson, vocab)`: seed FNV-1a của "khóa/bài" (ổn định giữa các lần chạy) → 7 bài `gen-*`: 2 Hàn→Việt, 2 Việt→Hàn, 2 nghe→nghĩa, 1 nối 5 cặp; nghĩa dùng `ShortMeaning` (nghĩa đầu, trước ";"); nhiễu không trùng nghĩa đáp án (VD 형/오빠 cùng "anh"); < 4 nghĩa khác nhau → không sinh.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Domain +32; Infrastructure +1: 5 bài sơ cấp thật đều sinh 7 bài, gộp với bài tự soạn vẫn pass `LessonValidator`).
+- Tiếp theo: T4.3
 
 ### 2026-11-24 — T4.1 /learn/{course} + CourseMap
 - Đã làm: `LearnController` (`GET /learn/{course}`, khóa lạ → 404) + `Views/Learn/Course`. View Component `CourseMap` (`ViewComponents/CourseMapViewComponent.cs` + `Views/Shared/Components/CourseMap/Default.cshtml`): danh sách dọc, nút tròn số thứ tự, tiêu đề, thống kê (từ · ngữ pháp · bài tập), `data-state` locked/open/completed (style bằng variant `group-data-[state=…]`, có icon khóa/✓). Trạng thái mặc định server: bài 1 mở, còn lại khóa; `wwwroot/js/course-map.js` (`lessonStates` — bài hoàn thành → completed, bài đầu chưa xong → open, còn lại locked; `completedLessons()` rỗng tới T5.4). Bấm bài khóa → toast "Hoàn thành bài trước…"; không có JS → mọi bài vẫn là link.

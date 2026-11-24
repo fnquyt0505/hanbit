@@ -77,6 +77,28 @@ public sealed class BeginnerCourseDataTests : IDisposable
     }
 
     [Fact]
+    public async Task GeneratedExercises_ForEveryLesson_AreValidAndDoNotCollideWithAuthoredIds()
+    {
+        var repository = CreateRepository();
+        var course = await repository.GetCourseAsync(CourseSlug, CancellationToken.None);
+        course.ShouldNotBeNull();
+
+        foreach (var summary in course.Lessons)
+        {
+            var lesson = await repository.GetLessonAsync(CourseSlug, summary.Slug, CancellationToken.None);
+            lesson.ShouldNotBeNull();
+            var vocab = await repository.GetVocabularyAsync(lesson.VocabIds, CancellationToken.None);
+
+            var generated = Hanbit.Domain.Learning.ExerciseGenerator.Generate(CourseSlug, summary.Slug, vocab);
+
+            generated.Count.ShouldBe(7, summary.Slug);
+            var combined = lesson with { Exercises = [.. lesson.Exercises, .. generated] };
+            var validation = new LessonValidator().Validate(combined);
+            validation.IsValid.ShouldBeTrue($"{summary.Slug}: {string.Join("; ", validation.Errors)}");
+        }
+    }
+
+    [Fact]
     public async Task BeginnerLessons_EachHasAllFiveExerciseTypes()
     {
         var repository = CreateRepository();
