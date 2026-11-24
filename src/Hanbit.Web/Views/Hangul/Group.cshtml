@@ -1,0 +1,157 @@
+@using System.Text.Json
+@model Hanbit.Web.Models.Hangul.HangulGroupPageViewModel
+@{
+    ViewData["Title"] = $"{Model.Info.Title} — Hangul";
+    ViewData["Description"] = $"Học {Model.Letters.Count} chữ Hangul nhóm {Model.Info.Title.ToLowerInvariant()}: cách đọc, ví dụ, nghe phát âm và làm bài kiểm tra 10 câu.";
+    var args = JsonSerializer.Serialize(new { group = Model.Info.Slug, letterCount = Model.Letters.Count });
+    const string ChoiceBase = "flex min-h-14 w-full items-center justify-center gap-2 rounded-xl border-2 bg-surface px-3 py-3 transition duration-150 ease-out disabled:cursor-default";
+}
+
+@section Head {
+    <script type="module" src="~/js/hangul-quiz.js" asp-append-version="true"></script>
+}
+
+<div class="mx-auto max-w-2xl px-4 py-8 sm:py-12" x-data="@($"hangulLesson({args})")" data-testid="hangul-lesson" data-group="@Model.Info.Slug">
+    <nav aria-label="Vị trí" class="text-sm text-ink-muted">
+        <a href="/hangul" class="text-secondary hover:underline">Hangul</a> <span aria-hidden="true">/</span> @Model.Info.Title
+    </nav>
+    <h1 class="mt-2 text-3xl font-bold">@Model.Info.Title</h1>
+    <p class="mt-1 text-ink-muted">@Model.Info.Description</p>
+
+    @* ───────── Học từng chữ ───────── *@
+    <section x-show="phase === 'learn'" aria-labelledby="learn-title" class="mt-8" data-testid="learn">
+        <h2 id="learn-title" class="sr-only">Học từng chữ</h2>
+        <p class="text-sm text-ink-muted" aria-live="polite">Chữ <span x-text="index + 1">1</span>/@Model.Letters.Count</p>
+
+        @for (var i = 0; i < Model.Letters.Count; i++)
+        {
+            var letter = Model.Letters[i];
+            <article class="mt-3 rounded-2xl border border-border bg-surface p-6" x-show="index === @i"
+                     data-testid="letter-card" data-letter-id="@letter.Id">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <p lang="ko" class="font-hangul text-hangul-display leading-none">@letter.Char</p>
+                        <p class="mt-2 text-xl italic">@letter.Romanization</p>
+                        @if (letter.NameKo is not null)
+                        {
+                            <p class="text-sm text-ink-muted">Tên chữ: <span lang="ko" class="font-ko">@letter.NameKo</span></p>
+                        }
+                    </div>
+                    <audio-button text="@letter.SpeakText" audio="@letter.Audio" slow="true" />
+                </div>
+                <p class="mt-5"><span class="font-semibold">Cách đọc:</span> @letter.ViHint</p>
+                @if (letter.Examples.Count > 0)
+                {
+                    <h3 class="mt-5 font-semibold">Ví dụ</h3>
+                    <ul class="mt-2 space-y-2">
+                        @foreach (var example in letter.Examples)
+                        {
+                            <li class="flex items-center gap-3">
+                                <audio-button text="@example.Ko" size="sm" />
+                                <span><ko-text romanization="@example.Romanization">@example.Ko</ko-text> — @example.Vi</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </article>
+        }
+
+        <div class="mt-6 flex gap-3">
+            <hb-button variant="outline" size="lg" x-on:click="prev()" x-bind:disabled="index === 0" data-testid="learn-prev">Trước</hb-button>
+            <hb-button size="lg" x-show="!isLastLetter" x-on:click="next()" class="flex-1 sm:flex-none" data-testid="learn-next">Tiếp</hb-button>
+            <hb-button size="lg" x-show="isLastLetter" x-cloak x-on:click="startQuiz()" x-bind:disabled="loading" class="flex-1 sm:flex-none" data-testid="start-quiz">Làm bài kiểm tra (10 câu)</hb-button>
+        </div>
+        <p class="mt-3 text-sm text-ink-muted" x-show="!isLastLetter">Hoặc <button type="button" class="text-secondary underline" x-on:click="startQuiz()">kiểm tra ngay</button>.</p>
+        <p x-show="error" x-cloak x-text="error" role="alert" class="mt-3 text-danger"></p>
+    </section>
+
+    @* ───────── Quiz ───────── *@
+    <section x-show="phase === 'quiz'" x-cloak aria-labelledby="quiz-title" class="mt-8 outline-none" x-ref="quiz" tabindex="-1" data-testid="quiz">
+        <h2 id="quiz-title" class="sr-only">Bài kiểm tra</h2>
+        <div class="flex items-center justify-between text-sm text-ink-muted">
+            <span>Câu <span x-text="current + 1" data-testid="quiz-number"></span>/<span x-text="questions.length"></span></span>
+            <span>Đúng: <span x-text="score"></span></span>
+        </div>
+        <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-border" role="progressbar" aria-label="Tiến độ bài kiểm tra"
+             aria-valuemin="0" x-bind:aria-valuemax="questions.length" x-bind:aria-valuenow="current">
+            <div class="h-full rounded-full bg-secondary transition-all duration-300" x-bind:style="`width: ${questions.length ? (current / questions.length) * 100 : 0}%`"></div>
+        </div>
+
+        <template x-if="question">
+            <div class="mt-6 rounded-2xl border border-border bg-surface p-6">
+                <p class="font-semibold" x-text="promptLabel" data-testid="quiz-prompt-label"></p>
+                <div class="mt-4 flex min-h-24 items-center justify-center">
+                    <template x-if="question.kind === 'char-to-romanization'">
+                        <p lang="ko" class="font-hangul text-hangul-display leading-none" x-text="question.prompt" data-testid="quiz-prompt"></p>
+                    </template>
+                    <template x-if="question.kind === 'romanization-to-char'">
+                        <p class="text-4xl italic" x-text="question.prompt" data-testid="quiz-prompt"></p>
+                    </template>
+                    <template x-if="isListen">
+                        <div class="flex gap-3">
+                            <hb-button variant="secondary" size="lg" x-on:click="listen()" data-testid="quiz-listen">Nghe</hb-button>
+                            <hb-button variant="outline" size="lg" x-on:click="listen(true)">Nghe chậm</hb-button>
+                        </div>
+                    </template>
+                </div>
+
+                <ul class="mt-6 grid grid-cols-2 gap-3" data-testid="quiz-choices">
+                    <template x-for="choice in question.choices" x-bind:key="choice">
+                        <li>
+                            <button type="button" class="@ChoiceBase" x-on:click="choose(choice)" x-bind:disabled="!!result || loading"
+                                    x-bind:data-state="choiceState(choice)"
+                                    x-bind:lang="question.kind === 'char-to-romanization' ? null : 'ko'"
+                                    x-bind:class="{
+                                        'font-hangul text-3xl': question.kind !== 'char-to-romanization',
+                                        'text-xl italic': question.kind === 'char-to-romanization',
+                                        'border-border hover:border-secondary': choiceState(choice) === 'idle',
+                                        'border-secondary': choiceState(choice) === 'selected',
+                                        'border-success text-success-ink': choiceState(choice) === 'correct',
+                                        'border-danger text-danger': choiceState(choice) === 'wrong',
+                                    }">
+                                <svg x-show="choiceState(choice) === 'correct'" class="size-5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd" />
+                                </svg>
+                                <svg x-show="choiceState(choice) === 'wrong'" class="size-5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M4.3 4.3a1 1 0 0 1 1.4 0L10 8.6l4.3-4.3a1 1 0 1 1 1.4 1.4L11.4 10l4.3 4.3a1 1 0 0 1-1.4 1.4L10 11.4l-4.3 4.3a1 1 0 0 1-1.4-1.4L8.6 10 4.3 5.7a1 1 0 0 1 0-1.4Z" clip-rule="evenodd" />
+                                </svg>
+                                <span x-text="choice"></span>
+                            </button>
+                        </li>
+                    </template>
+                </ul>
+
+                <div x-show="result" aria-live="polite" class="mt-6" data-testid="quiz-feedback">
+                    <p x-show="result?.correct" class="font-semibold text-success-ink">Chính xác! 🎉</p>
+                    <p x-show="result && !result.correct" class="font-semibold">
+                        Gần đúng rồi! Đáp án là <span lang="ko" class="font-ko" x-text="result?.letter"></span>
+                        (<span class="italic" x-text="result?.romanization"></span>).
+                    </p>
+                    <div class="mt-4"><hb-button size="lg" block="true" x-on:click="continueQuiz()" data-testid="quiz-continue">Tiếp tục</hb-button></div>
+                </div>
+                <p x-show="error" x-text="error" role="alert" class="mt-3 text-danger"></p>
+            </div>
+        </template>
+    </section>
+
+    @* ───────── Kết quả ───────── *@
+    <section x-show="phase === 'done'" x-cloak aria-labelledby="done-title" class="mt-8 rounded-2xl border border-border bg-surface p-8 text-center" data-testid="quiz-done">
+        <h2 id="done-title" class="text-2xl font-bold">
+            Bạn đúng <span x-text="score" data-testid="quiz-score"></span>/<span x-text="questions.length"></span> câu
+            <span x-show="score >= questions.length * 0.8">🎉</span>
+        </h2>
+        <p class="mt-2 text-ink-muted" x-show="score >= questions.length * 0.8">Tuyệt! Bạn đã nhớ nhóm chữ này.</p>
+        <p class="mt-2 text-ink-muted" x-show="score < questions.length * 0.8">Ôn lại các chữ rồi thử lại nhé — lần sau sẽ tốt hơn.</p>
+        <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            <hb-button variant="outline" size="lg" block="true" x-on:click="restart()" data-testid="quiz-restart">Làm lại</hb-button>
+            @if (Model.Next is not null)
+            {
+                <hb-button href="@($"/hangul/{Model.Next.Slug}")" size="lg" block="true" data-testid="next-group">Học tiếp: @Model.Next.Title</hb-button>
+            }
+            else
+            {
+                <hb-button href="/hangul" size="lg" block="true">Về bảng chữ cái</hb-button>
+            }
+        </div>
+    </section>
+</div>

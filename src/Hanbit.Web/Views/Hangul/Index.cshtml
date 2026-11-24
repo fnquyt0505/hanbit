@@ -19,6 +19,7 @@
         <section class="mt-10" aria-labelledby="group-@group.Info.Slug" data-group="@group.Info.Slug">
             <div class="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 id="group-@group.Info.Slug" class="text-xl font-bold">@group.Info.Title <span class="text-base font-normal text-ink-muted">· @group.Tiles.Count chữ</span></h2>
+                <hb-button href="@($"/hangul/{group.Info.Slug}")" variant="outline" size="sm" data-testid="learn-group">Học nhóm này</hb-button>
             </div>
             <p class="mt-1 text-ink-muted">@group.Info.Description</p>
             <ul class="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-5 sm:gap-3 lg:grid-cols-7">

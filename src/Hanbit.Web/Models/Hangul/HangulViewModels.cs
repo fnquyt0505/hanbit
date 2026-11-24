@@ -29,14 +29,39 @@ public sealed record HangulTileViewModel(string Id, string Char, string Romaniza
         SpeakTextFor(letter),
         letter.Audio);
 
-    public static string SpeakTextFor(HangulLetter letter) => letter.Type switch
-    {
-        HangulType.Vowel or HangulType.CompoundVowel => HangulSyllable.VowelSyllable(letter.Char[0]).ToString(),
-        _ => letter.NameKo ?? letter.Char,
-    };
+    public static string SpeakTextFor(HangulLetter letter) => HangulPronunciation.SpeakText(letter);
 }
 
 public sealed record HangulGroupViewModel(HangulGroupInfo Info, IReadOnlyList<HangulTileViewModel> Tiles);
+
+/// <summary>Trang /hangul/{group}: học từng chữ rồi làm quiz.</summary>
+public sealed record HangulGroupPageViewModel(HangulGroupInfo Info, IReadOnlyList<HangulLetterCard> Letters, HangulGroupInfo? Next)
+{
+    public static HangulGroupPageViewModel Create(HangulGroupInfo info, IReadOnlyList<HangulLetter> allLetters)
+    {
+        var index = HangulGroupInfo.All.ToList().IndexOf(info);
+        return new(
+            info,
+            allLetters.Where(l => l.Type == info.Type).Select(HangulLetterCard.From).ToList(),
+            index + 1 < HangulGroupInfo.All.Count ? HangulGroupInfo.All[index + 1] : null);
+    }
+}
+
+/// <summary>Thẻ học một chữ cái.</summary>
+public sealed record HangulLetterCard(
+    string Id,
+    string Char,
+    string Romanization,
+    string? NameKo,
+    string ViHint,
+    string SpeakText,
+    string? Audio,
+    IReadOnlyList<HangulExample> Examples)
+{
+    public static HangulLetterCard From(HangulLetter letter) => new(
+        letter.Id, letter.Char, letter.Romanization, letter.NameKo, letter.ViHint,
+        HangulPronunciation.SpeakText(letter), letter.Audio, letter.Examples);
+}
 
 public sealed record HangulIndexViewModel(IReadOnlyList<HangulGroupViewModel> Groups)
 {
