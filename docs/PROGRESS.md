@@ -9,7 +9,7 @@
 | Giai đoạn                     | 4 — Bài học & bài tập |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T4.3** `GET /api/lessons/{c}/{l}` + `POST /api/exercises/check` |
+| Task tiếp theo                 | **T4.4** `/learn/{c}/{l}` + `lesson-runner.js` |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T4.3 API bài học + chấm bài
+- Đã làm: Application `Lessons/LessonService` (`GetAsync`: khóa + bài phải có trong mục lục, từ vựng đã duyệt theo thứ tự `vocab_ids`, ngữ pháp, bài tự soạn + 7 bài sinh; `CheckAsync` → `CheckOutcome` Checked/NotFound/InvalidAnswer; đăng ký Scoped). `PartOfSpeechNames.Vietnamese` chuyển vào Domain (tool duyệt nghĩa dùng lại). `Models/Learn/LessonDtos.cs`: `LessonDto`/`VocabDto` (romanization tính bằng `RomanizationService`, từ loại tiếng Việt, link nguồn krdict)/`GrammarDto`/`ExerciseDto` (không đáp án, không giải thích; nối cặp xáo riêng 2 cột, sắp xếp xáo khác thứ tự đúng, seed theo id bài tập). `LessonsApiController`: `GET /api/lessons/{c}/{l}` (404 nếu không có), `POST /api/exercises/check` `{ course, lesson, exerciseId, answer: { index | pairs | tokens | text } }` → `{ correct, correctAnswer, explanationVi }` (404 bài tập lạ, 400 thiếu/sai dạng câu trả lời).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Web +13 integration: nội dung bài, JSON không có trường đáp án, xáo mảnh/cột, 404/400, chấm 5 loại, mỗi bài sinh đúng 1 lựa chọn đúng).
+- Tiếp theo: T4.4
 
 ### 2026-11-24 — T4.2 ExerciseGenerator + AnswerChecker (Domain/Learning)
 - Đã làm: `TextNormalizer` (NFC → gộp khoảng trắng → bỏ dấu câu hai đầu → chữ thường). `AnswerChecker.Check(exercise, answer)` cho 5 loại (`ChoiceAnswer` / `PairsAnswer` (mọi thứ tự) / `OrderAnswer` (so chuỗi ghép) / `TextAnswer` (so với `accepted_answers` sau chuẩn hóa)) → `CheckResult(correct, correctAnswer hiển thị, explanation)`; sai loại câu trả lời → null. `ExerciseGenerator.Generate(course, lesson, vocab)`: seed FNV-1a của "khóa/bài" (ổn định giữa các lần chạy) → 7 bài `gen-*`: 2 Hàn→Việt, 2 Việt→Hàn, 2 nghe→nghĩa, 1 nối 5 cặp; nghĩa dùng `ShortMeaning` (nghĩa đầu, trước ";"); nhiễu không trùng nghĩa đáp án (VD 형/오빠 cùng "anh"); < 4 nghĩa khác nhau → không sinh.

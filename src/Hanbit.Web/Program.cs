@@ -14,6 +14,7 @@ builder.Services.Configure<ContentOptions>(builder.Configuration.GetSection(Cont
 builder.Services.PostConfigure<ContentOptions>(options =>
     options.RootPath = Path.GetFullPath(options.RootPath, builder.Environment.ContentRootPath));
 builder.Services.AddInfrastructure();
+builder.Services.AddScoped<Hanbit.Application.Lessons.LessonService>();
 
 var app = builder.Build();
 
