@@ -63,6 +63,19 @@ public sealed class BeginnerCourseDataTests : IDisposable
         }
     }
 
+    [Theory]
+    [InlineData("kd-44506", "tôi (khiêm nhường); em, con, cháu")]
+    [InlineData("kd-29702", "lui tới; ghé qua; đi làm, đi học")]
+    [InlineData("kd-25949", "cảnh sát")]
+    public async Task ReviewedMeaningOverrides_AreMergedIntoVocabulary(string id, string expectedVi)
+    {
+        var vocab = await CreateRepository().GetVocabularyAsync([id], CancellationToken.None);
+
+        var item = vocab.ShouldHaveSingleItem();
+        item.Reviewed.ShouldBeTrue();
+        item.Vi.ShouldBe(expectedVi);
+    }
+
     [Fact]
     public async Task BeginnerLessons_EachHasAllFiveExerciseTypes()
     {
