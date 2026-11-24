@@ -9,7 +9,7 @@
 | Giai đoạn                     | 7 — Hoàn thiện & ra mắt MVP |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T7.3** Rate limiting `/api/*`, security headers, `Cache-Control` |
+| Task tiếp theo                 | **T7.4** Accessibility (axe), SEO meta, OG image, sitemap |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T7.3 Rate limiting, security headers, Cache-Control
+- Đã làm: `Hosting/HttpHardening.cs`: **rate limiting** `/api/*` (Fixed window theo IP, `RateLimit:ApiPermitPerMinute` — Production 120/phút, Development 100.000 để test; vượt → 429 `application/problem+json` tiếng Việt + `Retry-After`; trang không bị giới hạn; dùng `Microsoft.AspNetCore.RateLimiting` có sẵn). **Security headers** mọi phản hồi: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `COOP`; HTML thêm **CSP** (`default-src 'self'`; script `'self' 'unsafe-eval'` (Alpine bản chuẩn cần) + **SHA-256** của script theme nội tuyến — `Hosting/InlineScripts.cs`; style `'unsafe-inline'` + Google Fonts/jsDelivr; font CDN; `connect-src 'self'`; `object-src 'none'`; `frame-ancestors 'none'`). **Cache-Control**: file tĩnh có `?v=` (asp-append-version) → `public, max-age=31536000, immutable`; không `?v=` (module import) → `no-cache` + ETag; HTML → `no-cache`; API → `no-store`. **WebEncoderOptions** `UnicodeRanges.All`: HTML không còn `&#x…;` cho tiếng Việt/Hàn (đề xuất từ T0.6).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Web +6: header, CSP chứa đúng mã băm script nội tuyến duy nhất, cache 3 loại, 429 + Retry-After, HTML không mã hóa; E2E +10: 9 trang chính không vi phạm CSP + Alpine chạy + gọi API, script theme chạy dưới CSP).
+- Vấn đề / ghi chú: `'unsafe-eval'` là bắt buộc với Alpine bản chuẩn (chuyển sang bản CSP của Alpine cần viết lại toàn bộ biểu thức trong template — không làm ở MVP).
+- Tiếp theo: T7.4
 
 ### 2026-11-24 — T7.2 E2E 3 luồng chính
 - Đã làm: `tests/Hanbit.E2E/CriticalFlowsTests.cs` — đi như người dùng qua giao diện + kiểm tra localStorage: (1) **mobile** trang chủ → "Bắt đầu miễn phí" → "Học nhóm này" (nguyên âm) → nghe chữ ㅏ (아) → học 10 chữ → quiz 10 câu → +XP, `hangul/nguyen-am` hoàn thành → bottom nav Tổng quan: streak 1, gợi ý bài 1; (2) **desktop** lộ trình → bài 1 → làm đủ 14 bài tập → tiến độ (bài hoàn thành, 14 thẻ, XP) → về lộ trình + reload: bài 1 ✓, bài 2 mở; (3) học bài 1 → dời hạn thẻ về quá khứ ("thời gian trôi") → dashboard "Ôn tập (14 thẻ)" → ôn hết bằng Space + phím 3 → không còn thẻ đến hạn, 14 lượt ôn → dashboard "Ôn tập".
