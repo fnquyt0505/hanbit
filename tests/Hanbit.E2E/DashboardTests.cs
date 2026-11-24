@@ -30,7 +30,7 @@ public class DashboardTests(WebServerFixture server)
         var page = await server.NewPageAsync(viewport: new ViewportSize { Width = 1280, Height = 800 });
         await page.GotoAsync(server.BaseUrl);
 
-        await page.GetByTestId("sidebar").GetByRole(AriaRole.Link, new() { Name = "Tổng quan" }).ClickAsync();
+        await page.GetByTestId("sidebar").GetByRole(AriaRole.Link, new() { Name = "Tổng quan", Exact = true }).ClickAsync();
         await page.GetByTestId("dashboard").WaitForAsync();
 
         new Uri(page.Url).AbsolutePath.ShouldBe("/dashboard");
