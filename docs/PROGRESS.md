@@ -9,7 +9,7 @@
 | Giai đoạn                     | 5 — Tiến độ chế độ khách |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T5.2** `SubmitLessonHandler` + `POST /api/lessons/{c}/{l}/complete` |
+| Task tiếp theo                 | **T5.3** `progress-store.js` (localStorage, JSON hỏng/khác version, merge kết quả API) |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T5.2 SubmitLessonHandler + POST /api/lessons/{c}/{l}/complete
+- Đã làm: Domain `LessonCompletion.Complete` (điểm %, giữ điểm cao nhất, XP theo `XpRules`, mọi từ của bài thành thẻ — từ sai đến hạn ngay, từ khác 00:00 ngày mai giờ VN; thẻ đã có không bị đặt lại, thẻ của từ sai được đưa về hạn ngay; cộng hoạt động + tính streak). Application `SubmitLessonHandler` **chấm lại mọi câu trả lời ở server** (bài thiếu câu trả lời = sai), "hôm nay" qua `IClock`. Endpoint `POST /api/lessons/{c}/{l}/complete` `{ answers[{exerciseId, answer}], previous, cards, activity }` → `{ lessonKey, lessonRecord, newCards, activity, xp, streak, correct, total, score, today }`; giới hạn kích thước (≤ 200 câu, ≤ 20.000 thẻ, ≤ 396 ngày) → 400; bài lạ → 404. MVC JSON: enum chuỗi camelCase.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Domain +8; Web +7 integration với đồng hồ cố định 01:00 giờ VN: chấm lại, XP, 14 thẻ / 6 thẻ đến hạn ngay, giữ điểm cao nhất, enum camelCase, 404/400).
+- Tiếp theo: T5.3
 
 ### 2026-11-24 — T5.1 Model tiến độ + IClock + XpRules + StreakCalculator
 - Đã làm: Domain `Progress/`: `LearnerProgress` (SchemaVersion 1, `Empty`, `LessonKey`), `LessonRecord`/`LessonStatus`, `ReviewCard` (giới hạn ease 1.3–5, interval ≤ 3650), `ItemType`, `DailyActivity`; `XpRules` (theo quyết định người dùng); `StreakCalculator` (`Calculate` → current/longest/activeToday — hôm nay chưa học vẫn giữ chuỗi từ hôm qua; `AddActivity` cộng dồn theo ngày, giữ 365 ngày); `VietnamTime` (Asia/Ho_Chi_Minh, thiếu dữ liệu múi giờ → UTC+7 cố định). Application `IClock` (`Today` theo giờ VN); Infrastructure `SystemClock` (TimeProvider) đăng ký DI.
