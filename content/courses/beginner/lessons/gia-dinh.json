@@ -1,0 +1,84 @@
+// Bài tập do AI soạn ở T1.8 — chờ người dùng duyệt (PROGRESS.md, câu hỏi 10).
+{
+  "slug": "gia-dinh",
+  "title": "Gia đình",
+  "order": 4,
+  "vocab_ids": [
+    "kd-44487", // 가족
+    "kd-71101", // 식구
+    "kd-71343", // 아버지
+    "kd-74361", // 어머니
+    "kd-62272", // 부모님
+    "kd-74121", // 할아버지
+    "kd-27375", // 할머니
+    "kd-20286", // 형
+    "kd-68006", // 오빠
+    "kd-32205", // 누나
+    "kd-31971", // 언니
+    "kd-70748", // 동생
+    "kd-26820", // 남동생
+    "kd-71002", // 여동생
+    "kd-20240", // 아들
+    "kd-30210", // 딸
+    "kd-62078", // 누구
+    "kd-17182"  // 우리
+  ],
+  "grammar_ids": ["particle-ui"],
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "id": "tu-em-gai",
+      "prompt": "\"Em gái\" là từ nào?",
+      "choices": ["남동생", "누나", "여동생", "언니"],
+      "answer_index": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "nam-goi-chi",
+      "prompt": "Con trai gọi chị gái là gì?",
+      "choices": ["누나", "언니", "오빠", "형"],
+      "answer_index": 0,
+      "explanation_vi": "Nam gọi chị là 누나, gọi anh là 형. Nữ gọi chị là 언니, gọi anh là 오빠."
+    },
+    {
+      "type": "multiple_choice",
+      "id": "nu-goi-anh",
+      "prompt": "Con gái gọi anh trai là gì?",
+      "choices": ["형", "누나", "언니", "오빠"],
+      "answer_index": 3,
+      "explanation_vi": "Nữ gọi anh là 오빠, gọi chị là 언니. Nam gọi anh là 형, gọi chị là 누나."
+    },
+    {
+      "type": "listen_choose",
+      "id": "nghe-je-dongsaeng",
+      "audio_ko": "제 동생이에요",
+      "choices": ["(Đây) là mẹ tôi.", "(Đây) là em tôi.", "(Đây) là bạn tôi."],
+      "answer_index": 1
+    },
+    {
+      "type": "match_pairs",
+      "id": "noi-gia-dinh",
+      "prompt": "Nối từ với nghĩa",
+      "pairs": [
+        { "left": "아버지", "right": "bố" },
+        { "left": "어머니", "right": "mẹ" },
+        { "left": "할아버지", "right": "ông" },
+        { "left": "할머니", "right": "bà" },
+        { "left": "아들", "right": "con trai" },
+        { "left": "딸", "right": "con gái" }
+      ]
+    },
+    {
+      "type": "reorder",
+      "id": "sap-xep-me-noi-tro",
+      "prompt": "Sắp xếp: \"Mẹ tôi là nội trợ.\"",
+      "tokens": ["우리", "어머니는", "주부예요."]
+    },
+    {
+      "type": "type_answer",
+      "id": "go-rut-gon-jeoui",
+      "prompt": "저의 (của tôi) rút gọn thành chữ nào?",
+      "accepted_answers": ["제"]
+    }
+  ]
+}

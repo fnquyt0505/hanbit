@@ -1,0 +1,81 @@
+// Bài tập do AI soạn ở T1.8 — chờ người dùng duyệt (PROGRESS.md, câu hỏi 10).
+{
+  "slug": "gioi-thieu",
+  "title": "Giới thiệu bản thân",
+  "order": 2,
+  "vocab_ids": [
+    "kd-44506", // 저
+    "kd-71692", // 이름
+    "kd-49073", // 성함
+    "kd-63033", // 성
+    "kd-58145", // 씨
+    "kd-31670", // 학생
+    "kd-62818", // 선생님
+    "kd-29742", // 친구
+    "kd-58161", // 사람
+    "kd-29699", // 나라
+    "kd-70403", // 우리나라
+    "kd-26210", // 외국인
+    "kd-64301", // 소개
+    "kd-73940", // 자기소개
+    "kd-62815"  // 뵙다
+  ],
+  "grammar_ids": ["particle-eun-neun", "copula-imnida"],
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "id": "tieu-tu-jeo",
+      "prompt": "Điền tiểu từ: 저___ 학생입니다.",
+      "choices": ["은", "는"],
+      "answer_index": 1,
+      "explanation_vi": "저 không có patchim → 는."
+    },
+    {
+      "type": "multiple_choice",
+      "id": "tieu-tu-seonsaengnim",
+      "prompt": "Điền tiểu từ: 선생님___ 한국 사람입니다.",
+      "choices": ["은", "는"],
+      "answer_index": 0,
+      "explanation_vi": "선생님 có patchim ㅁ → 은."
+    },
+    {
+      "type": "multiple_choice",
+      "id": "hoi-ten-kinh-trong",
+      "prompt": "Hỏi tên người lớn tuổi một cách kính trọng, nên dùng từ nào?",
+      "choices": ["이름", "성함"],
+      "answer_index": 1,
+      "explanation_vi": "성함 là từ kính ngữ của 이름."
+    },
+    {
+      "type": "listen_choose",
+      "id": "nghe-oegugin",
+      "audio_ko": "저는 외국인입니다",
+      "choices": ["Tôi là học sinh.", "Tôi là người nước ngoài.", "Tôi là giáo viên."],
+      "answer_index": 1
+    },
+    {
+      "type": "match_pairs",
+      "id": "noi-tu-gioi-thieu",
+      "prompt": "Nối từ với nghĩa",
+      "pairs": [
+        { "left": "이름", "right": "tên" },
+        { "left": "성", "right": "họ" },
+        { "left": "친구", "right": "bạn" },
+        { "left": "나라", "right": "đất nước" },
+        { "left": "학생", "right": "học sinh" }
+      ]
+    },
+    {
+      "type": "reorder",
+      "id": "sap-xep-toi-la-hoc-sinh",
+      "prompt": "Sắp xếp: \"Tôi là học sinh.\"",
+      "tokens": ["저는", "학생입니다."]
+    },
+    {
+      "type": "type_answer",
+      "id": "go-seonsaengnim-imnikka",
+      "prompt": "Gõ tiếng Hàn: \"(Anh/chị) là giáo viên phải không?\" (dùng 입니까)",
+      "accepted_answers": ["선생님입니까?", "선생님입니까"]
+    }
+  ]
+}

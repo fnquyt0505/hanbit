@@ -6,11 +6,11 @@
 
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 1 — Dữ liệu nội dung (한국어기초사전)                                                                                     |
+| Giai đoạn                     | 1 — Dữ liệu nội dung ✅ xong → tiếp theo 2 — Layout & điều hướng                                                       |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T1.8** Soạn khóa `beginner`: 5 bài đầu (chỉ từ đã duyệt) |
-| Việc song song (người dùng) | (tùy chọn) Tinh chỉnh nghĩa các từ đã duyệt hàng loạt khi soạn bài — xem câu hỏi 9 |
+| Task tiếp theo                 | **T2.1** `_Layout.cshtml`: `_BottomNav`, `_Sidebar`, `_Footer` ghi công |
+| Việc song song (người dùng) | Duyệt ngữ pháp + bài tập AI soạn ở T1.8 (câu hỏi 10) · (tùy chọn) sửa nghĩa krdict chưa tự nhiên (câu hỏi 9) |
 | Blocker                         | —                                                                                                                           |
 
 ## 💻 Môi trường máy dev
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T1.8 Khóa `beginner`: 5 bài đầu
+- Đã làm: dàn bài được người dùng duyệt trước. `content/grammar/beginner.json` — 8 điểm ngữ pháp tự viết giải thích (-ㅂ니다/-습니다, N은/는, N입니다/입니까, N이에요/예요, N이/가 아니에요, N의, 무슨 N이에요?, N에 thời gian). `content/courses/beginner/course.json` + 5 bài `lessons/`: chào hỏi (14 từ), giới thiệu bản thân (15), nghề nghiệp (14), gia đình (18), thứ trong tuần (10) — **71 từ, toàn bộ đã duyệt**; mỗi bài 7 bài tập tự soạn đủ 5 loại (vị trí đáp án đúng đã xáo tay). Đầu mỗi file có comment "AI soạn — chờ người dùng duyệt". Test `BeginnerCourseDataTests` (dữ liệu thật qua `JsonContentRepository`: validator sạch, 5 bài đúng thứ tự, từ đều `reviewed`, ngữ pháp tồn tại, đủ 5 loại bài tập).
+- Kiểm tra: validator ✅ (10 file) · build ✅ 0 warning · test ✅ 258/258 (không tính E2E)
+- Vấn đề / ghi chú: ngữ pháp + câu ví dụ + bài tập do AI viết → câu hỏi 10. Nghĩa krdict gặp khi soạn cần người dùng cân nhắc → bổ sung câu hỏi 9.
+- Tiếp theo: T2.1
 
 ### 2026-11-24 — T1.7 Duyệt nghĩa đợt 1 (150 từ)
 - Đã làm: người dùng **quyết định duyệt cả 150 từ bộ chủ đề A với nghĩa krdict nguyên bản** (không sửa nghĩa). AI tạo `data-raw/review/dot-01-duyet-tat-ca.csv` (`duyet = x`, ghi chú `duyệt hàng loạt theo nghĩa krdict (người dùng, 2026-11-24)`) và nhập qua `review-import` → `content/vocab-reviews.json` 150 bản duyệt. File CSV gốc giữ nguyên.
@@ -173,6 +179,8 @@
 7. ~~Duyệt `content/hangul.json`~~ → đã duyệt (2026-11-24); tinh chỉnh `vi_hint` khi làm trang `/hangul` (T3.2) nếu cần.
 8. ~~Giấy phép phần tự biên soạn~~ → đã chốt: giữ mọi quyền.
 9. **Nghĩa duyệt hàng loạt (T1.7):** 150 từ đợt 1 dùng nghĩa krdict nguyên bản. Khi soạn bài (T1.8) nếu gặp nghĩa chưa tự nhiên, AI sẽ liệt kê để người dùng quyết sửa qua `nghia_moi` (xuất lại bằng `review-export` không lấy từ đã duyệt → cần sửa trực tiếp `vocab-reviews.json` hoặc một CSV mới chỉ chứa các id cần sửa).
+   Gặp khi soạn T1.8 (đề xuất, chờ người dùng quyết): 저 (kd-44506) = "em, con, cháu" → thiếu "tôi (khiêm nhường)" · 안녕히 (kd-28415) = "một cách an lành" → thêm "(안녕히 가세요/계세요: tạm biệt)" · 다니다 (kd-29702) = "lui tới; ghé qua; **l**đi làm, đi học" — lỗi gõ từ krdict · 나라 (kd-29699) = "…; quốc gia." — trùng + dấu chấm · 반갑다 (kd-70861) = "hân hoan, vui sướng, hân hạnh" → "vui mừng (được gặp)" · 경찰 (kd-25949) = "(cơ quan) cảnh sát; (viên) cảnh sát" → "cảnh sát".
+10. **Duyệt nội dung AI soạn ở T1.8:** `content/grammar/beginner.json` (giải thích + câu ví dụ) và bài tập trong `content/courses/beginner/lessons/*.json`. Duyệt xong → xóa comment "chờ người dùng duyệt" ở đầu file.
 
 ## 📝 Quyết định đã chốt
 

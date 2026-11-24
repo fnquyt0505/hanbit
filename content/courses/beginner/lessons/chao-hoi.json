@@ -1,0 +1,78 @@
+// Bài tập do AI soạn ở T1.8 — chờ người dùng duyệt (PROGRESS.md, câu hỏi 10).
+{
+  "slug": "chao-hoi",
+  "title": "Chào hỏi",
+  "order": 1,
+  "vocab_ids": [
+    "kd-17298", // 안녕
+    "kd-28415", // 안녕히
+    "kd-70861", // 반갑다
+    "kd-17170", // 처음
+    "kd-68090", // 오랜만
+    "kd-66311", // 인사
+    "kd-20041", // 고맙다
+    "kd-46944", // 감사
+    "kd-56257", // 미안
+    "kd-91763", // 죄송하다
+    "kd-26872", // 실례
+    "kd-72137", // 축하
+    "kd-73239", // 환영
+    "kd-15619"  // 수고
+  ],
+  "grammar_ids": ["ending-mnida-seumnida"],
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "id": "nghia-gamsahamnida",
+      "prompt": "\"감사합니다\" nghĩa là gì?",
+      "choices": ["Xin lỗi", "Cảm ơn", "Xin chào", "Chúc mừng"],
+      "answer_index": 1
+    },
+    {
+      "type": "listen_choose",
+      "id": "nghe-joesonghamnida",
+      "audio_ko": "죄송합니다",
+      "choices": ["Cảm ơn", "Rất vui được gặp bạn", "Xin lỗi"],
+      "answer_index": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "tam-biet-nguoi-ve",
+      "prompt": "Bạn ở lại, người kia ra về. Bạn chào họ thế nào?",
+      "choices": ["안녕히 가세요", "안녕히 계세요"],
+      "answer_index": 0,
+      "explanation_vi": "안녕히 가세요: chào người ra về. 안녕히 계세요: chào người ở lại (khi mình là người đi)."
+    },
+    {
+      "type": "multiple_choice",
+      "id": "duoi-gomapda",
+      "prompt": "고맙다 ở dạng trang trọng là gì?",
+      "choices": ["고맙니다", "고마습니다", "고맙습니다"],
+      "answer_index": 2,
+      "explanation_vi": "Gốc 고맙 có patchim ㅂ → gắn -습니다."
+    },
+    {
+      "type": "match_pairs",
+      "id": "noi-tu-chao-hoi",
+      "prompt": "Nối từ với nghĩa",
+      "pairs": [
+        { "left": "인사", "right": "sự chào hỏi" },
+        { "left": "축하", "right": "sự chúc mừng" },
+        { "left": "환영", "right": "sự hoan nghênh" },
+        { "left": "감사", "right": "sự cảm tạ" }
+      ]
+    },
+    {
+      "type": "reorder",
+      "id": "sap-xep-gap-lan-dau",
+      "prompt": "Sắp xếp câu chào khi gặp lần đầu: \"Lần đầu gặp mặt. Rất vui được gặp bạn.\"",
+      "tokens": ["처음", "뵙겠습니다.", "반갑습니다."]
+    },
+    {
+      "type": "type_answer",
+      "id": "go-bangapseumnida",
+      "prompt": "Gõ 반갑다 ở dạng trang trọng (-습니다)",
+      "accepted_answers": ["반갑습니다", "반갑습니다."]
+    }
+  ]
+}
