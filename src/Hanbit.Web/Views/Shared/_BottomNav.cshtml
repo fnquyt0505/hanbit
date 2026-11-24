@@ -11,7 +11,13 @@
             <li>
                 <a href="@item.Href" aria-current="@(active ? "page" : null)"
                    class="flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 py-1.5 text-xs font-medium @(active ? "text-primary" : "text-ink-muted hover:text-ink")">
-                    <partial name="_NavIcon" model="item.Icon" />
+                    <span class="relative">
+                        <partial name="_NavIcon" model="item.Icon" />
+                        @if (item.Href == "/review")
+                        {
+                            <span class="absolute -right-3 -top-1.5"><partial name="_DueBadge" /></span>
+                        }
+                    </span>
                     <span>@item.Label</span>
                 </a>
             </li>
