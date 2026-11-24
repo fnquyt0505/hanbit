@@ -1,6 +1,5 @@
-// Dashboard (T2.4): server render skeleton, Alpine điền số liệu tiến độ.
-// Giai đoạn 5 (T5.3/T5.4) thay emptySummary() bằng dữ liệu từ progress-store.js.
-// KHÔNG đọc localStorage trực tiếp ở đây (RULES: chỉ qua progress-store.js).
+// Dashboard (T2.4 → T5.4): server render skeleton, Alpine điền từ store "progress" (progress-summary.js —
+// số liệu do server tính từ tiến độ localStorage). Lỗi mạng → trạng thái người học mới.
 
 /** Tóm tắt tiến độ của người học mới (chưa có dữ liệu). */
 export function emptySummary() {
@@ -9,20 +8,36 @@ export function emptySummary() {
     xpToday: 0,
     dueCards: 0,
     learnedWords: 0,
-    nextLesson: null, // { title, href } — null → dùng bài đầu tiên do server cung cấp
+    nextLesson: null, // { title, href }
+  };
+}
+
+/** Đổi phản hồi /api/progress/summary sang dạng dashboard dùng. */
+export function toDashboardSummary(response) {
+  if (!response) {
+    return emptySummary();
+  }
+  return {
+    streakDays: response.streak?.current ?? 0,
+    xpToday: response.xpToday ?? 0,
+    dueCards: response.dueCards ?? 0,
+    learnedWords: response.learnedWords ?? 0,
+    nextLesson: response.nextLesson
+      ? { title: `Bài ${response.nextLesson.order} · ${response.nextLesson.title}`, href: response.nextLesson.href }
+      : null,
   };
 }
 
 document.addEventListener('alpine:init', () => {
   window.Alpine.data('dashboard', () => ({
-    loaded: false,
-    summary: emptySummary(),
-    init() {
-      this.summary = emptySummary();
-      this.loaded = true;
+    get loaded() {
+      return window.Alpine.store('progress').loaded;
+    },
+    get summary() {
+      return toDashboardSummary(window.Alpine.store('progress').summary);
     },
     get isNewLearner() {
-      return this.summary.xpToday === 0 && this.summary.learnedWords === 0 && this.summary.nextLesson === null;
+      return window.Alpine.store('progress').summary?.isNewLearner ?? true;
     },
   }));
 });

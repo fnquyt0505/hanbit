@@ -3,9 +3,12 @@
     var path = Context.Request.Path;
 }
 <aside class="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border bg-surface lg:flex" data-testid="sidebar">
-    <a href="/" class="flex items-baseline gap-2 px-6 py-5 text-xl font-bold">
-        Hanbit <span lang="ko" class="font-ko text-ink-muted">한빛</span>
-    </a>
+    <div class="flex items-center justify-between gap-2 px-6 py-5">
+        <a href="/" class="flex items-baseline gap-2 text-xl font-bold">
+            Hanbit <span lang="ko" class="font-ko text-ink-muted">한빛</span>
+        </a>
+        <partial name="_StreakBadge" />
+    </div>
     <nav aria-label="Điều hướng chính" class="flex-1 px-3">
         <ul class="flex flex-col gap-1">
             @foreach (var item in MainNavigation.Items)

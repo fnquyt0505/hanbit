@@ -1,9 +1,11 @@
 using System.Text.Json;
 
 using Hanbit.Application.Abstractions;
+using Hanbit.Application.Progress;
 using Hanbit.Domain.Content;
 using Hanbit.Domain.Hangul;
 using Hanbit.Web.Models.Hangul;
+using Hanbit.Web.Models.Progress;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -86,6 +88,57 @@ public sealed class HangulApiController(IContentRepository contentRepository) : 
         }
 
         return new QuizCheckResponse(check.Correct, check.CorrectAnswer, check.LetterChar, check.Romanization);
+    }
+
+    /// <summary>
+    /// <c>POST /api/hangul/quiz/complete</c> <c>{ group, answers[{kind, prompt, answer}], previous, activity }</c> — chấm lại
+    /// mọi câu ở server, XP 5 + 1/câu đúng, bản ghi key <c>hangul/{group}</c> (cùng dạng phản hồi với hoàn thành bài học).
+    /// </summary>
+    [HttpPost("quiz/complete")]
+    [ProducesResponseType<CompleteLessonResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<CompleteLessonResponse>> CompleteQuiz(
+        HangulQuizCompleteRequest request, [FromServices] ProgressService progressService, CancellationToken cancellationToken)
+    {
+        var letters = await GroupLettersAsync(request.Group, cancellationToken);
+        var answers = request.Answers ?? [];
+        var activity = request.Activity ?? [];
+        if (letters is null || answers.Count is 0 or > HangulQuizCompleteRequest.MaxAnswers || activity.Count > CompleteLessonRequest.MaxActivity)
+        {
+            ModelState.AddModelError("request", "Nhóm chữ không hợp lệ hoặc số câu trả lời không hợp lệ.");
+            return ValidationProblem(ModelState);
+        }
+
+        var parsed = new List<HangulQuizAnswer>();
+        foreach (var answer in answers)
+        {
+            if (!TryParseKind(answer.Kind, out var kind) || answer.Prompt is null)
+            {
+                ModelState.AddModelError(nameof(request.Answers), "Câu trả lời thiếu dạng câu hoặc câu hỏi.");
+                return ValidationProblem(ModelState);
+            }
+
+            parsed.Add(new HangulQuizAnswer(kind, answer.Prompt, answer.Answer ?? string.Empty));
+        }
+
+        var result = progressService.CompleteHangulQuiz(letters, parsed, request.Previous, activity);
+        if (result is null)
+        {
+            ModelState.AddModelError(nameof(request.Answers), "Có câu hỏi không thuộc nhóm chữ này.");
+            return ValidationProblem(ModelState);
+        }
+
+        return new CompleteLessonResponse(
+            $"{ProgressService.HangulKeyPrefix}{request.Group}",
+            result.Record,
+            result.Cards,
+            result.Activity,
+            result.XpEarned,
+            result.Streak,
+            result.Correct,
+            result.Total,
+            result.Score,
+            result.Activity[^1].Date);
     }
 
     private async Task<IReadOnlyList<HangulLetter>?> GroupLettersAsync(string? group, CancellationToken cancellationToken)

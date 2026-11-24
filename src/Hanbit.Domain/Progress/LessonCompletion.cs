@@ -56,7 +56,31 @@ public static class LessonCompletion
             }
         }
 
-        var xp = XpRules.ForLesson(correct);
+        return Finish(record, cards, activity, XpRules.ForLesson(correct), correct, total, score, today);
+    }
+
+    /// <summary>
+    /// Hoàn thành quiz Hangul một nhóm: bản ghi (key <c>hangul/{nhóm}</c>), XP 5 + 1/câu đúng, cộng hoạt động + streak.
+    /// Không tạo thẻ ôn (chữ cái ôn qua trang Hangul).
+    /// </summary>
+    public static LessonCompletionResult CompleteHangulQuiz(
+        LessonRecord? previous,
+        int correct,
+        int total,
+        IReadOnlyList<DailyActivity> activity,
+        DateTimeOffset now,
+        DateOnly today)
+    {
+        correct = Math.Clamp(correct, 0, Math.Max(0, total));
+        var score = total > 0 ? (int)Math.Round(correct * 100.0 / total) : 0;
+        var record = new LessonRecord(LessonStatus.Completed, Math.Max(score, previous?.BestScore ?? 0), now);
+        return Finish(record, [], activity, XpRules.ForHangulQuiz(correct), correct, total, score, today);
+    }
+
+    private static LessonCompletionResult Finish(
+        LessonRecord record, IReadOnlyList<ReviewCard> cards, IReadOnlyList<DailyActivity> activity,
+        int xp, int correct, int total, int score, DateOnly today)
+    {
         var newActivity = StreakCalculator.AddActivity(activity, today, xp, reviews: 0);
         return new LessonCompletionResult(record, cards, newActivity, xp, StreakCalculator.Calculate(newActivity, today), correct, total, score);
     }

@@ -17,6 +17,7 @@
     <script type="module" src="~/js/theme.js" asp-append-version="true"></script>
     <script type="module" src="~/js/ui.js" asp-append-version="true"></script>
     <script type="module" src="~/js/audio-button.js" asp-append-version="true"></script>
+    <script type="module" src="~/js/progress-summary.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Head", required: false)
     <script defer src="~/lib/alpinejs/alpine.min.js" asp-append-version="true"></script>
 </head>
@@ -26,10 +27,11 @@
     </a>
     <partial name="_Sidebar" />
     <div class="flex min-h-dvh flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-60">
-        <header class="flex items-center border-b border-border bg-surface px-4 py-3 lg:hidden" data-testid="mobile-header">
+        <header class="flex items-center justify-between border-b border-border bg-surface px-4 py-3 lg:hidden" data-testid="mobile-header">
             <a href="/" class="flex items-baseline gap-2 text-lg font-bold">
                 Hanbit <span lang="ko" class="font-ko text-ink-muted">한빛</span>
             </a>
+            <partial name="_StreakBadge" />
         </header>
         <main id="noi-dung" tabindex="-1" class="flex-1">
             @RenderBody()
