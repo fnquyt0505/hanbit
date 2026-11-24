@@ -1,6 +1,7 @@
 // CourseMap (T4.1): trạng thái từng bài — completed | open | locked.
 // Quy tắc: bài đã hoàn thành → completed; bài đầu tiên chưa hoàn thành → open; còn lại → locked.
-// Giai đoạn 5 (T5.4): completedLessons() đọc từ progress-store.js. KHÔNG đọc localStorage trực tiếp.
+// Bài đã hoàn thành đọc qua progress-store.js (T5.3). KHÔNG đọc localStorage trực tiếp.
+import { completedLessons as storedCompletedLessons } from './progress-store.js';
 
 /** Tính trạng thái cho danh sách khóa bài (theo thứ tự) từ tập bài đã hoàn thành. */
 export function lessonStates(keys, completed) {
@@ -19,9 +20,9 @@ export function lessonStates(keys, completed) {
   return states;
 }
 
-/** Bài đã hoàn thành — chưa có tiến độ cho tới giai đoạn 5. */
+/** Bài đã hoàn thành (từ localStorage qua progress-store). */
 export function completedLessons() {
-  return new Set();
+  return storedCompletedLessons();
 }
 
 document.addEventListener('alpine:init', () => {

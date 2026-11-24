@@ -1,5 +1,6 @@
 // Chế độ giao diện: "system" (theo hệ điều hành), "light", "dark" → thuộc tính data-theme trên <html>.
-// Lựa chọn chưa được lưu lại giữa các lần tải trang (xem câu hỏi trong docs/PROGRESS.md).
+// Lựa chọn lưu qua progress-store.js (khóa hanbit.settings.v1); script trong <head> của _Layout áp lại trước khi vẽ.
+import { saveSettings } from './progress-store.js';
 
 export const THEME_MODES = ['system', 'light', 'dark'];
 
@@ -24,6 +25,7 @@ document.addEventListener('alpine:init', () => {
     select(mode) {
       this.mode = mode;
       applyTheme(mode);
+      saveSettings({ theme: mode });
     },
   }));
 });

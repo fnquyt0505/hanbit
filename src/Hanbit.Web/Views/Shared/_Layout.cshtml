@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Hanbit</title>
     <meta name="description" content="@(ViewData["Description"] as string ?? "Hanbit (한빛) — web học tiếng Hàn miễn phí cho người Việt.")" />
+    @* Áp chế độ sáng/tối đã lưu TRƯỚC khi vẽ (tránh nháy). Chỉ ĐỌC khóa do progress-store.js ghi — ngoại lệ đã chốt 2026-11-23. *@
+    <script>try{var t=JSON.parse(localStorage.getItem('hanbit.settings.v1')||'{}').theme;if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />

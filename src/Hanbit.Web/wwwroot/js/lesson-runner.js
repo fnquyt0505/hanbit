@@ -1,6 +1,7 @@
 // Màn học (T4.4): từ vựng → ngữ pháp → bài tập (chấm qua POST /api/exercises/check) → kết thúc.
 // Dữ liệu: <script type="application/json" id="lesson-data"> (bài tập KHÔNG đáp án).
 import { speak } from './speech.js';
+import { applyLessonResult, lessonContext } from './progress-store.js';
 
 /** Loại bài tập màn học hỗ trợ hiển thị. */
 export const SUPPORTED_TYPES = ['multiple_choice', 'listen_choose', 'match_pairs', 'reorder', 'type_answer'];
@@ -83,6 +84,38 @@ document.addEventListener('alpine:init', () => {
         window.location.reload();
       },
 
+      // ── Hoàn thành: server chấm lại + tính XP/thẻ/streak, progress-store lưu (T5.3) ──
+      saved: null, // null | 'saving' | 'saved' | 'failed'
+      completion: null, // phản hồi POST /complete
+      async finish() {
+        this.phase = 'done';
+        window.scrollTo({ top: 0 });
+        await this.saveProgress();
+      },
+      async saveProgress() {
+        this.saved = 'saving';
+        const lessonKey = `${this.course}/${this.lesson}`;
+        try {
+          const response = await fetch(`/api/lessons/${encodeURIComponent(this.course)}/${encodeURIComponent(this.lesson)}/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              answers: this.answers.map((a) => ({ exerciseId: a.exerciseId, answer: a.answer })),
+              ...lessonContext(lessonKey),
+            }),
+          });
+          if (!response.ok) {
+            throw new Error(String(response.status));
+          }
+          this.completion = await response.json();
+          applyLessonResult(this.completion);
+          this.saved = 'saved';
+        } catch {
+          this.saved = 'failed';
+          window.Alpine.store('toast')?.show('Không lưu được tiến độ. Kiểm tra kết nối rồi bấm "Lưu lại".', 'danger', 6000);
+        }
+      },
+
       // ── Từ vựng & ngữ pháp ──
       nextVocab() {
         if (this.vocabIndex < this.vocabCount - 1) {
@@ -109,7 +142,11 @@ document.addEventListener('alpine:init', () => {
         }
       },
       goTo(phase) {
-        this.phase = phase === 'exercises' && this.exercises.length === 0 ? 'done' : phase;
+        if (phase === 'exercises' && this.exercises.length === 0) {
+          this.finish();
+          return;
+        }
+        this.phase = phase;
         if (this.phase === 'exercises') {
           this.onExerciseShown();
         }
@@ -153,7 +190,7 @@ document.addEventListener('alpine:init', () => {
             throw new Error(String(response.status));
           }
           this.result = await response.json();
-          this.answers.push({ exerciseId: this.exercise.id, correct: this.result.correct, vocabId: this.result.vocabId ?? null });
+          this.answers.push({ exerciseId: this.exercise.id, correct: this.result.correct, vocabId: this.result.vocabId ?? null, answer });
         } catch {
           this.selected = null;
           this.error = 'Không chấm được câu này. Bạn thử lại nhé.';
@@ -227,7 +264,7 @@ document.addEventListener('alpine:init', () => {
 
       next() {
         if (this.exIndex >= this.exercises.length - 1) {
-          this.phase = 'done';
+          this.finish();
           return;
         }
         this.exIndex++;
