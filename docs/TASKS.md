@@ -31,7 +31,7 @@
 - [x] **T2.2** Trang chủ `/`: hero, 3 lợi ích, CTA "Bắt đầu miễn phí". DoD: responsive, Lighthouse ≥ 90. *(Lighthouse mobile trên production: 95 · 96 · 100 · 100.)*
 - [x] **T2.2a** Trang lỗi thân thiện: `UseStatusCodePagesWithReExecute("/loi/{0}")` (trừ `/api/*`) → trang 404/lỗi trong layout, giữ mã HTTP gốc, nút "Về trang chủ". DoD: test Web + E2E.
 - [x] **T2.3** `/nguon-du-lieu`: ghi công 국립국어원 · 한국어기초사전, giấy phép, link gốc.
-- [ ] **T2.4** `/dashboard` với skeleton (dữ liệu điền bằng JS ở giai đoạn 5).
+- [x] **T2.4** `/dashboard` với skeleton (dữ liệu điền bằng JS ở giai đoạn 5).
 
 ## Giai đoạn 3 — Hangul & âm thanh
 
