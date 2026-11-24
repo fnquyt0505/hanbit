@@ -46,7 +46,7 @@
 - [x] **T4.2** `ExerciseGenerator` + `AnswerChecker` (Domain) — 5 loại, NFC, chuẩn hóa khoảng trắng. DoD: unit test.
 - [x] **T4.3** `GET /api/lessons/{c}/{l}` (DTO không đáp án) + `POST /api/exercises/check`. DoD: integration test; HTML/JSON không lộ đáp án.
 - [x] **T4.4** `/learn/{c}/{l}` + `lesson-runner.js`: từ vựng → ngữ pháp → bài tập (`multiple_choice`, `listen_choose`).
-- [ ] **T4.5** UI `match_pairs`, `reorder`, `type_answer`.
+- [x] **T4.5** UI `match_pairs`, `reorder`, `type_answer`.
 - [ ] **T4.6** Màn tổng kết: điểm, từ sai (XP/lưu ở giai đoạn 5).
 
 ## Giai đoạn 5 — Tiến độ chế độ khách

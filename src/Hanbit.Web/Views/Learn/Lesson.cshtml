@@ -155,6 +155,78 @@
                     </ul>
                 </template>
 
+                @* match_pairs: chạm trái rồi phải để nối; chạm cặp đã nối để gỡ *@
+                <template x-if="exercise.type === 'match_pairs'">
+                    <div data-testid="match">
+                        <p class="text-lg font-semibold" x-text="exercise.prompt"></p>
+                        <p class="mt-1 text-sm text-ink-muted">Chạm một từ bên trái, rồi chạm nghĩa bên phải.</p>
+                        <div class="mt-5 grid grid-cols-2 gap-3">
+                            @foreach (var side in new[] { "left", "right" })
+                            {
+                                <ul class="space-y-2" data-side="@side">
+                                    <template x-for="value in exercise.@side" x-bind:key="value">
+                                        <li>
+                                            <button type="button" x-on:click="@(side == "left" ? "tapLeft(value)" : "tapRight(value)")" x-bind:disabled="!!result || loading"
+                                                    x-bind:data-value="value" x-bind:aria-pressed="(matchLeft === value || pairNumber('@side', value) > 0).toString()"
+                                                    class="flex min-h-12 w-full items-center gap-2 rounded-xl border-2 bg-surface px-3 py-2 text-left transition duration-150 ease-out"
+                                                    x-bind:class="{
+                                                        'border-border hover:border-secondary': matchLeft !== value && pairNumber('@side', value) === 0,
+                                                        'border-secondary': matchLeft === value,
+                                                        'border-secondary bg-bg': pairNumber('@side', value) > 0,
+                                                    }">
+                                                <span x-show="pairNumber('@side', value) > 0" class="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-bg" x-text="pairNumber('@side', value)"></span>
+                                                @if (side == "left")
+                                                {
+                                                    <span lang="ko" class="font-ko text-lg" x-text="value"></span>
+                                                }
+                                                else
+                                                {
+                                                    <span x-text="value"></span>
+                                                }
+                                            </button>
+                                        </li>
+                                    </template>
+                                </ul>
+                            }
+                        </div>
+                        <div class="mt-6" x-show="!result"><hb-button size="lg" block="true" x-on:click="submitMatch()" x-bind:disabled="!matchComplete || loading" data-testid="check">Kiểm tra</hb-button></div>
+                    </div>
+                </template>
+
+                @* reorder: chạm mảnh để xếp câu; chạm mảnh đã xếp để trả lại *@
+                <template x-if="exercise.type === 'reorder'">
+                    <div data-testid="reorder">
+                        <p class="text-lg font-semibold" x-text="exercise.prompt"></p>
+                        <div class="mt-5 flex min-h-14 flex-wrap items-center gap-2 rounded-xl border-2 border-dashed border-border p-2" aria-label="Câu của bạn" data-testid="reorder-answer">
+                            <template x-for="(tokenIndex, position) in order" x-bind:key="tokenIndex">
+                                <button type="button" lang="ko" class="font-ko rounded-lg border border-secondary bg-bg px-3 py-2 text-lg" x-on:click="unpickToken(position)"
+                                        x-bind:disabled="!!result || loading" x-text="exercise.tokens[tokenIndex]"></button>
+                            </template>
+                            <span x-show="order.length === 0" class="px-2 text-sm text-ink-muted">Chạm các mảnh bên dưới theo đúng thứ tự</span>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-2" data-testid="reorder-bank">
+                            <template x-for="(token, i) in exercise.tokens" x-bind:key="i">
+                                <button type="button" lang="ko" class="font-ko rounded-lg border border-border bg-surface px-3 py-2 text-lg hover:border-secondary disabled:opacity-30"
+                                        x-on:click="pickToken(i)" x-bind:disabled="order.includes(i) || !!result || loading" x-text="token"></button>
+                            </template>
+                        </div>
+                        <div class="mt-6" x-show="!result"><hb-button size="lg" block="true" x-on:click="submitOrder()" x-bind:disabled="!orderComplete || loading" data-testid="check">Kiểm tra</hb-button></div>
+                    </div>
+                </template>
+
+                @* type_answer: gõ câu trả lời (cần bàn phím tiếng Hàn khi đáp án là chữ Hàn) *@
+                <template x-if="exercise.type === 'type_answer'">
+                    <form x-on:submit.prevent="submitText()" data-testid="type">
+                        <label for="type-answer" class="text-lg font-semibold" x-text="exercise.prompt"></label>
+                        <input id="type-answer" type="text" x-model="text" x-bind:disabled="!!result || loading" x-init="$nextTick(() => $el.focus())"
+                               autocomplete="off" autocapitalize="off" spellcheck="false" lang="ko"
+                               class="font-ko mt-4 block h-14 w-full rounded-xl border-2 border-border bg-bg px-4 text-xl outline-none focus:border-secondary"
+                               x-bind:class="{ 'border-success': result?.correct, 'border-danger': result && !result.correct }" data-testid="type-input" />
+                        <p class="mt-2 text-sm text-ink-muted">Gõ bằng bàn phím tiếng Hàn (두벌식). Dấu câu và khoảng trắng thừa được bỏ qua.</p>
+                        <div class="mt-6" x-show="!result"><hb-button type="submit" size="lg" block="true" x-bind:disabled="!text.trim() || loading" data-testid="check">Kiểm tra</hb-button></div>
+                    </form>
+                </template>
+
                 @* Phản hồi: đúng/sai + đáp án + giải thích *@
                 <div x-show="result" aria-live="polite" class="mt-6" data-testid="exercise-feedback">
                     <p x-show="result?.correct" class="font-semibold text-success-ink">Chính xác! 🎉</p>

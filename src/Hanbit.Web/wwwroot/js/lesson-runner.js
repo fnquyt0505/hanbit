@@ -3,7 +3,7 @@
 import { speak } from './speech.js';
 
 /** Loại bài tập màn học hỗ trợ hiển thị. */
-export const SUPPORTED_TYPES = ['multiple_choice', 'listen_choose'];
+export const SUPPORTED_TYPES = ['multiple_choice', 'listen_choose', 'match_pairs', 'reorder', 'type_answer'];
 
 document.addEventListener('alpine:init', () => {
   window.Alpine.data('lessonRunner', () => {
@@ -134,6 +134,61 @@ document.addEventListener('alpine:init', () => {
         }
         return this.selected === index ? 'wrong' : 'idle';
       },
+      // ── match_pairs ──
+      matchLeft: null,
+      pairs: [], // [{ left, right }]
+      pairNumber(side, value) {
+        return this.pairs.findIndex((p) => p[side] === value) + 1;
+      },
+      tapLeft(value) {
+        if (this.result || this.loading) return;
+        const paired = this.pairNumber('left', value);
+        if (paired) {
+          this.pairs.splice(paired - 1, 1);
+          return;
+        }
+        this.matchLeft = this.matchLeft === value ? null : value;
+      },
+      tapRight(value) {
+        if (this.result || this.loading) return;
+        const paired = this.pairNumber('right', value);
+        if (paired) {
+          this.pairs.splice(paired - 1, 1);
+          return;
+        }
+        if (this.matchLeft !== null) {
+          this.pairs.push({ left: this.matchLeft, right: value });
+          this.matchLeft = null;
+        }
+      },
+      get matchComplete() {
+        return this.exercise?.left && this.pairs.length === this.exercise.left.length;
+      },
+      submitMatch() {
+        if (this.matchComplete) this.submit({ pairs: this.pairs });
+      },
+
+      // ── reorder ──
+      order: [], // chỉ số trong exercise.tokens theo thứ tự đã chọn
+      pickToken(i) {
+        if (!this.result && !this.loading && !this.order.includes(i)) this.order.push(i);
+      },
+      unpickToken(position) {
+        if (!this.result && !this.loading) this.order.splice(position, 1);
+      },
+      get orderComplete() {
+        return this.exercise?.tokens && this.order.length === this.exercise.tokens.length;
+      },
+      submitOrder() {
+        if (this.orderComplete) this.submit({ tokens: this.order.map((i) => this.exercise.tokens[i]) });
+      },
+
+      // ── type_answer ──
+      text: '',
+      submitText() {
+        if (this.text.trim() && !this.result && !this.loading) this.submit({ text: this.text });
+      },
+
       next() {
         if (this.exIndex >= this.exercises.length - 1) {
           this.phase = 'done';
@@ -142,6 +197,10 @@ document.addEventListener('alpine:init', () => {
         this.exIndex++;
         this.selected = null;
         this.result = null;
+        this.matchLeft = null;
+        this.pairs = [];
+        this.order = [];
+        this.text = '';
         this.onExerciseShown();
       },
     };
