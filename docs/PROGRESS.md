@@ -7,9 +7,9 @@
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Giai đoạn                     | 2 — Layout & điều hướng                                                                                                   |
-| Task đang làm                 | —                                                                                                                           |
+| Task đang làm                 | **T2.2** — code xong, chờ người dùng đo Lighthouse (câu hỏi 11) |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T2.2** Trang chủ `/`: hero, 3 lợi ích, CTA "Bắt đầu miễn phí" |
+| Task tiếp theo                 | **T2.3** `/nguon-du-lieu`: ghi công, giấy phép, link gốc |
 | Việc song song (người dùng) | Duyệt ngữ pháp + bài tập AI soạn ở T1.8 (câu hỏi 10) · (tùy chọn) sửa nghĩa krdict chưa tự nhiên (câu hỏi 9) |
 | Blocker                         | —                                                                                                                           |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T2.2 Trang chủ (chờ đo Lighthouse)
+- Đã làm: `Views/Home/Index.cshtml` — hero (tiêu đề, mô tả, CTA "Bắt đầu miễn phí" → `/hangul` theo user flow PRD §6, nút phụ "Xem lộ trình" → `/learn/beginner`, thẻ minh họa 안녕하세요), 3 lợi ích (Hangul từ con số 0 · Giải thích bằng tiếng Việt · Ôn đúng lúc sắp quên), CTA cuối trang. `_Layout` thêm `<meta name="description">` (đặt qua `ViewData["Description"]`). Bỏ khối thử Alpine tạm thời (Alpine vẫn được E2E kiểm qua bộ chuyển theme ở `/styleguide`).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ Web 44/44, E2E 25/25 (CTA mobile full-width & cao ≥ 48px, không cuộn ngang ở 320/390/1280px) · ảnh chụp mobile/desktop OK.
+- Vấn đề / ghi chú: **chưa đo Lighthouse** — AI không được phép tải/chạy `npx lighthouse`; người dùng đo bằng Chrome DevTools trên https://hanbit.onrender.com sau deploy (câu hỏi 11). Link CTA tới `/hangul` 404 cho tới T3.2.
+- Tiếp theo: người dùng gửi điểm Lighthouse → đóng T2.2 → T2.3
 
 ### 2026-11-24 — T2.1 Layout: sidebar, bottom nav, footer ghi công
 - Đã làm: `Models/Shared/Navigation.cs` (`MainNavigation.Items` dùng chung: Tổng quan `/dashboard`, Hangul `/hangul`, Bài học `/learn/beginner`, Ôn tập `/review`, Hồ sơ `/profile`; `NavItem.IsActive` so tiền tố theo segment, không phân biệt hoa thường). Partial `_Sidebar` (desktop ≥ 1024px, `lg`), `_BottomNav` (mobile + tablet, 5 cột, chừa `safe-area-inset-bottom`), `_NavIcon` (SVG nội tuyến tự vẽ + chữ 한 cho Hangul, `aria-hidden`), `_Footer` (ghi công *한국어기초사전 © 국립국어원, CC BY-SA 2.0 KR* + link krdict, giấy phép, `/nguon-du-lieu`). `_Layout`: link "Bỏ qua điều hướng", header thương hiệu trên mobile, `aria-current="page"` cho mục đang ở, nội dung chừa chỗ cho bottom nav. Toast nâng lên trên bottom nav tới `lg`. Fixture E2E nhận thêm `viewport`.
@@ -187,6 +193,7 @@
 9. **Nghĩa duyệt hàng loạt (T1.7):** 150 từ đợt 1 dùng nghĩa krdict nguyên bản. Khi soạn bài (T1.8) nếu gặp nghĩa chưa tự nhiên, AI sẽ liệt kê để người dùng quyết sửa qua `nghia_moi` (xuất lại bằng `review-export` không lấy từ đã duyệt → cần sửa trực tiếp `vocab-reviews.json` hoặc một CSV mới chỉ chứa các id cần sửa).
    Gặp khi soạn T1.8 (đề xuất, chờ người dùng quyết): 저 (kd-44506) = "em, con, cháu" → thiếu "tôi (khiêm nhường)" · 안녕히 (kd-28415) = "một cách an lành" → thêm "(안녕히 가세요/계세요: tạm biệt)" · 다니다 (kd-29702) = "lui tới; ghé qua; **l**đi làm, đi học" — lỗi gõ từ krdict · 나라 (kd-29699) = "…; quốc gia." — trùng + dấu chấm · 반갑다 (kd-70861) = "hân hoan, vui sướng, hân hạnh" → "vui mừng (được gặp)" · 경찰 (kd-25949) = "(cơ quan) cảnh sát; (viên) cảnh sát" → "cảnh sát".
 10. **Duyệt nội dung AI soạn ở T1.8:** `content/grammar/beginner.json` (giải thích + câu ví dụ) và bài tập trong `content/courses/beginner/lessons/*.json`. Duyệt xong → xóa comment "chờ người dùng duyệt" ở đầu file.
+11. **Lighthouse trang chủ (DoD T2.2):** mở https://hanbit.onrender.com (đợi hết cold start) → DevTools → Lighthouse → Mobile → Analyze; gửi 4 điểm Performance / Accessibility / Best Practices / SEO (mục nào < 90 thì gửi kèm danh sách gợi ý).
 
 ## 📝 Quyết định đã chốt
 

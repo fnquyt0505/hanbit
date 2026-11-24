@@ -1,3 +1,5 @@
+using Microsoft.Playwright;
+
 using Shouldly;
 
 namespace Hanbit.E2E;
@@ -32,16 +34,33 @@ public class HomePageTests(WebServerFixture server)
     }
 
     [Fact]
-    public async Task ClickToggle_AlpineComponent_ShowsPanel()
+    public async Task Mobile_HeroCta_IsVisibleFullWidthAndTallEnough()
     {
-        var page = await server.NewPageAsync();
+        var page = await server.NewPageAsync(viewport: new ViewportSize { Width = 390, Height = 844 });
         await page.GotoAsync(server.BaseUrl);
-        var panel = page.GetByTestId("alpine-panel");
-        (await panel.IsVisibleAsync()).ShouldBeFalse();
 
-        await page.GetByTestId("alpine-toggle").ClickAsync();
+        var cta = page.GetByTestId("cta-start");
+        (await cta.IsVisibleAsync()).ShouldBeTrue();
+        (await cta.GetAttributeAsync("href")).ShouldBe("/hangul");
 
-        await panel.WaitForAsync();
-        (await panel.IsVisibleAsync()).ShouldBeTrue();
+        var box = await cta.BoundingBoxAsync();
+        box.ShouldNotBeNull();
+        box.Height.ShouldBeGreaterThanOrEqualTo(48);
+        box.Width.ShouldBeGreaterThan(390 - 2 * 16 - 1);
+    }
+
+    [Theory]
+    [InlineData(320)]
+    [InlineData(390)]
+    [InlineData(1280)]
+    public async Task HomePage_HasNoHorizontalScroll(int width)
+    {
+        var page = await server.NewPageAsync(viewport: new ViewportSize { Width = width, Height = 800 });
+        await page.GotoAsync(server.BaseUrl);
+
+        var overflow = await page.EvaluateAsync<bool>(
+            "() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
+
+        overflow.ShouldBeFalse();
     }
 }

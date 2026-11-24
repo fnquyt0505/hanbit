@@ -35,7 +35,8 @@ public class LayoutTests(WebApplicationFactory<Program> factory)
     [Fact]
     public async Task Layout_LinksEveryNavItem_InSidebarAndBottomNav()
     {
-        var html = await GetHtmlAsync("/");
+        // Trang không tự chứa link điều hướng → mỗi href xuất hiện đúng 2 lần (sidebar + bottom nav).
+        var html = await GetHtmlAsync("/styleguide");
 
         foreach (var item in MainNavigation.Items)
         {
