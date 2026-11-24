@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 5 — Tiến độ chế độ khách ✅ xong → tiếp theo 6 — Ôn tập SRS (chờ người dùng) |
+| Giai đoạn                     | 6 — Ôn tập SRS |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T6.1** `Sm2Scheduler` thuần + test 4 grade và biên |
+| Task tiếp theo                 | **T6.2** `POST /api/reviews/due`, `POST /api/reviews/grade` |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T6.1 Sm2Scheduler
+- Đã làm: Domain `Srs/Sm2Scheduler`: `ReviewGrade` (Again 0 / Hard 1 / Good 2 / Easy 3), `Schedule(card, grade, now)` thuần theo quy ước ở Quyết định, `PreviewIntervals` (khoảng ôn của từng mức — cho nút đánh giá). Ease làm tròn 2 chữ số, NaN → mặc định 2,5.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Domain +17: Again, 3 mức ở lần 1/lần 2/thẻ trưởng thành, biên ease 1,3/5, khoảng 3650, Again rồi Good bắt đầu lại 1 ngày, đến hạn 00:00 giờ VN khi gần nửa đêm UTC, preview).
+- Tiếp theo: T6.2
 
 ### 2026-11-24 — T5.5 Xuất/nhập tiến độ + POST /api/progress/validate
 - Đã làm: Domain `ProgressSanitizer` (kẹp giới hạn thay vì từ chối: ease 1,3–5, interval 0–3650, lặp 0–1000, điểm 0–100, XP ≥ 0, ngày tương lai → hiện tại; bỏ key bài sai mẫu `khóa/bài`, thẻ rỗng/trùng, key thẻ = itemId; hoạt động gộp trùng ngày, bỏ ngày tương lai/quá 365 ngày; trả cảnh báo tiếng Việt). Application `ProgressImporter` (kiểm tra `schemaVersion` → chuỗi migrate theo phiên bản (schema 1 là bản đầu, chưa có bước) → đọc `LearnerProgress` → làm sạch; schema mới hơn/thiếu/sai kiểu → lỗi). API `POST /api/progress/validate` (thân = file sao lưu, ≤ 5 MB) → `{ progress, warnings }` hoặc 400. `progress-store.js`: `backupFileName` (`hanbit-backup-YYYYMMDD.json`), `exportJson`, `replaceProgress`, `clearProgress`. Trang `/profile` (`ProfileController` + `profile.js`): số liệu (XP, bài xong, từ đã học), Xuất tiến độ (tải file), Nhập tiến độ (server kiểm tra → khung xác nhận so sánh hiện tại/tệp + cảnh báo → Khôi phục/Hủy), Xóa tiến độ có xác nhận.
@@ -348,6 +353,7 @@
 | 2026-11-24      | Nội dung tự biên soạn (`hangul.json`, `grammar/`, `courses/`): **giữ mọi quyền**                                                  | Có thể mở giấy phép sau; CC thì không rút lại được                           |
 | 2026-11-24      | Phát âm chữ cái: phụ âm (cơ bản + kép) đọc ghép với ㅏ (ㄱ → 가), nguyên âm đọc với ㅇ câm (ㅏ → 아); `speech.js` ưu tiên giọng Natural/Online/Google, lỗi → giọng cục bộ | Người dùng: giọng máy tính khó nghe; chỉ cần ghép phụ âm với ㅏ (câu hỏi 12) |
 | 2026-11-24      | XP theo số câu đúng: bài học 10 + 1/câu đúng, quiz Hangul 5 + 1/câu đúng, ôn thẻ 1/thẻ, học lại vẫn được XP · streak: ngày có ≥ 1 XP (giờ Việt Nam) · mở khóa bài sau khi **hoàn thành** bài trước (không cần điểm) · hoàn thành bài → **mọi từ** thành thẻ SRS (từ sai đến hạn hôm nay, từ đúng ngày mai) | Người dùng chọn phương án đề xuất (giai đoạn 5) |
+| 2026-11-24      | SM-2 rút gọn: Again → lặp 0, đến hạn ngay (ôn lại trong phiên), ease −0,20 · Hard 1 → 1 → ×1,2, ease −0,15 · Good 1 → 3 → ×ease · Easy 3 → 6 → ×ease×1,3, ease +0,15 · ease 1,3–5, khoảng ≤ 3650 ngày, đến hạn 00:00 giờ VN | AI chọn theo SM-2 phổ biến (ARCHITECTURE §7 chỉ nêu khung); hằng số trong `Sm2Scheduler` |
 
 ---
 
