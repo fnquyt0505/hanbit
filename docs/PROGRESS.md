@@ -9,7 +9,7 @@
 | Giai đoạn                     | 3 — Hangul & âm thanh                                                                                                     |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T3.3** `HangulComposer` + `GET /api/hangul/compose` + bảng ghép âm |
+| Task tiếp theo                 | **T3.4** `/hangul/{group}`: học từng chữ + quiz 10 câu |
 | Việc song song (người dùng) | Nghe thử phát âm T3.1 (câu hỏi 12) · Duyệt ngữ pháp + bài tập AI soạn ở T1.8 (câu hỏi 10) · (tùy chọn) sửa nghĩa krdict (câu hỏi 9) |
 | Blocker                         | —                                                                                                                           |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T3.3 Ghép âm: HangulComposer + API + bảng ghép âm
+- Đã làm: Domain `HangulComposer.TryCompose(c, v, f?)` (chữ cái tương thích → âm tiết theo công thức Unicode qua `HangulSyllable` + romanization qua `RomanizationService`; lỗi trả về `ComposeError(field, thông báo tiếng Việt)` thay vì exception; danh sách 19 đầu / 21 nguyên âm / 27 cuối). `Controllers/Api/HangulApiController`: `GET /api/hangul/compose?c=&v=&f=` → `{ syllable, romanization, initial, vowel, final }` (camelCase) hoặc 400 `ValidationProblemDetails` theo tham số. Partial `Hangul/_Composer` trên `/hangul#ghep-am`: âm tiết lớn + công thức + romanization + nút Nghe, 3 nhóm nút chọn (`aria-pressed`, bấm lại phụ âm cuối để bỏ), mặc định 가 render ở server; `wwwroot/js/hangul-composer.js` (Alpine `hangulComposer`, `AbortController` chống kết quả cũ ghi đè, lỗi hiện `role="alert"`).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 399/399 (Domain +23 gồm duyệt đủ 11.172 âm tiết; Web +8 integration API: 200/400 ProblemDetails, camelCase; E2E +3: mặc định 가, ㅎ+ㅏ+ㄴ → 한/han rồi bỏ phụ âm cuối → 하, không cuộn ngang 320px).
+- Tiếp theo: T3.4
 
 ### 2026-11-24 — T3.2 Trang /hangul
 - Đã làm: `HangulController` (`GET /hangul`, đọc qua `IContentRepository`) + `Models/Hangul/HangulViewModels.cs`: `HangulGroupInfo` (4 nhóm theo thứ tự học **nguyên âm cơ bản → phụ âm cơ bản → nguyên âm ghép → phụ âm kép**, slug `nguyen-am`/`phu-am`/`nguyen-am-ghep`/`phu-am-kep` cho T3.4), `HangulTileViewModel` (chữ được đọc: phụ âm → tên chữ `name_ko` VD 기역; nguyên âm → âm tiết ㅇ câm VD 아). Domain: `HangulSyllable.VowelSyllable` + `SilentInitial`. Partial `_HangulTile` (ô vuông, chữ lớn Noto Serif KR, romanization, tên chữ; bấm để nghe qua Alpine `audioButton`; `data-letter-id`, `data-state="new"` chờ tiến độ giai đoạn 5). View `Hangul/Index` (lưới 4/5/7 cột).

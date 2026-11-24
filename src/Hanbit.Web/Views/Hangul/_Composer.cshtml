@@ -1,0 +1,71 @@
+@using System.Text.Json
+@using Hanbit.Domain.Hangul
+@model ComposedSyllable
+@* Bảng ghép âm (T3.3): Alpine hangulComposer (wwwroot/js/hangul-composer.js) → GET /api/hangul/compose. *@
+@{
+    var initial = JsonSerializer.Serialize(new
+    {
+        c = Model.Initial.ToString(),
+        v = Model.Vowel.ToString(),
+        f = Model.Final?.ToString(),
+        syllable = Model.Syllable.ToString(),
+        romanization = Model.Romanization,
+    });
+    const string Jamo = "font-ko inline-flex size-10 items-center justify-center rounded-lg border border-border bg-surface text-lg hover:border-secondary aria-pressed:border-secondary aria-pressed:bg-secondary aria-pressed:text-bg";
+}
+
+<section class="mt-12 rounded-2xl border border-border bg-surface p-4 sm:p-6" id="ghep-am" aria-labelledby="composer-title"
+         x-data="@($"hangulComposer({initial})")" data-testid="composer">
+    <h2 id="composer-title" class="text-xl font-bold">Bảng ghép âm</h2>
+    <p class="mt-1 text-ink-muted">Chọn phụ âm đầu và nguyên âm (thêm phụ âm cuối nếu muốn) để tạo âm tiết.</p>
+
+    @* Kết quả *@
+    <div class="mt-6 flex flex-wrap items-center gap-6" aria-live="polite">
+        <p lang="ko" class="font-hangul text-hangul-display leading-none" data-testid="composer-syllable" x-text="syllable"
+           x-bind:class="{ 'opacity-50': loading }">@Model.Syllable</p>
+        <div>
+            <p class="text-lg text-ink-muted"><span lang="ko" class="font-ko" x-text="formula">@Model.Initial + @Model.Vowel</span></p>
+            <p class="text-xl italic" data-testid="composer-romanization" x-text="romanization">@Model.Romanization</p>
+            <button type="button" x-on:click="listen()" data-testid="composer-listen"
+                    class="mt-2 inline-flex h-11 items-center gap-2 rounded-full border border-border px-4 hover:border-secondary hover:text-secondary">
+                <svg aria-hidden="true" focusable="false" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 5 6 9H3v6h3l5 4z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M18.5 5.5a9 9 0 0 1 0 13" />
+                </svg>
+                Nghe
+            </button>
+        </div>
+    </div>
+    <p x-show="error" x-cloak x-text="error" role="alert" class="mt-3 text-danger" data-testid="composer-error"></p>
+
+    @* Chọn chữ cái *@
+    @foreach (var (part, title, letters, optional) in new (string, string, IReadOnlyList<char>, bool)[]
+    {
+        ("c", "Phụ âm đầu", HangulComposer.Initials, false),
+        ("v", "Nguyên âm", HangulComposer.Vowels, false),
+        ("f", "Phụ âm cuối (tùy chọn)", HangulComposer.Finals, true),
+    })
+    {
+        <fieldset class="mt-6">
+            <legend class="font-semibold">@title</legend>
+            <div class="mt-2 flex flex-wrap gap-1.5" data-part="@part">
+                @foreach (var jamo in letters)
+                {
+                    var selected = part switch
+                    {
+                        "c" => jamo == Model.Initial,
+                        "v" => jamo == Model.Vowel,
+                        _ => jamo == Model.Final,
+                    };
+                    <button type="button" lang="ko" class="@Jamo" data-jamo="@jamo"
+                            aria-pressed="@(selected ? "true" : "false")"
+                            x-bind:aria-pressed="(@part === '@jamo').toString()"
+                            x-on:click="select('@part', '@jamo')">@jamo</button>
+                }
+            </div>
+            @if (optional)
+            {
+                <p class="mt-1 text-sm text-ink-muted">Bấm lại chữ đang chọn để bỏ phụ âm cuối.</p>
+            }
+        </fieldset>
+    }
+</section>
