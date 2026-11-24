@@ -9,7 +9,7 @@
 | Giai đoạn                     | 2 — Layout & điều hướng                                                                                                   |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T2.3** `/nguon-du-lieu`: ghi công, giấy phép, link gốc |
+| Task tiếp theo                 | **T2.4** `/dashboard` với skeleton |
 | Việc song song (người dùng) | Duyệt ngữ pháp + bài tập AI soạn ở T1.8 (câu hỏi 10) · (tùy chọn) sửa nghĩa krdict chưa tự nhiên (câu hỏi 9) |
 | Blocker                         | —                                                                                                                           |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T2.3 Trang /nguon-du-lieu
+- Đã làm: `CreditsController` (`[Route("nguon-du-lieu")]`) + `Views/Credits/Index.cshtml`: khối ghi công *한국어기초사전 © 국립국어원, CC BY-SA 2.0 KR*; bảng nguồn (link krdict), tác giả (국립국어원, link korean.go.kr), giấy phép (link CC BY-SA 2.0 KR, `rel="license"`), phần Hanbit dùng (từ vựng 초급, không dùng tệp đa phương tiện), phần đã thay đổi (lọc, chuẩn hóa, romanization, duyệt/sửa nghĩa) + cam kết chia sẻ dữ liệu dẫn xuất cùng giấy phép; nội dung tự biên soạn (© Hanbit, giữ mọi quyền; phần chữ chép nguyên văn từ krdict vẫn CC BY-SA); phần mềm & phông chữ (Alpine.js/Tailwind MIT, Be Vietnam Pro/Noto/Pretendard OFL 1.1). Nội dung khớp `content/LICENSE-DATA.md`.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 316/316 (Web +7, E2E +2: bấm link footer → trang ghi công; không cuộn ngang ở 320px) · ảnh chụp desktop OK.
+- Vấn đề / ghi chú: chưa có link tải dữ liệu dẫn xuất (CC BY-SA không bắt buộc, có thể thêm link tới `content/` trên GitHub khi rà giấy phép ở T7.5).
+- Tiếp theo: T2.4
 
 ### 2026-11-24 — T2.2a Trang lỗi thân thiện (thêm theo yêu cầu người dùng)
 - Lý do: người dùng bấm CTA → `/hangul` gặp trang 404 trống của trình duyệt (mất menu, không có đường về) — nhiều link điều hướng còn 404 tới các giai đoạn sau.

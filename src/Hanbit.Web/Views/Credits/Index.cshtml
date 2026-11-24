@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "Nguồn dữ liệu & giấy phép";
+    ViewData["Description"] = "Hanbit dùng dữ liệu từ vựng của 한국어기초사전 (국립국어원) theo giấy phép CC BY-SA 2.0 KR. Ghi công, giấy phép và nguồn gốc dữ liệu.";
+    const string Link = "text-secondary underline underline-offset-2";
+}
+
+<article class="mx-auto max-w-2xl px-4 py-10 sm:py-16" data-testid="credits">
+    <h1 class="text-3xl font-bold">Nguồn dữ liệu &amp; giấy phép</h1>
+    <p class="mt-3 text-ink-muted">
+        Hanbit là dự án học tiếng Hàn miễn phí cho người Việt. Trang này ghi rõ dữ liệu lấy từ đâu và được dùng theo giấy phép nào.
+    </p>
+
+    @* 1. Dữ liệu từ vựng — ghi công bắt buộc *@
+    <section class="mt-10" aria-labelledby="krdict-title" data-testid="credits-krdict">
+        <h2 id="krdict-title" class="text-2xl font-bold">Dữ liệu từ vựng</h2>
+
+        <blockquote class="mt-4 rounded-xl border border-border bg-surface p-5 text-lg" data-testid="credits-attribution">
+            Dữ liệu từ vựng: <span lang="ko" class="font-ko">한국어기초사전</span> © <span lang="ko" class="font-ko">국립국어원</span>, CC BY-SA 2.0 KR
+        </blockquote>
+
+        <dl class="mt-6 grid gap-x-6 gap-y-4 sm:grid-cols-[10rem_1fr]">
+            <dt class="font-semibold">Nguồn</dt>
+            <dd>
+                <a href="https://krdict.korean.go.kr/" class="@Link" rel="noopener"><span lang="ko" class="font-ko">한국어기초사전</span></a>
+                (Từ điển tiếng Hàn cơ bản — Basic Korean Dictionary)
+            </dd>
+
+            <dt class="font-semibold">Tác giả / chủ sở hữu</dt>
+            <dd>
+                <span lang="ko" class="font-ko">국립국어원</span> — Viện Quốc ngữ Quốc gia Hàn Quốc (National Institute of Korean Language),
+                <a href="https://www.korean.go.kr/" class="@Link" rel="noopener">korean.go.kr</a>
+            </dd>
+
+            <dt class="font-semibold">Giấy phép</dt>
+            <dd>
+                <a href="https://creativecommons.org/licenses/by-sa/2.0/kr/" class="@Link" rel="license noopener">Creative Commons Ghi công – Chia sẻ tương tự 2.0 Hàn Quốc (CC BY-SA 2.0 KR)</a>
+            </dd>
+
+            <dt class="font-semibold">Hanbit dùng</dt>
+            <dd>
+                Từ vựng cấp sơ cấp (<span lang="ko" class="font-ko">초급</span>): mục từ, phát âm, từ loại, Hán tự, nghĩa và định nghĩa tiếng Việt,
+                lấy từ bộ dữ liệu tải toàn bộ (<span lang="ko" class="font-ko">사전 전체 내려받기</span>).
+                Hanbit <strong>không</strong> dùng ảnh, video hay tệp âm thanh của từ điển (các tệp này có giấy phép riêng).
+            </dd>
+
+            <dt class="font-semibold">Đã thay đổi</dt>
+            <dd>
+                Hanbit chọn lọc theo cấp độ và chủ đề, chuẩn hóa chữ, thêm phiên âm Latinh tự tạo (Revised Romanization).
+                Nghĩa tiếng Việt được người biên soạn của Hanbit duyệt trước khi đưa vào bài học, và có thể được sửa lại.
+            </dd>
+        </dl>
+
+        <p class="mt-6">
+            Mọi dữ liệu từ vựng lấy từ <span lang="ko" class="font-ko">한국어기초사전</span>, kể cả phần nghĩa đã được Hanbit chỉnh sửa
+            (dữ liệu dẫn xuất), được chia sẻ lại theo <strong>cùng giấy phép CC BY-SA 2.0 KR</strong>.
+            Mỗi từ trong Hanbit giữ mã mục từ và đường dẫn về trang gốc trên từ điển.
+        </p>
+    </section>
+
+    @* 2. Nội dung tự biên soạn *@
+    <section class="mt-10" aria-labelledby="own-title" data-testid="credits-own">
+        <h2 id="own-title" class="text-2xl font-bold">Nội dung do Hanbit biên soạn</h2>
+        <p class="mt-3">
+            Bảng chữ cái Hangul, giải thích ngữ pháp, cấu trúc khóa học và bài tập do Hanbit tự biên soạn,
+            không sao chép từ giáo trình hay đề thi TOPIK. © Hanbit — giữ mọi quyền.
+        </p>
+        <p class="mt-3 text-ink-muted">
+            Phần chữ trong bài tập được lấy nguyên văn từ <span lang="ko" class="font-ko">한국어기초사전</span> (ví dụ nghĩa của một từ)
+            vẫn thuộc giấy phép CC BY-SA 2.0 KR như mục trên.
+        </p>
+    </section>
+
+    @* 3. Phần mềm & phông chữ bên thứ ba *@
+    <section class="mt-10" aria-labelledby="third-party-title" data-testid="credits-third-party">
+        <h2 id="third-party-title" class="text-2xl font-bold">Phần mềm &amp; phông chữ</h2>
+        <ul class="mt-4 space-y-2">
+            <li><a href="https://alpinejs.dev/" class="@Link" rel="noopener">Alpine.js</a> — giấy phép MIT</li>
+            <li><a href="https://tailwindcss.com/" class="@Link" rel="noopener">Tailwind CSS</a> — giấy phép MIT</li>
+            <li><a href="https://fonts.google.com/specimen/Be+Vietnam+Pro" class="@Link" rel="noopener">Be Vietnam Pro</a>,
+                <a href="https://fonts.google.com/noto/specimen/Noto+Sans+KR" class="@Link" rel="noopener">Noto Sans KR</a>,
+                <a href="https://fonts.google.com/noto/specimen/Noto+Serif+KR" class="@Link" rel="noopener">Noto Serif KR</a> — SIL Open Font License 1.1</li>
+            <li><a href="https://github.com/orioncactus/pretendard" class="@Link" rel="noopener">Pretendard</a> — SIL Open Font License 1.1</li>
+        </ul>
+    </section>
+</article>
