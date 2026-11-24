@@ -9,7 +9,7 @@
 | Giai đoạn                     | 7 — Hoàn thiện & ra mắt MVP |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T7.2** E2E 3 luồng: Hangul bài 1, 1 bài học, 1 phiên ôn tập |
+| Task tiếp theo                 | **T7.3** Rate limiting `/api/*`, security headers, `Cache-Control` |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T7.2 E2E 3 luồng chính
+- Đã làm: `tests/Hanbit.E2E/CriticalFlowsTests.cs` — đi như người dùng qua giao diện + kiểm tra localStorage: (1) **mobile** trang chủ → "Bắt đầu miễn phí" → "Học nhóm này" (nguyên âm) → nghe chữ ㅏ (아) → học 10 chữ → quiz 10 câu → +XP, `hangul/nguyen-am` hoàn thành → bottom nav Tổng quan: streak 1, gợi ý bài 1; (2) **desktop** lộ trình → bài 1 → làm đủ 14 bài tập → tiến độ (bài hoàn thành, 14 thẻ, XP) → về lộ trình + reload: bài 1 ✓, bài 2 mở; (3) học bài 1 → dời hạn thẻ về quá khứ ("thời gian trôi") → dashboard "Ôn tập (14 thẻ)" → ôn hết bằng Space + phím 3 → không còn thẻ đến hạn, 14 lượt ôn → dashboard "Ôn tập".
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 655/655 (E2E +3, chạy lặp 3 lần ổn định).
+- Tiếp theo: T7.3
 
 ### 2026-11-24 — T7.1 /profile: thống kê từ đã thuộc + lịch streak
 - Đã làm: Domain `ProgressStatsCalculator` (`WordStatus` Learning/Mastered — ngưỡng 21 ngày; `LevelOf` XP → mức 0–4; lịch 17 tuần bắt đầu thứ Hai tới hôm nay; tổng lượt ôn, số ngày có học, streak). API `POST /api/progress/stats` `{ cards, activity }` → `{ masteredWords, learningWords, totalReviews, activeDays, streak, calendar[], words[] (≤ 500, đã thuộc trước), today }`. `/profile`: Lịch học (heatmap 7 hàng × tuần, một màu nhấn 4 mức `secondary/25…100`, tooltip ngày/XP/lượt ôn, chú thích Ít→Nhiều, cuộn ngang trong khung trên mobile), streak hiện tại/dài nhất, số ngày học + lượt ôn, ô Đã thuộc/Đang học, danh sách từ lọc Tất cả/Đã thuộc/Đang học (ngày ôn tiếp theo). `profile.js` thêm Alpine `profileStats` (làm mới khi tiến độ đổi).
