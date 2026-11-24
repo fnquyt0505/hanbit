@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 6 — Ôn tập SRS ✅ xong → tiếp theo 7 — Hoàn thiện & ra mắt MVP (chờ người dùng) |
+| Giai đoạn                     | 7 — Hoàn thiện & ra mắt MVP |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T7.1** `/profile`: thống kê từ đã thuộc, lịch streak |
+| Task tiếp theo                 | **T7.2** E2E 3 luồng: Hangul bài 1, 1 bài học, 1 phiên ôn tập |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T7.1 /profile: thống kê từ đã thuộc + lịch streak
+- Đã làm: Domain `ProgressStatsCalculator` (`WordStatus` Learning/Mastered — ngưỡng 21 ngày; `LevelOf` XP → mức 0–4; lịch 17 tuần bắt đầu thứ Hai tới hôm nay; tổng lượt ôn, số ngày có học, streak). API `POST /api/progress/stats` `{ cards, activity }` → `{ masteredWords, learningWords, totalReviews, activeDays, streak, calendar[], words[] (≤ 500, đã thuộc trước), today }`. `/profile`: Lịch học (heatmap 7 hàng × tuần, một màu nhấn 4 mức `secondary/25…100`, tooltip ngày/XP/lượt ôn, chú thích Ít→Nhiều, cuộn ngang trong khung trên mobile), streak hiện tại/dài nhất, số ngày học + lượt ôn, ô Đã thuộc/Đang học, danh sách từ lọc Tất cả/Đã thuộc/Đang học (ngày ôn tiếp theo). `profile.js` thêm Alpine `profileStats` (làm mới khi tiến độ đổi).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 652/652 (Domain +13; Web +1; E2E +2) · ảnh chụp OK.
+- Tiếp theo: T7.2
 
 ### 2026-11-24 — T6.4 Số thẻ đến hạn trên dashboard + điều hướng
 - Đã làm: nút Ôn tập trên dashboard hiện **"Ôn tập (n thẻ)"** khi có thẻ đến hạn (PRD §6 luồng 2; ô "Thẻ cần ôn" + dòng "Hôm nay ôn n thẻ" đã có từ T5.4). Partial `_DueBadge` (số thẻ đến hạn từ store `progress`, ẩn khi 0, tối đa "99+", `aria-label` "n thẻ cần ôn") cạnh mục "Ôn tập" trên sidebar và trên icon ở thanh điều hướng dưới đáy.
@@ -372,6 +377,7 @@
 | 2026-11-24      | Phát âm chữ cái: phụ âm (cơ bản + kép) đọc ghép với ㅏ (ㄱ → 가), nguyên âm đọc với ㅇ câm (ㅏ → 아); `speech.js` ưu tiên giọng Natural/Online/Google, lỗi → giọng cục bộ | Người dùng: giọng máy tính khó nghe; chỉ cần ghép phụ âm với ㅏ (câu hỏi 12) |
 | 2026-11-24      | XP theo số câu đúng: bài học 10 + 1/câu đúng, quiz Hangul 5 + 1/câu đúng, ôn thẻ 1/thẻ, học lại vẫn được XP · streak: ngày có ≥ 1 XP (giờ Việt Nam) · mở khóa bài sau khi **hoàn thành** bài trước (không cần điểm) · hoàn thành bài → **mọi từ** thành thẻ SRS (từ sai đến hạn hôm nay, từ đúng ngày mai) | Người dùng chọn phương án đề xuất (giai đoạn 5) |
 | 2026-11-24      | SM-2 rút gọn: Again → lặp 0, đến hạn ngay (ôn lại trong phiên), ease −0,20 · Hard 1 → 1 → ×1,2, ease −0,15 · Good 1 → 3 → ×ease · Easy 3 → 6 → ×ease×1,3, ease +0,15 · ease 1,3–5, khoảng ≤ 3650 ngày, đến hạn 00:00 giờ VN | AI chọn theo SM-2 phổ biến (ARCHITECTURE §7 chỉ nêu khung); hằng số trong `Sm2Scheduler` |
+| 2026-11-24      | Giai đoạn 7: thêm `Deque.AxeCore.Playwright` (chỉ project E2E) cho T7.4 · giữ domain `hanbit.onrender.com` · "đã thuộc" = thẻ có khoảng ôn ≥ 21 ngày | Người dùng chọn (axe, domain); ngưỡng 21 ngày AI chọn theo Anki "mature" |
 
 ---
 
