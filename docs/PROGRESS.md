@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 3 — Hangul & âm thanh ✅ code xong (T3.1 chờ nghe thử) → **tạm dừng theo yêu cầu người dùng**, tiếp theo 4 — Bài học & bài tập |
+| Giai đoạn                     | 4 — Bài học & bài tập |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T4.1** `/learn/{course}`: View Component `CourseMap` |
+| Task tiếp theo                 | **T4.2** `ExerciseGenerator` + `AnswerChecker` (Domain) |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T4.1 /learn/{course} + CourseMap
+- Đã làm: `LearnController` (`GET /learn/{course}`, khóa lạ → 404) + `Views/Learn/Course`. View Component `CourseMap` (`ViewComponents/CourseMapViewComponent.cs` + `Views/Shared/Components/CourseMap/Default.cshtml`): danh sách dọc, nút tròn số thứ tự, tiêu đề, thống kê (từ · ngữ pháp · bài tập), `data-state` locked/open/completed (style bằng variant `group-data-[state=…]`, có icon khóa/✓). Trạng thái mặc định server: bài 1 mở, còn lại khóa; `wwwroot/js/course-map.js` (`lessonStates` — bài hoàn thành → completed, bài đầu chưa xong → open, còn lại locked; `completedLessons()` rỗng tới T5.4). Bấm bài khóa → toast "Hoàn thành bài trước…"; không có JS → mọi bài vẫn là link.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Web +5, E2E +4: toast khi bấm bài khóa, bài mở dẫn tới bài học, `lessonStates`, không cuộn ngang 320px) · ảnh chụp mobile OK.
+- Tiếp theo: T4.2
 
 ### 2026-11-24 — Theo phản hồi người dùng: câu hỏi 9, 10, 12
 - Đã làm: (9) sửa `vi` 6 từ trong `vocab-reviews.json` theo đề xuất (PR #30, test gộp nghĩa). (10) đánh dấu ngữ pháp + bài tập T1.8 đã duyệt. (12) Domain `HangulSyllable.ConsonantSyllable` + `HangulPronunciation`: phụ âm đọc ghép ㅏ (ㄱ → 가, ㄲ → 까) — áp dụng cho ô chữ, thẻ học, câu nghe trong quiz; `speech.js`: `voiceScore` ưu tiên giọng Natural/Neural, Online, Google; giọng online lỗi → đọc lại bằng giọng cục bộ. T3.1 đóng.

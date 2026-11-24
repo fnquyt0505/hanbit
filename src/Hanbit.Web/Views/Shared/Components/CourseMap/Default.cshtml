@@ -1,0 +1,45 @@
+@using System.Text.Json
+@model Hanbit.Web.Models.Learn.CourseMapViewModel
+@* CourseMap: danh sách dọc, mỗi bài một nút tròn số thứ tự + tiêu đề + thống kê.
+   data-state: locked | open | completed — server đặt mặc định, Alpine courseMap (course-map.js) điền theo tiến độ.
+   Không có JS: mọi bài vẫn là link (không chặn người học). *@
+@{
+    var keys = JsonSerializer.Serialize(Model.Lessons.Select(l => l.Key(Model.CourseSlug)));
+}
+<ol class="relative space-y-3" x-data="@($"courseMap({keys})")" data-testid="course-map" data-course="@Model.CourseSlug">
+    @foreach (var lesson in Model.Lessons)
+    {
+        var key = lesson.Key(Model.CourseSlug);
+        <li>
+            <a href="@($"/learn/{Model.CourseSlug}/{lesson.Slug}")" data-testid="course-map-lesson" data-lesson="@lesson.Slug"
+               data-state="@lesson.DefaultState" x-bind:data-state="state('@key')"
+               x-bind:aria-disabled="(state('@key') === 'locked').toString()"
+               x-on:click="if (state('@key') === 'locked') { $event.preventDefault(); locked() }"
+               class="group flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition duration-150 ease-out hover:border-secondary data-[state=locked]:opacity-60 data-[state=locked]:hover:border-border">
+                <span class="relative inline-flex size-12 shrink-0 items-center justify-center rounded-full border-2 text-lg font-bold
+                             group-data-[state=open]:border-primary group-data-[state=open]:text-primary
+                             group-data-[state=completed]:border-success group-data-[state=completed]:bg-success group-data-[state=completed]:text-bg
+                             group-data-[state=locked]:border-border group-data-[state=locked]:text-ink-muted">
+                    <span class="group-data-[state=completed]:hidden">@lesson.Order</span>
+                    <svg class="hidden size-6 group-data-[state=completed]:block" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+                <span class="min-w-0 flex-1">
+                    <span class="block font-semibold">@lesson.Title</span>
+                    <span class="block text-sm text-ink-muted">@lesson.VocabCount từ · @lesson.GrammarCount ngữ pháp · @lesson.ExerciseCount bài tập</span>
+                </span>
+                <span class="shrink-0 text-sm font-semibold">
+                    <span class="hidden text-primary group-data-[state=open]:inline">Học</span>
+                    <span class="hidden text-success-ink group-data-[state=completed]:inline">Học lại</span>
+                    <span class="hidden items-center gap-1 text-ink-muted group-data-[state=locked]:inline-flex">
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                        </svg>
+                        <span>Khóa</span>
+                    </span>
+                </span>
+            </a>
+        </li>
+    }
+</ol>
