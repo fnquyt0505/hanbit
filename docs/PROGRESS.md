@@ -9,7 +9,7 @@
 | Giai đoạn                     | 7 — Hoàn thiện & ra mắt MVP |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T7.6** Render: domain (giữ onrender.com), kiểm tra cold start trên 4G |
+| Task tiếp theo                 | **T7.6** chờ người dùng (câu hỏi 14) · MVP xong phần code |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,13 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T7.6 Tối ưu cold start + 4G (chờ đo thực tế)
+- Đo production trước khi sửa (warm): `/` TTFB 0,30 s / 22 KB, `/hangul` 0,68 s / 88 KB, bài học 1,42 s / 87 KB — HTML **không nén**, request bài học đầu tiên phải đọc tệp từ vựng 1,3 MB. Domain: giữ `hanbit.onrender.com` (người dùng chọn).
+- Đã làm: **nén Brotli/Gzip** cho HTML/JSON động (`AddResponseCompression`, mức Fastest, bật cho HTTPS — không có bí mật/token theo người dùng nên không có rủi ro BREACH; file tĩnh vẫn do `MapStaticAssets` nén sẵn). JSON API giữ nguyên chữ Việt/Hàn (`JavaScriptEncoder` UnicodeRanges.All, vẫn mã hóa `< > &`) → nhỏ hơn, nén tốt hơn. `Hosting/ContentWarmup` (BackgroundService) nạp sẵn Hangul/khóa/bài/từ vựng/ngữ pháp vào cache khi khởi động, ghi log thời gian. Dockerfile publish **ReadyToRun** (`-r linux-x64`) → ít JIT lúc khởi động.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 716/716 (Web +6: HTML/JSON nén br/gzip nhỏ hơn ≥ 2 lần và giải nén đúng, không Accept-Encoding thì không nén, warmup đăng ký + chạy không lỗi); CI `docker` build image ReadyToRun.
+- Vấn đề / ghi chú: cold start của Render free chủ yếu do hạ tầng → câu hỏi 14 (đo trên 4G + chọn cách giữ thức).
+- Tiếp theo: chờ người dùng (câu hỏi 13, 14)
 
 ### 2026-11-24 — T7.5 Rà soát giấy phép krdict
 - Đã làm: đối chiếu CC BY-SA 2.0 KR: (1) ghi tác giả/nguồn/giấy phép — footer mọi trang, `/nguon-du-lieu`, link mục từ gốc ở màn học + ôn tập, `sourceUrl` trong API ✅; (2) nêu thay đổi — trang nguồn dữ liệu ✅; (3) **chia sẻ cùng giấy phép** — trước chỉ cam kết bằng chữ → thêm mục **Tải dữ liệu** trên `/nguon-du-lieu` + `GET /nguon-du-lieu/tai-xuong/{tên}` (danh sách cố định: `krdict-beginner.json`, `vocab-reviews.json`, `LICENSE-DATA.md`; tải dạng attachment; tên khác → 404, chống path traversal) — không dẫn link repo GitHub để khỏi lộ tài khoản cá nhân; (4) không dùng tệp đa phương tiện krdict ✅; (5) thư viện bên thứ ba: Alpine/Tailwind MIT, font OFL (cả ảnh OG), axe MPL-2.0 chỉ ở test ✅. `content/LICENSE-DATA.md` thêm link từng từ, mục tải về, ngày rà soát.
@@ -366,6 +373,7 @@
 11. ~~Lighthouse trang chủ (DoD T2.2)~~ → đã đo (2026-11-24, Mobile, production): 95 · 96 · 100 · 100.
 12. ~~Nghe thử phát âm (DoD T3.1)~~ → người dùng trả lời (2026-11-24): giọng trên máy tính khó nghe, không tự nhiên → ưu tiên giọng Natural/Online (Edge SunHi Natural, Google), lỗi mạng thì về giọng cục bộ; phụ âm cơ bản + phụ âm kép đọc **ghép với ㅏ** (ㄱ → 가, ㄲ → 까) thay cho tên chữ. Android/Safari chưa kiểm — giọng TTS vẫn phụ thuộc thiết bị; giải pháp lâu dài: MP3 tạo trước (Backlog).
 13. **Màu nút đánh giá ôn tập (T6.3):** 4 nút Quên/Khó/Được/Dễ dùng 4 màu ngữ nghĩa (danger/warning/success/secondary) — lệch quy tắc DESIGN.md §2 "không quá 1 màu nhấn trên một màn hình" nhưng giúp phân biệt nhanh (giống các app flashcard). Giữ hay đổi sang viền trung tính + chỉ màu chữ?
+14. **Cold start Render free (T7.6):** instance ngủ sau ~15 phút không có truy cập; lần mở đầu tiên sau đó phải chờ Render khởi động lại container (thường 30–60 s — phần lớn do hạ tầng, app chỉ chiếm vài giây). Cần: (a) đo trên điện thoại 4G: mở https://hanbit.onrender.com sau ≥ 20 phút không ai truy cập, ghi số giây tới khi thấy trang; (b) chọn: giữ nguyên (miễn phí) · nâng gói Render Starter (~7 USD/tháng, không ngủ) · dùng dịch vụ ping định kỳ (VD UptimeRobot 10 phút/lần — 1 instance chạy liên tục ≈ 744 giờ/tháng, vừa hạn mức 750 giờ free).
 
 
 
