@@ -1,0 +1,176 @@
+@model Hanbit.Web.Models.Learn.LessonPageViewModel
+@{
+    var lesson = Model.Lesson;
+    ViewData["Title"] = $"{lesson.Title} — {Model.CourseTitle}";
+    ViewData["Description"] = $"Bài {lesson.Order}: {lesson.Title} — {lesson.Vocab.Count} từ vựng, {lesson.Grammar.Count} điểm ngữ pháp và bài tập tiếng Hàn.";
+    var courseHref = $"/learn/{lesson.Course}";
+    const string ChoiceBase = "flex min-h-14 w-full items-center gap-3 rounded-xl border-2 bg-surface px-4 py-3 text-left transition duration-150 ease-out disabled:cursor-default";
+}
+
+@section Head {
+    <script type="module" src="~/js/lesson-runner.js" asp-append-version="true"></script>
+}
+
+@* JSON KHÔNG chứa đáp án (System.Text.Json mặc định mã hóa < > & → an toàn trong <script>). *@
+<script type="application/json" id="lesson-data">@Html.Raw(Model.RunnerJson)</script>
+
+<div class="mx-auto max-w-2xl px-4 py-6 sm:py-10" x-data="lessonRunner" data-testid="lesson" data-lesson="@lesson.Slug">
+    @* LessonProgressBar (DESIGN.md §5): thanh tiến độ + nút thoát *@
+    <div class="flex items-center gap-3">
+        <a href="@courseHref" class="inline-flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-surface" aria-label="Thoát bài học" data-testid="lesson-exit">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        </a>
+        <div class="h-3 flex-1 overflow-hidden rounded-full bg-border" role="progressbar" aria-label="Tiến độ bài học"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" x-bind:aria-valuenow="percent">
+            <div class="h-full w-0 rounded-full bg-secondary transition-[width] duration-300 ease-out" x-bind:style="`width: ${percent}%`"></div>
+        </div>
+    </div>
+
+    <p class="mt-6 text-sm font-semibold text-secondary">Bài @lesson.Order · @Model.CourseTitle</p>
+    <h1 class="mt-1 text-2xl font-bold sm:text-3xl">@lesson.Title</h1>
+
+    @* ───────── 1. Từ vựng ───────── *@
+    <section x-show="phase === 'vocab'" class="mt-6" aria-labelledby="vocab-title" data-testid="vocab-step">
+        <h2 id="vocab-title" class="text-lg font-semibold">Từ vựng <span class="font-normal text-ink-muted">· <span x-text="vocabIndex + 1">1</span>/@lesson.Vocab.Count</span></h2>
+        @for (var i = 0; i < lesson.Vocab.Count; i++)
+        {
+            var word = lesson.Vocab[i];
+            <article class="mt-3 rounded-2xl border border-border bg-surface p-6" x-show="vocabIndex === @i" data-testid="vocab-card" data-vocab-id="@word.Id">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                        <p lang="ko" class="font-ko text-4xl font-bold sm:text-5xl">@word.Ko</p>
+                        <p class="mt-2 text-sm italic text-ink-muted">
+                            @word.Romanization
+                            @if (word.Pronunciation is not null && word.Pronunciation != word.Ko)
+                            {
+                                <span lang="ko" class="font-ko not-italic"> · [@word.Pronunciation]</span>
+                            }
+                        </p>
+                    </div>
+                    <audio-button text="@word.Ko" slow="true" />
+                </div>
+                <p class="mt-4 text-xl font-semibold">@word.Vi</p>
+                <p class="mt-1 text-sm text-ink-muted">
+                    @word.Pos
+                    @if (word.Hanja is not null)
+                    {
+                        <span> · Hán tự: <span lang="zh-Hant">@word.Hanja</span></span>
+                    }
+                </p>
+                @if (word.Examples.Count > 0)
+                {
+                    <ul class="mt-4 space-y-2">
+                        @foreach (var example in word.Examples.Take(2))
+                        {
+                            <li class="flex items-start gap-3">
+                                <audio-button text="@example.Ko" size="sm" />
+                                <span><span lang="ko" class="font-ko">@example.Ko</span><br /><span class="text-ink-muted">@example.Vi</span></span>
+                            </li>
+                        }
+                    </ul>
+                }
+                <p class="mt-4 text-xs text-ink-muted">
+                    Nguồn: <a href="@word.SourceUrl" class="text-secondary hover:underline" rel="noopener"><span lang="ko" class="font-ko">한국어기초사전</span></a> (CC BY-SA 2.0 KR)
+                </p>
+            </article>
+        }
+        <div class="mt-6 flex gap-3">
+            <hb-button variant="outline" size="lg" x-on:click="prevVocab()" x-bind:disabled="vocabIndex === 0">Trước</hb-button>
+            <hb-button size="lg" x-on:click="nextVocab()" class="flex-1 sm:flex-none" data-testid="vocab-next">Tiếp</hb-button>
+        </div>
+    </section>
+
+    @* ───────── 2. Ngữ pháp ───────── *@
+    <section x-show="phase === 'grammar'" x-cloak class="mt-6" aria-labelledby="grammar-title" data-testid="grammar-step">
+        <h2 id="grammar-title" class="text-lg font-semibold">Ngữ pháp <span class="font-normal text-ink-muted">· <span x-text="grammarIndex + 1"></span>/@lesson.Grammar.Count</span></h2>
+        @for (var i = 0; i < lesson.Grammar.Count; i++)
+        {
+            var point = lesson.Grammar[i];
+            <article class="mt-3 rounded-2xl border border-border bg-surface p-6" x-show="grammarIndex === @i" data-testid="grammar-card" data-grammar-id="@point.Id">
+                <p lang="ko" class="font-ko text-2xl font-bold">@point.Pattern</p>
+                <p class="mt-1 font-semibold text-secondary">@point.MeaningVi</p>
+                <p class="mt-4 leading-relaxed">@point.ExplanationVi</p>
+                <h3 class="mt-5 font-semibold">Ví dụ</h3>
+                <ul class="mt-2 space-y-3">
+                    @foreach (var example in point.Examples)
+                    {
+                        <li class="flex items-start gap-3">
+                            <audio-button text="@example.Ko" size="sm" />
+                            <span><span lang="ko" class="font-ko text-lg">@example.Ko</span><br /><span class="text-ink-muted">@example.Vi</span></span>
+                        </li>
+                    }
+                </ul>
+            </article>
+        }
+        <div class="mt-6 flex gap-3">
+            <hb-button variant="outline" size="lg" x-on:click="prevGrammar()">Trước</hb-button>
+            <hb-button size="lg" x-on:click="nextGrammar()" class="flex-1 sm:flex-none" data-testid="grammar-next">Tiếp</hb-button>
+        </div>
+    </section>
+
+    @* ───────── 3. Bài tập ───────── *@
+    <section x-show="phase === 'exercises'" x-cloak class="mt-6" aria-labelledby="ex-title" data-testid="exercise-step">
+        <h2 id="ex-title" class="text-lg font-semibold">Bài tập <span class="font-normal text-ink-muted">· <span x-text="exIndex + 1" data-testid="exercise-number"></span>/<span x-text="exercises.length"></span></span></h2>
+
+        <template x-if="exercise">
+            <div class="mt-3 rounded-2xl border border-border bg-surface p-6" x-bind:data-exercise-id="exercise.id" x-bind:data-type="exercise.type" data-testid="exercise">
+                @* multiple_choice *@
+                <template x-if="exercise.type === 'multiple_choice'">
+                    <p class="text-lg font-semibold" x-text="exercise.prompt" data-testid="exercise-prompt"></p>
+                </template>
+                @* listen_choose *@
+                <template x-if="exercise.type === 'listen_choose'">
+                    <div>
+                        <p class="text-lg font-semibold">Nghe và chọn nghĩa đúng</p>
+                        <div class="mt-4 flex gap-3">
+                            <hb-button variant="secondary" size="lg" x-on:click="listen()" data-testid="exercise-listen">Nghe</hb-button>
+                            <hb-button variant="outline" size="lg" x-on:click="listen(true)">Nghe chậm</hb-button>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="exercise.choices">
+                    <ul class="mt-6 grid gap-3" data-testid="choices">
+                        <template x-for="(choice, i) in exercise.choices" x-bind:key="i">
+                            <li>
+                                <button type="button" class="@ChoiceBase" x-on:click="choose(i)" x-bind:disabled="!!result || loading"
+                                        x-bind:data-state="choiceState(i)"
+                                        x-bind:class="{
+                                            'border-border hover:border-secondary': choiceState(i) === 'idle',
+                                            'border-secondary': choiceState(i) === 'selected',
+                                            'border-success': choiceState(i) === 'correct',
+                                            'border-danger': choiceState(i) === 'wrong',
+                                        }">
+                                    <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-border text-sm" x-text="i + 1" x-show="choiceState(i) === 'idle' || choiceState(i) === 'selected'"></span>
+                                    <svg x-show="choiceState(i) === 'correct'" class="size-7 shrink-0 text-success-ink" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd" />
+                                    </svg>
+                                    <svg x-show="choiceState(i) === 'wrong'" class="size-7 shrink-0 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M4.3 4.3a1 1 0 0 1 1.4 0L10 8.6l4.3-4.3a1 1 0 1 1 1.4 1.4L11.4 10l4.3 4.3a1 1 0 0 1-1.4 1.4L10 11.4l-4.3 4.3a1 1 0 0 1-1.4-1.4L8.6 10 4.3 5.7a1 1 0 0 1 0-1.4Z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="text-lg" x-text="choice"></span>
+                                </button>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+
+                @* Phản hồi: đúng/sai + đáp án + giải thích *@
+                <div x-show="result" aria-live="polite" class="mt-6" data-testid="exercise-feedback">
+                    <p x-show="result?.correct" class="font-semibold text-success-ink">Chính xác! 🎉</p>
+                    <p x-show="result && !result.correct" class="font-semibold">Gần đúng rồi! Đáp án là <span class="font-ko" x-text="result?.correctAnswer"></span>.</p>
+                    <p x-show="result?.explanationVi" class="mt-2 text-ink-muted" x-text="result?.explanationVi"></p>
+                    <div class="mt-4"><hb-button size="lg" block="true" x-on:click="next()" data-testid="exercise-next">Tiếp tục</hb-button></div>
+                </div>
+                <p x-show="error" x-text="error" role="alert" class="mt-3 text-danger"></p>
+            </div>
+        </template>
+    </section>
+
+    @* ───────── Kết thúc (chi tiết ở T4.6) ───────── *@
+    <section x-show="phase === 'done'" x-cloak class="mt-8 rounded-2xl border border-border bg-surface p-8 text-center" aria-labelledby="done-title" data-testid="lesson-done">
+        <h2 id="done-title" class="text-2xl font-bold">Hoàn thành bài học!</h2>
+        <p class="mt-2 text-ink-muted">Bạn đúng <span class="font-semibold text-ink" x-text="correctCount" data-testid="done-correct"></span>/<span x-text="answers.length"></span> bài tập.</p>
+        <div class="mt-6 flex justify-center"><hb-button href="@courseHref" size="lg" block="true">Về lộ trình</hb-button></div>
+    </section>
+</div>

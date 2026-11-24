@@ -9,7 +9,7 @@
 | Giai đoạn                     | 4 — Bài học & bài tập |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T4.4** `/learn/{c}/{l}` + `lesson-runner.js` |
+| Task tiếp theo                 | **T4.5** UI `match_pairs`, `reorder`, `type_answer` |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T4.4 Màn học /learn/{c}/{l} + lesson-runner.js
+- Đã làm: `LearnController.Lesson` (qua `LessonService`, không có → 404) + `LessonPageViewModel` (JSON cho runner: bài tập DTO **không đáp án**, nhúng `<script type="application/json" id="lesson-data">`, System.Text.Json mã hóa `<>` an toàn). View `Learn/Lesson`: LessonProgressBar (nút thoát ✕ về lộ trình + thanh % theo tổng bước), từ vựng từng thẻ (chữ Hàn lớn, romanization + phát âm, `<audio-button>` thường/chậm, nghĩa, từ loại, Hán tự, 2 ví dụ, link nguồn krdict), ngữ pháp từng thẻ (mẫu, nghĩa, giải thích, ví dụ có nút nghe), bài tập `multiple_choice` + `listen_choose` (tự đọc khi hiện, nút Nghe/Nghe chậm; chấm `POST /api/exercises/check`; đúng/sai có icon ✓/✗ + "Gần đúng rồi! Đáp án là …" + giải thích), màn kết thúc tạm (x/y đúng). `wwwroot/js/lesson-runner.js` (Alpine `lessonRunner`; `SUPPORTED_TYPES` lọc loại chưa có UI — T4.5).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Web +6: thẻ từ vựng/ngữ pháp, JSON nhúng không lộ đáp án, nav, 404; E2E +4: stepper, làm hết 10 bài chọn đáp án có phản hồi → kết thúc, bài nghe tự đọc, không cuộn ngang 320px) · ảnh chụp OK.
+- Tiếp theo: T4.5
 
 ### 2026-11-24 — T4.3 API bài học + chấm bài
 - Đã làm: Application `Lessons/LessonService` (`GetAsync`: khóa + bài phải có trong mục lục, từ vựng đã duyệt theo thứ tự `vocab_ids`, ngữ pháp, bài tự soạn + 7 bài sinh; `CheckAsync` → `CheckOutcome` Checked/NotFound/InvalidAnswer; đăng ký Scoped). `PartOfSpeechNames.Vietnamese` chuyển vào Domain (tool duyệt nghĩa dùng lại). `Models/Learn/LessonDtos.cs`: `LessonDto`/`VocabDto` (romanization tính bằng `RomanizationService`, từ loại tiếng Việt, link nguồn krdict)/`GrammarDto`/`ExerciseDto` (không đáp án, không giải thích; nối cặp xáo riêng 2 cột, sắp xếp xáo khác thứ tự đúng, seed theo id bài tập). `LessonsApiController`: `GET /api/lessons/{c}/{l}` (404 nếu không có), `POST /api/exercises/check` `{ course, lesson, exerciseId, answer: { index | pairs | tokens | text } }` → `{ correct, correctAnswer, explanationVi }` (404 bài tập lạ, 400 thiếu/sai dạng câu trả lời).
