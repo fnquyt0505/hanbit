@@ -51,7 +51,7 @@
 
 ## Giai đoạn 5 — Tiến độ chế độ khách
 
-- [ ] **T5.1** Model `LearnerProgress` + `IClock` + `XpRules` + `StreakCalculator` (Asia/Ho_Chi_Minh, qua nửa đêm). DoD: unit test.
+- [x] **T5.1** Model `LearnerProgress` + `IClock` + `XpRules` + `StreakCalculator` (Asia/Ho_Chi_Minh, qua nửa đêm). DoD: unit test.
 - [ ] **T5.2** `SubmitLessonHandler` + `POST /api/lessons/{c}/{l}/complete` (trả LessonRecord, card mới, activity, XP). DoD: integration test.
 - [ ] **T5.3** `progress-store.js`: load/save localStorage, xử lý JSON hỏng/khác version, merge kết quả từ API. DoD: E2E reload trang vẫn giữ tiến độ.
 - [ ] **T5.4** Dashboard, CourseMap, StreakBadge đọc tiến độ thật.
