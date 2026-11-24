@@ -9,7 +9,7 @@
 | Giai đoạn                     | 7 — Hoàn thiện & ra mắt MVP |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T7.5** Kiểm tra điều khoản bản quyền krdict, trang ghi công, `LICENSE-DATA.md` |
+| Task tiếp theo                 | **T7.6** Render: domain (giữ onrender.com), kiểm tra cold start trên 4G |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T7.5 Rà soát giấy phép krdict
+- Đã làm: đối chiếu CC BY-SA 2.0 KR: (1) ghi tác giả/nguồn/giấy phép — footer mọi trang, `/nguon-du-lieu`, link mục từ gốc ở màn học + ôn tập, `sourceUrl` trong API ✅; (2) nêu thay đổi — trang nguồn dữ liệu ✅; (3) **chia sẻ cùng giấy phép** — trước chỉ cam kết bằng chữ → thêm mục **Tải dữ liệu** trên `/nguon-du-lieu` + `GET /nguon-du-lieu/tai-xuong/{tên}` (danh sách cố định: `krdict-beginner.json`, `vocab-reviews.json`, `LICENSE-DATA.md`; tải dạng attachment; tên khác → 404, chống path traversal) — không dẫn link repo GitHub để khỏi lộ tài khoản cá nhân; (4) không dùng tệp đa phương tiện krdict ✅; (5) thư viện bên thứ ba: Alpine/Tailwind MIT, font OFL (cả ảnh OG), axe MPL-2.0 chỉ ở test ✅. `content/LICENSE-DATA.md` thêm link từng từ, mục tải về, ngày rà soát.
+- Kiểm tra: build ✅ 0 warning · format ✅ · validator ✅ · test ✅ (Web +7 tải dữ liệu/whitelist/link; Infrastructure +1: mọi mục từ có nguồn 한국어기초사전 + CC BY-SA 2.0 KR + URL khớp mã; axe trang nguồn dữ liệu sạch).
+- Tiếp theo: T7.6
 
 ### 2026-11-24 — T7.4 Accessibility (axe), SEO, OG image, sitemap
 - Đã làm: **axe** — thêm `Deque.AxeCore.Playwright` 4.14.0 (MPL-2.0, chỉ project E2E — người dùng duyệt); `AccessibilityTests` chạy WCAG 2.0/2.1 A+AA + best-practice trên 10 trang × sáng/tối + trạng thái tương tác (bài tập, phản hồi, quiz Hangul, thẻ đã lật), fail khi có lỗi serious/critical. Sửa lỗi axe tìm ra: link trong đoạn văn chỉ phân biệt bằng màu → **luôn gạch chân** (footer, nguồn krdict, breadcrumb, hồ sơ); nhãn không chứa chữ hiển thị → ô chữ Hangul "ㄱ g/k 기역 — bấm để nghe", nút chậm "Nghe chậm 0.7×: …". **SEO** — `Site:BaseUrl` (Production `https://hanbit.onrender.com`; Development lấy từ request): canonical (bỏ query), Open Graph (title/description/url/image 1200×630/locale vi_VN/site_name), `twitter:card`, `theme-color` sáng/tối, favicon SVG (`wwwroot/favicon.svg`), `noindex` cho dashboard/ôn tập/hồ sơ/styleguide/trang lỗi. `SeoController`: `/robots.txt` (chặn `/api/`, trỏ sitemap) + `/sitemap.xml` (13 URL công khai sinh từ nội dung). Ảnh OG `wwwroot/img/og-image.png` (chụp bằng Playwright từ HTML theo token màu + font Be Vietnam Pro/Noto Serif KR — OFL).

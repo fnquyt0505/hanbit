@@ -1,3 +1,4 @@
+@model IReadOnlyList<Hanbit.Web.Controllers.DataDownload>
 @{
     ViewData["Title"] = "Nguồn dữ liệu & giấy phép";
     ViewData["Description"] = "Hanbit dùng dữ liệu từ vựng của 한국어기초사전 (국립국어원) theo giấy phép CC BY-SA 2.0 KR. Ghi công, giấy phép và nguồn gốc dữ liệu.";
@@ -55,6 +56,21 @@
             (dữ liệu dẫn xuất), được chia sẻ lại theo <strong>cùng giấy phép CC BY-SA 2.0 KR</strong>.
             Mỗi từ trong Hanbit giữ mã mục từ và đường dẫn về trang gốc trên từ điển.
         </p>
+    </section>
+
+    @* Tải dữ liệu — CC BY-SA: dữ liệu dẫn xuất được chia sẻ cùng giấy phép (T7.5) *@
+    <section class="mt-10" aria-labelledby="download-title" data-testid="credits-downloads">
+        <h2 id="download-title" class="text-2xl font-bold">Tải dữ liệu</h2>
+        <p class="mt-3">Bạn có thể tải và dùng lại dữ liệu từ vựng (kể cả phần nghĩa Hanbit đã duyệt/sửa) theo giấy phép CC BY-SA 2.0 KR — nhớ ghi công <span lang="ko" class="font-ko">한국어기초사전</span> © <span lang="ko" class="font-ko">국립국어원</span> và chia sẻ lại cùng giấy phép.</p>
+        <ul class="mt-4 space-y-3">
+            @foreach (var file in Model)
+            {
+                <li class="rounded-xl border border-border bg-surface p-4">
+                    <a href="@($"/nguon-du-lieu/tai-xuong/{file.Name}")" class="@Link font-semibold" download data-download="@file.Name">@file.Name</a>
+                    <p class="mt-1 text-sm text-ink-muted">@file.Description</p>
+                </li>
+            }
+        </ul>
     </section>
 
     @* 2. Nội dung tự biên soạn *@

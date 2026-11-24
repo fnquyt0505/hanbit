@@ -17,6 +17,9 @@ Mã nguồn Hanbit và dữ liệu trong `content/` có giấy phép **riêng bi
 - Dữ liệu dẫn xuất (nghĩa tiếng Việt đã sửa/duyệt) được chia sẻ **cùng giấy phép CC BY-SA**.
 - Ghi công hiển thị trên site: footer mọi trang + trang `/nguon-du-lieu`:
   > Dữ liệu từ vựng: 한국어기초사전 © 국립국어원, CC BY-SA 2.0 KR
+- Mỗi từ trong màn học và màn ôn tập có link về mục từ gốc trên 한국어기초사전.
+- **Tải về** (chia sẻ dữ liệu dẫn xuất cùng giấy phép): trang `/nguon-du-lieu` → `/nguon-du-lieu/tai-xuong/krdict-beginner.json`, `/nguon-du-lieu/tai-xuong/vocab-reviews.json`, `/nguon-du-lieu/tai-xuong/LICENSE-DATA.md`.
+- Rà soát điều khoản lần cuối: 2026-11-24 (T7.5) — ghi công tác giả/nguồn/giấy phép, nêu thay đổi, chia sẻ cùng giấy phép, không dùng tệp đa phương tiện.
 
 ## 2. Dữ liệu tự biên soạn
 

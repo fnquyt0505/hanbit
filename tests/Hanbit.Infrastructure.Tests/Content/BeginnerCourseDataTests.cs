@@ -113,3 +113,23 @@ public sealed class BeginnerCourseDataTests : IDisposable
         }
     }
 }
+
+/// <summary>T7.5: mọi mục từ krdict mang đúng thông tin nguồn + giấy phép (ghi công CC BY-SA).</summary>
+public sealed class VocabLicenseDataTests
+{
+    [Fact]
+    public void EveryVocabItem_HasKrdictSourceAndLicense()
+    {
+        var path = Path.Combine(RepoRoot.Find(), "content", "vocab", "krdict-beginner.json");
+        var items = System.Text.Json.JsonSerializer.Deserialize<List<VocabItem>>(File.ReadAllText(path), ContentJson.Options)!;
+
+        items.Count.ShouldBeGreaterThan(2000);
+        foreach (var item in items)
+        {
+            item.Source.Name.ShouldBe("한국어기초사전", item.Id);
+            item.Source.License.ShouldBe("CC BY-SA 2.0 KR", item.Id);
+            item.Source.Url.ShouldBe($"https://krdict.korean.go.kr/kor/dicSearch/SearchView?ParaWordNo={item.Source.Id}", item.Id);
+            item.Id.ShouldBe($"kd-{item.Source.Id}");
+        }
+    }
+}
