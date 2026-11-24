@@ -9,7 +9,7 @@
 | Giai đoạn                     | 4 — Bài học & bài tập |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T4.5** UI `match_pairs`, `reorder`, `type_answer` |
+| Task tiếp theo                 | **T4.6** Màn tổng kết: điểm, từ sai |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T4.5 UI match_pairs, reorder, type_answer
+- Đã làm: `Learn/Lesson` + `lesson-runner.js` hỗ trợ đủ 5 loại. **Nối cặp**: chạm trái rồi phải, cặp đã nối hiện số thứ tự (không dùng thêm màu), chạm lại để gỡ, đủ cặp mới bật "Kiểm tra" → gửi `pairs`. **Sắp xếp**: chạm mảnh ở ngân hàng để thêm vào câu, chạm mảnh trong câu để trả lại, đủ mảnh mới kiểm tra → gửi `tokens`. **Gõ**: ô nhập `lang=ko` tự focus, tắt autocomplete/spellcheck, Enter để kiểm tra, ghi chú bàn phím 두벌식 → gửi `text`. Trạng thái reset khi sang bài.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (E2E: đi hết 14 bài của bài 1 đủ 5 loại; nối đúng + gỡ cặp; sắp xếp đúng + trả mảnh; gõ có khoảng trắng/dấu câu thừa vẫn đúng) · ảnh chụp nối cặp OK.
+- Tiếp theo: T4.6
 
 ### 2026-11-24 — T4.4 Màn học /learn/{c}/{l} + lesson-runner.js
 - Đã làm: `LearnController.Lesson` (qua `LessonService`, không có → 404) + `LessonPageViewModel` (JSON cho runner: bài tập DTO **không đáp án**, nhúng `<script type="application/json" id="lesson-data">`, System.Text.Json mã hóa `<>` an toàn). View `Learn/Lesson`: LessonProgressBar (nút thoát ✕ về lộ trình + thanh % theo tổng bước), từ vựng từng thẻ (chữ Hàn lớn, romanization + phát âm, `<audio-button>` thường/chậm, nghĩa, từ loại, Hán tự, 2 ví dụ, link nguồn krdict), ngữ pháp từng thẻ (mẫu, nghĩa, giải thích, ví dụ có nút nghe), bài tập `multiple_choice` + `listen_choose` (tự đọc khi hiện, nút Nghe/Nghe chậm; chấm `POST /api/exercises/check`; đúng/sai có icon ✓/✗ + "Gần đúng rồi! Đáp án là …" + giải thích), màn kết thúc tạm (x/y đúng). `wwwroot/js/lesson-runner.js` (Alpine `lessonRunner`; `SUPPORTED_TYPES` lọc loại chưa có UI — T4.5).
