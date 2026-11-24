@@ -1,0 +1,14 @@
+// Khóa sơ cấp — Hanbit tự biên soạn; từ vựng từ 한국어기초사전 (CC BY-SA 2.0 KR, xem LICENSE-DATA.md).
+{
+  "slug": "beginner",
+  "title": "Tiếng Hàn sơ cấp 1",
+  "level": "beginner",
+  "description": "Chào hỏi, giới thiệu bản thân, nghề nghiệp, gia đình và thứ trong tuần — nền tảng giao tiếp đầu tiên.",
+  "lessons": [
+    { "slug": "chao-hoi", "title": "Chào hỏi", "order": 1 },
+    { "slug": "gioi-thieu", "title": "Giới thiệu bản thân", "order": 2 },
+    { "slug": "nghe-nghiep", "title": "Nghề nghiệp", "order": 3 },
+    { "slug": "gia-dinh", "title": "Gia đình", "order": 4 },
+    { "slug": "thu-trong-tuan", "title": "Thứ trong tuần", "order": 5 }
+  ]
+}

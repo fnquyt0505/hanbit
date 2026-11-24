@@ -1,0 +1,97 @@
+// Ngữ pháp sơ cấp — Hanbit tự biên soạn (© Hanbit, xem LICENSE-DATA.md).
+// Do AI soạn ở T1.8 — chờ người dùng duyệt (PROGRESS.md, câu hỏi 10).
+[
+  {
+    "id": "ending-mnida-seumnida",
+    "pattern": "-ㅂ니다 / -습니다",
+    "meaning_vi": "đuôi câu trần thuật trang trọng, lịch sự",
+    "explanation_vi": "Bỏ 다 ở động từ/tính từ rồi gắn đuôi. Gốc kết thúc bằng nguyên âm → -ㅂ니다 (가다 → 갑니다). Gốc có phụ âm cuối (patchim) → -습니다 (반갑다 → 반갑습니다). Gốc có patchim ㄹ → bỏ ㄹ rồi gắn -ㅂ니다 (살다 → 삽니다). 하다 → 합니다 (감사하다 → 감사합니다). Dạng câu hỏi: -ㅂ니까? / -습니까?. Dùng khi chào hỏi lần đầu, ở nơi làm việc, phát biểu, tin tức.",
+    "examples": [
+      { "ko": "반갑습니다.", "vi": "Rất vui được gặp bạn." },
+      { "ko": "감사합니다.", "vi": "Cảm ơn." },
+      { "ko": "고맙습니다.", "vi": "Cảm ơn." },
+      { "ko": "죄송합니다.", "vi": "Xin lỗi." }
+    ],
+    "grade": "beginner"
+  },
+  {
+    "id": "particle-eun-neun",
+    "pattern": "N은 / N는",
+    "meaning_vi": "tiểu từ chủ đề: \"(còn) … thì\"",
+    "explanation_vi": "Gắn ngay sau danh từ để nêu chủ đề của câu — điều mình đang nói tới. Danh từ có patchim → 은 (선생님은). Danh từ không có patchim → 는 (저는). Rất hay dùng khi tự giới thiệu và khi so sánh, đối chiếu hai người/vật.",
+    "examples": [
+      { "ko": "저는 학생입니다.", "vi": "Tôi là học sinh." },
+      { "ko": "선생님은 한국 사람입니다.", "vi": "Thầy (cô) là người Hàn Quốc." }
+    ],
+    "grade": "beginner"
+  },
+  {
+    "id": "copula-imnida",
+    "pattern": "N입니다 / N입니까?",
+    "meaning_vi": "là N (trang trọng)",
+    "explanation_vi": "Gắn liền sau danh từ, không có dấu cách: N입니다 = \"là N\". Câu hỏi: N입니까? = \"là N phải không?\". Đây là dạng -ㅂ니다 của 이다 (là), dùng như nhau dù danh từ có patchim hay không.",
+    "examples": [
+      { "ko": "저는 베트남 사람입니다.", "vi": "Tôi là người Việt Nam." },
+      { "ko": "학생입니까?", "vi": "(Bạn) là học sinh phải không?" },
+      { "ko": "네, 학생입니다.", "vi": "Vâng, tôi là học sinh." }
+    ],
+    "grade": "beginner"
+  },
+  {
+    "id": "copula-ieyo-yeyo",
+    "pattern": "N이에요 / N예요",
+    "meaning_vi": "là N (lịch sự, thân mật)",
+    "explanation_vi": "Dạng lịch sự thân mật của 이다, dùng nhiều trong hội thoại hằng ngày (mềm hơn N입니다). Danh từ có patchim → 이에요 (학생이에요). Danh từ không có patchim → 예요 (가수예요). Câu hỏi giữ nguyên, chỉ lên giọng ở cuối: 학생이에요?",
+    "examples": [
+      { "ko": "저는 회사원이에요.", "vi": "Tôi là nhân viên công ty." },
+      { "ko": "언니는 간호사예요.", "vi": "Chị gái tôi là y tá." },
+      { "ko": "누구예요?", "vi": "Ai vậy?" }
+    ],
+    "grade": "beginner"
+  },
+  {
+    "id": "negative-anieyo",
+    "pattern": "N이 / N가 아니에요",
+    "meaning_vi": "không phải là N",
+    "explanation_vi": "Phủ định của N이에요/예요. Danh từ có patchim → N이 아니에요. Danh từ không có patchim → N가 아니에요. Dạng trang trọng: N이/가 아닙니다.",
+    "examples": [
+      { "ko": "저는 학생이 아니에요. 회사원이에요.", "vi": "Tôi không phải học sinh. Tôi là nhân viên công ty." },
+      { "ko": "형은 가수가 아니에요. 기자예요.", "vi": "Anh tôi không phải ca sĩ. Anh ấy là nhà báo." }
+    ],
+    "grade": "beginner"
+  },
+  {
+    "id": "particle-ui",
+    "pattern": "N의",
+    "meaning_vi": "của N (sở hữu)",
+    "explanation_vi": "A의 B = \"B của A\" — người sở hữu đứng trước, ngược với tiếng Việt. Khi nói, 의 thường được đọc là [에]. Dạng rút gọn hay gặp: 저의 → 제, 나의 → 내. Khi nói về gia đình, nhà, đất nước của mình, người Hàn thường dùng 우리 (우리 가족, 우리 어머니) thay cho 제.",
+    "examples": [
+      { "ko": "제 동생은 학생이에요.", "vi": "Em tôi là học sinh." },
+      { "ko": "우리 어머니는 주부예요.", "vi": "Mẹ tôi là nội trợ." },
+      { "ko": "친구의 형은 경찰이에요.", "vi": "Anh trai của bạn tôi là cảnh sát." }
+    ],
+    "grade": "beginner"
+  },
+  {
+    "id": "question-museun",
+    "pattern": "무슨 N이에요?",
+    "meaning_vi": "N gì? / N nào?",
+    "explanation_vi": "무슨 đứng trước danh từ để hỏi về loại hoặc tên của sự vật: 무슨 요일 = thứ mấy. Trả lời bằng N이에요/예요.",
+    "examples": [
+      { "ko": "오늘은 무슨 요일이에요?", "vi": "Hôm nay là thứ mấy?" },
+      { "ko": "오늘은 금요일이에요.", "vi": "Hôm nay là thứ Sáu." }
+    ],
+    "grade": "beginner"
+  },
+  {
+    "id": "particle-e-time",
+    "pattern": "N에 (thời gian)",
+    "meaning_vi": "vào (thời điểm) N",
+    "explanation_vi": "Gắn sau danh từ chỉ thời gian để nói việc xảy ra lúc nào: 월요일에 = vào thứ Hai. Không dùng 에 sau 오늘 (hôm nay), 어제 (hôm qua), 내일 (ngày mai), 지금 (bây giờ).",
+    "examples": [
+      { "ko": "토요일에 친구를 만나요.", "vi": "Thứ Bảy tôi gặp bạn." },
+      { "ko": "일요일에 쉬어요.", "vi": "Chủ nhật tôi nghỉ." }
+    ],
+    "grade": "beginner"
+  }
+]

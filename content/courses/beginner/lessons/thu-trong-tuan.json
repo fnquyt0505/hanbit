@@ -1,0 +1,72 @@
+// Bài tập do AI soạn ở T1.8 — chờ người dùng duyệt (PROGRESS.md, câu hỏi 10).
+{
+  "slug": "thu-trong-tuan",
+  "title": "Thứ trong tuần",
+  "order": 5,
+  "vocab_ids": [
+    "kd-67865", // 요일
+    "kd-70069", // 월요일
+    "kd-73231", // 화요일
+    "kd-28236", // 수요일
+    "kd-55874", // 목요일
+    "kd-17289", // 금요일
+    "kd-30214", // 토요일
+    "kd-30198", // 일요일
+    "kd-46811", // 주
+    "kd-73252"  // 휴일
+  ],
+  "grammar_ids": ["question-museun", "particle-e-time"],
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "id": "tu-thu-hai",
+      "prompt": "\"Thứ Hai\" là từ nào?",
+      "choices": ["화요일", "월요일", "수요일", "목요일"],
+      "answer_index": 1
+    },
+    {
+      "type": "multiple_choice",
+      "id": "nghia-toyoil",
+      "prompt": "\"토요일\" là thứ mấy?",
+      "choices": ["Thứ Sáu", "Chủ nhật", "Thứ Năm", "Thứ Bảy"],
+      "answer_index": 3
+    },
+    {
+      "type": "multiple_choice",
+      "id": "tu-ngay-nghi",
+      "prompt": "\"Ngày nghỉ\" là từ nào?",
+      "choices": ["요일", "휴일", "주"],
+      "answer_index": 1
+    },
+    {
+      "type": "listen_choose",
+      "id": "nghe-suyoil",
+      "audio_ko": "수요일",
+      "choices": ["Thứ Ba", "Thứ Tư", "Thứ Năm"],
+      "answer_index": 1
+    },
+    {
+      "type": "match_pairs",
+      "id": "noi-thu",
+      "prompt": "Nối thứ với nghĩa",
+      "pairs": [
+        { "left": "화요일", "right": "Thứ Ba" },
+        { "left": "목요일", "right": "Thứ Năm" },
+        { "left": "금요일", "right": "Thứ Sáu" },
+        { "left": "일요일", "right": "Chủ nhật" }
+      ]
+    },
+    {
+      "type": "reorder",
+      "id": "sap-xep-hom-nay-thu-may",
+      "prompt": "Sắp xếp: \"Hôm nay là thứ mấy?\"",
+      "tokens": ["오늘은", "무슨", "요일이에요?"]
+    },
+    {
+      "type": "type_answer",
+      "id": "go-vao-thu-sau",
+      "prompt": "Gõ tiếng Hàn: \"vào thứ Sáu\"",
+      "accepted_answers": ["금요일에"]
+    }
+  ]
+}

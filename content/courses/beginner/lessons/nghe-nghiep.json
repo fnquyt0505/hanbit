@@ -1,0 +1,79 @@
+// Bài tập do AI soạn ở T1.8 — chờ người dùng duyệt (PROGRESS.md, câu hỏi 10).
+{
+  "slug": "nghe-nghiep",
+  "title": "Nghề nghiệp",
+  "order": 3,
+  "vocab_ids": [
+    "kd-88134", // 회사원
+    "kd-31668", // 회사
+    "kd-62466", // 직원
+    "kd-62256", // 가수
+    "kd-31450", // 간호사
+    "kd-25949", // 경찰
+    "kd-23113", // 공무원
+    "kd-62241", // 군인
+    "kd-61280", // 기자
+    "kd-58560", // 변호사
+    "kd-26621", // 요리사
+    "kd-73228", // 화가
+    "kd-91769", // 주부
+    "kd-29702"  // 다니다
+  ],
+  "grammar_ids": ["copula-ieyo-yeyo", "negative-anieyo"],
+  "exercises": [
+    {
+      "type": "multiple_choice",
+      "id": "nghia-ganhosa",
+      "prompt": "\"간호사\" nghĩa là gì?",
+      "choices": ["luật sư", "đầu bếp", "y tá", "nhà báo"],
+      "answer_index": 2
+    },
+    {
+      "type": "multiple_choice",
+      "id": "duoi-gasu",
+      "prompt": "Điền: 가수___",
+      "choices": ["예요", "이에요"],
+      "answer_index": 0,
+      "explanation_vi": "가수 không có patchim → 예요."
+    },
+    {
+      "type": "multiple_choice",
+      "id": "duoi-gyeongchal",
+      "prompt": "Điền: 경찰___",
+      "choices": ["예요", "이에요"],
+      "answer_index": 1,
+      "explanation_vi": "경찰 có patchim ㄹ → 이에요."
+    },
+    {
+      "type": "listen_choose",
+      "id": "nghe-yorisa",
+      "audio_ko": "저는 요리사예요",
+      "choices": ["Tôi là đầu bếp.", "Tôi là ca sĩ.", "Tôi là họa sĩ."],
+      "answer_index": 0
+    },
+    {
+      "type": "match_pairs",
+      "id": "noi-nghe-nghiep",
+      "prompt": "Nối nghề với nghĩa",
+      "pairs": [
+        { "left": "변호사", "right": "luật sư" },
+        { "left": "기자", "right": "nhà báo" },
+        { "left": "군인", "right": "quân nhân" },
+        { "left": "화가", "right": "họa sĩ" },
+        { "left": "공무원", "right": "công chức" }
+      ]
+    },
+    {
+      "type": "reorder",
+      "id": "sap-xep-khong-phai-hoc-sinh",
+      "prompt": "Sắp xếp: \"Tôi không phải học sinh.\"",
+      "tokens": ["저는", "학생이", "아니에요."]
+    },
+    {
+      "type": "type_answer",
+      "id": "go-hoesawon-anieyo",
+      "prompt": "Gõ tiếng Hàn: \"Không phải nhân viên công ty.\" (dùng 아니에요)",
+      "accepted_answers": ["회사원이 아니에요", "회사원이 아니에요."]
+    }
+  ]
+}
