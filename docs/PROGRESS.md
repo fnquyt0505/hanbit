@@ -9,8 +9,8 @@
 | Giai đoạn                     | 3 — Hangul & âm thanh                                                                                                     |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T3.1** `speech.js` + Tag Helper `<audio-button>` |
-| Việc song song (người dùng) | Duyệt ngữ pháp + bài tập AI soạn ở T1.8 (câu hỏi 10) · (tùy chọn) sửa nghĩa krdict chưa tự nhiên (câu hỏi 9) |
+| Task tiếp theo                 | **T3.2** `/hangul`: lưới chữ theo nhóm |
+| Việc song song (người dùng) | Nghe thử phát âm T3.1 (câu hỏi 12) · Duyệt ngữ pháp + bài tập AI soạn ở T1.8 (câu hỏi 10) · (tùy chọn) sửa nghĩa krdict (câu hỏi 9) |
 | Blocker                         | —                                                                                                                           |
 
 ## 💻 Môi trường máy dev
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T3.1 speech.js + `<audio-button>` (chờ nghe thử trên thiết bị)
+- Đã làm: `wwwroot/js/speech.js` (module thuần): `isSupported`, `loadVoices` (chờ `voiceschanged` tối đa 1,5 s — Chrome/Android nạp giọng bất đồng bộ), `pickKoreanVoice` (ưu tiên `ko-KR` cục bộ), `speechStatus` (`ok`/`no-voice`/`unsupported`), `speak(text, { slow, audioUrl })` (rate 1 / 0.7, `cancel()` câu đang đọc, bỏ qua lỗi `interrupted`/`canceled`, không có giọng Hàn → MP3 dự phòng nếu có, ngược lại `SpeechError` có mã), `stop`. `wwwroot/js/audio-button.js` (Alpine `audioButton`: trạng thái đang phát theo lượt, lỗi → toast tiếng Việt hướng dẫn cài giọng). Tag Helper `<audio-button text audio slow size>` → nút loa + nút `0.7×`, `aria-label` "Nghe: …"/"Nghe chậm: …", `aria-busy` khi đang đọc. Nạp `audio-button.js` trong `_Layout`. Demo + dòng trạng thái giọng đọc trên `/styleguide`.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 334/334 (Web +7 Tag Helper; E2E +4 với `speechSynthesis` giả: đọc đúng text/`ko-KR`/rate 1 và 0.7, không có giọng Hàn → toast + trạng thái "chưa có").
+- Vấn đề / ghi chú: headless không có giọng thật → DoD "test thủ công Chrome/Safari/Android" chờ người dùng (câu hỏi 12).
+- Tiếp theo: T3.2
 
 ### 2026-11-24 — T2.4 /dashboard (skeleton)
 - Đã làm: `HomeController.Dashboard` (`GET /dashboard`, nhận `IContentRepository` qua primary constructor) + `DashboardViewModel`/`DashboardCourse` (khóa học từ `content/`: tiêu đề, mô tả, số bài, link bài đầu). `Views/Home/Dashboard.cshtml`: StreakBadge (ngọn lửa + số ngày), 4 ô số liệu (chuỗi ngày, XP hôm nay, thẻ cần ôn, từ đã học), thẻ "Tiếp tục học" (người học mới → "Học Hangul" `/hangul`; có tiến độ → bài kế tiếp), thẻ "Ôn tập", danh sách khóa học. Số liệu tiến độ render **skeleton** (`animate-pulse`, `aria-busy="true"`), `wwwroot/js/dashboard.js` (Alpine `dashboard`) điền trạng thái người học mới — giai đoạn 5 thay bằng `progress-store.js` (không đọc localStorage trực tiếp). Không có JS → skeleton giữ nguyên.
@@ -211,6 +217,7 @@
    Gặp khi soạn T1.8 (đề xuất, chờ người dùng quyết): 저 (kd-44506) = "em, con, cháu" → thiếu "tôi (khiêm nhường)" · 안녕히 (kd-28415) = "một cách an lành" → thêm "(안녕히 가세요/계세요: tạm biệt)" · 다니다 (kd-29702) = "lui tới; ghé qua; **l**đi làm, đi học" — lỗi gõ từ krdict · 나라 (kd-29699) = "…; quốc gia." — trùng + dấu chấm · 반갑다 (kd-70861) = "hân hoan, vui sướng, hân hạnh" → "vui mừng (được gặp)" · 경찰 (kd-25949) = "(cơ quan) cảnh sát; (viên) cảnh sát" → "cảnh sát".
 10. **Duyệt nội dung AI soạn ở T1.8:** `content/grammar/beginner.json` (giải thích + câu ví dụ) và bài tập trong `content/courses/beginner/lessons/*.json`. Duyệt xong → xóa comment "chờ người dùng duyệt" ở đầu file.
 11. ~~Lighthouse trang chủ (DoD T2.2)~~ → đã đo (2026-11-24, Mobile, production): 95 · 96 · 100 · 100.
+12. **Nghe thử phát âm (DoD T3.1):** mở https://hanbit.onrender.com/styleguide → mục `<audio-button>` trên **Chrome/Edge (máy tính)**, **điện thoại Android (Chrome)** và nếu có **iPhone/iPad (Safari)**: bấm loa (tốc độ thường) và nút `0.7×` (chậm) cho 안녕하세요, 감사합니다; ghi lại dòng "Giọng đọc tiếng Hàn trên thiết bị này". Báo: thiết bị nào đọc được / không, giọng có tự nhiên không.
 
 ## 📝 Quyết định đã chốt
 

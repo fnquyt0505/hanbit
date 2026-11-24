@@ -111,6 +111,15 @@
             <p><ko-text display="true">가</ko-text></p>
         </div>))
 
+        @await Html.PartialAsync("_Card", new CardViewModel("<audio-button>", @<div class="space-y-4" data-testid="audio-buttons">
+            <p class="flex items-center gap-3"><audio-button text="안녕하세요" slow="true" /> <ko-text romanization="annyeonghaseyo">안녕하세요</ko-text> — Xin chào</p>
+            <p class="flex items-center gap-3"><audio-button text="감사합니다" size="sm" /> <ko-text romanization="gamsahamnida">감사합니다</ko-text> — Cảm ơn</p>
+            <p class="text-sm text-ink-muted" x-data="{ status: '…' }"
+               x-init="import('/js/speech.js').then(async (m) => status = await m.speechStatus())">
+                Giọng đọc tiếng Hàn trên thiết bị này: <span class="font-semibold text-ink" x-text="{ ok: 'có', 'no-voice': 'chưa có', unsupported: 'trình duyệt không hỗ trợ' }[status] ?? status" data-testid="speech-status"></span>
+            </p>
+        </div>))
+
         @await Html.PartialAsync("_Card", new CardViewModel("_ProgressBar", @<div class="space-y-3">
             <p class="text-sm text-ink-muted">3/10 câu</p>
             <partial name="_ProgressBar" model='new ProgressBarViewModel(3, 10, "Tiến độ bài học")' />
