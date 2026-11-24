@@ -1,0 +1,5 @@
+@* Số thẻ ôn tập đến hạn cạnh mục "Ôn tập" (T6.4) — đọc store "progress" (server tính). Ẩn khi 0. *@
+<span x-data x-show="($store.progress.summary?.dueCards ?? 0) > 0" x-cloak data-due-badge
+      class="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold leading-5 text-bg"
+      x-text="Math.min($store.progress.summary?.dueCards ?? 0, 99) + (($store.progress.summary?.dueCards ?? 0) > 99 ? '+' : '')"
+      x-bind:aria-label="`${$store.progress.summary?.dueCards ?? 0} thẻ cần ôn`"></span>

@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 6 — Ôn tập SRS |
+| Giai đoạn                     | 6 — Ôn tập SRS ✅ xong → tiếp theo 7 — Hoàn thiện & ra mắt MVP (chờ người dùng) |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T6.4** Dashboard hiển thị số thẻ đến hạn |
+| Task tiếp theo                 | **T7.1** `/profile`: thống kê từ đã thuộc, lịch streak |
 | Việc song song (người dùng) | (tùy chọn) nghe thử phát âm trên Android/iPhone — giọng chọn ưu tiên Natural/Google |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T6.4 Số thẻ đến hạn trên dashboard + điều hướng
+- Đã làm: nút Ôn tập trên dashboard hiện **"Ôn tập (n thẻ)"** khi có thẻ đến hạn (PRD §6 luồng 2; ô "Thẻ cần ôn" + dòng "Hôm nay ôn n thẻ" đã có từ T5.4). Partial `_DueBadge` (số thẻ đến hạn từ store `progress`, ẩn khi 0, tối đa "99+", `aria-label` "n thẻ cần ôn") cạnh mục "Ôn tập" trên sidebar và trên icon ở thanh điều hướng dưới đáy.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (E2E +3: desktop ô số + nút + huy hiệu sidebar = 2; mobile huy hiệu bottom nav = 2; không có thẻ → huy hiệu ẩn, nút "Ôn tập") · ảnh chụp OK.
+- Vấn đề / ghi chú: **Giai đoạn 6 xong.**
+- Tiếp theo: (chờ người dùng) T7.1
 
 ### 2026-11-24 — T6.3 Trang /review + review-session.js
 - Đã làm: `ReviewController` (`/review`) + `Views/Review/Index`: trạng thái đang tải / chưa có thẻ (CTA học bài mới) / lỗi (thử lại) / đang ôn / xong. Flashcard: mặt trước chữ Hàn + nút nghe; bấm "Lật thẻ" hoặc **Space** → mặt sau (nghĩa, romanization, từ loại, Hán tự, ví dụ, nguồn krdict) với hiệu ứng lật 3D 280ms chỉ khi `motion-safe` (`--animate-flip-in` trong `Styles/input.css`). GradeButtons 4 mức + khoảng ôn (`intervalLabel`: Ngay / n ngày / tháng / năm), **phím 1–4** chỉ sau khi lật. `review-session.js` (Alpine `reviewSession`): tải thẻ đến hạn (tối đa 50), chấm qua API, "Quên" → đưa thẻ đã lập lịch lại xuống cuối phiên (previews từ server), tổng kết lượt ôn + XP + streak, "Ôn tiếp". `progress-store.js`: `mergeReviewResult`/`applyReviewResult`. `POST /api/reviews/grade` trả thêm `previews`.
