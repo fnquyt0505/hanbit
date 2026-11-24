@@ -1,6 +1,7 @@
 using Hanbit.Infrastructure;
 using Hanbit.Infrastructure.Content;
 using Hanbit.Web.HealthChecks;
+using Hanbit.Web.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,11 @@ builder.Services.AddScoped<Hanbit.Application.Progress.ProgressService>();
 builder.Services.AddScoped<Hanbit.Application.Progress.ProgressImporter>();
 builder.Services.AddScoped<Hanbit.Application.Reviews.ReviewService>();
 
+// T7.3: rate limiting /api/*; HTML không mã hóa ký tự tiếng Việt/Hàn thành &#x…; (giảm dung lượng, dễ đọc).
+builder.Services.AddHttpHardening(builder.Configuration);
+builder.Services.Configure<Microsoft.Extensions.WebEncoders.WebEncoderOptions>(options =>
+    options.TextEncoderSettings = new System.Text.Encodings.Web.TextEncoderSettings(System.Text.Unicode.UnicodeRanges.All));
+
 var app = builder.Build();
 
 // Render (và Docker local) kết thúc TLS ở proxy rồi chuyển tiếp HTTP vào container:
@@ -39,7 +45,11 @@ app.UseWhen(
     context => !context.Request.Path.StartsWithSegments("/api"),
     branch => branch.UseStatusCodePagesWithReExecute("/loi/{0}"));
 
+app.UseSecurityHeaders();
+
 app.UseRouting();
+
+app.UseRateLimiter();
 
 app.UseAuthorization();
 
