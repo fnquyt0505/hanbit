@@ -70,7 +70,7 @@
 - [x] **T7.2** E2E 3 luồng: Hangul bài 1, 1 bài học, 1 phiên ôn tập.
 - [x] **T7.3** Rate limiting cho `/api/*`, security headers, `Cache-Control` cho nội dung tĩnh.
 - [x] **T7.4** Accessibility (axe), SEO meta, OG image, sitemap.
-- [ ] **T7.5** Kiểm tra điều khoản bản quyền krdict, trang ghi công, `LICENSE-DATA.md`.
+- [x] **T7.5** Kiểm tra điều khoản bản quyền krdict, trang ghi công, `LICENSE-DATA.md`.
 - [ ] **T7.6** Render: domain riêng (nếu có), kiểm tra cold start trên 4G.
 
 ## Giai đoạn 8 — Tài khoản (P1, sau MVP)

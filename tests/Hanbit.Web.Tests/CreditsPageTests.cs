@@ -67,3 +67,52 @@ public class CreditsPageTests(WebApplicationFactory<Program> factory)
         home.ShouldContain("href=\"/nguon-du-lieu\"");
     }
 }
+
+/// <summary>T7.5: tải dữ liệu dẫn xuất (CC BY-SA — chia sẻ cùng giấy phép).</summary>
+public class DataDownloadTests(WebApplicationFactory<Program> factory)
+    : IClassFixture<WebApplicationFactory<Program>>
+{
+    [Theory]
+    [InlineData("krdict-beginner.json", "application/json", "\"license\": \"CC BY-SA 2.0 KR\"")]
+    [InlineData("vocab-reviews.json", "application/json", "\"reviewed\": true")]
+    [InlineData("LICENSE-DATA.md", "text/markdown", "CC BY-SA 2.0 KR")]
+    public async Task Download_ServesFileAsAttachment(string name, string mediaType, string expectedContent)
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync($"/nguon-du-lieu/tai-xuong/{name}");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType?.MediaType.ShouldBe(mediaType);
+        response.Content.Headers.ContentDisposition?.DispositionType.ShouldBe("attachment");
+        response.Content.Headers.ContentDisposition?.FileNameStar.ShouldBe(name);
+        (await response.Content.ReadAsStringAsync()).ShouldContain(expectedContent);
+    }
+
+    [Theory]
+    [InlineData("/nguon-du-lieu/tai-xuong/hangul.json")]
+    [InlineData("/nguon-du-lieu/tai-xuong/..%2F..%2Fappsettings.json")]
+    [InlineData("/nguon-du-lieu/tai-xuong/KRDICT-BEGINNER.JSON")]
+    public async Task Download_OnlyWhitelistedFiles(string path)
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync(path);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task CreditsPage_LinksEveryDownload()
+    {
+        using var client = factory.CreateClient();
+
+        var html = await client.GetStringAsync("/nguon-du-lieu");
+
+        html.ShouldContain("data-testid=\"credits-downloads\"");
+        foreach (var file in Hanbit.Web.Controllers.CreditsController.Downloads)
+        {
+            html.ShouldContain($"href=\"/nguon-du-lieu/tai-xuong/{file.Name}\"");
+        }
+    }
+}
