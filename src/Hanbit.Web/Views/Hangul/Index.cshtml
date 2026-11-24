@@ -1,7 +1,11 @@
 @model Hanbit.Web.Models.Hangul.HangulIndexViewModel
 @{
     ViewData["Title"] = "Bảng chữ cái Hangul";
-    ViewData["Description"] = "Học bảng chữ cái tiếng Hàn Hangul: 40 chữ gồm nguyên âm, phụ âm, nguyên âm ghép và phụ âm kép — bấm vào chữ để nghe phát âm.";
+    ViewData["Description"] = "Học bảng chữ cái tiếng Hàn Hangul: 40 chữ gồm nguyên âm, phụ âm, nguyên âm ghép và phụ âm kép — bấm vào chữ để nghe phát âm, tự ghép âm tiết.";
+}
+
+@section Head {
+    <script type="module" src="~/js/hangul-composer.js" asp-append-version="true"></script>
 }
 
 <div class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
@@ -25,4 +29,6 @@
             </ul>
         </section>
     }
+
+    <partial name="_Composer" model="Model.DefaultComposition" />
 </div>

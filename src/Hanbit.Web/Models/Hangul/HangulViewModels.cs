@@ -42,6 +42,9 @@ public sealed record HangulIndexViewModel(IReadOnlyList<HangulGroupViewModel> Gr
 {
     public int LetterCount => Groups.Sum(g => g.Tiles.Count);
 
+    /// <summary>Âm tiết mặc định của bảng ghép âm (render sẵn ở server, JS cập nhật khi chọn).</summary>
+    public ComposedSyllable DefaultComposition { get; } = HangulComposer.TryCompose("ㄱ", "ㅏ").Result!;
+
     public static HangulIndexViewModel Create(IReadOnlyList<HangulLetter> letters) => new(
         HangulGroupInfo.All
             .Select(info => new HangulGroupViewModel(
