@@ -4,7 +4,9 @@ using Hanbit.Web.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(
+        new System.Text.Json.Serialization.JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase)));
 builder.Services.AddHealthChecks()
     .AddCheck<ContentHealthCheck>("content");
 
@@ -15,6 +17,7 @@ builder.Services.PostConfigure<ContentOptions>(options =>
     options.RootPath = Path.GetFullPath(options.RootPath, builder.Environment.ContentRootPath));
 builder.Services.AddInfrastructure();
 builder.Services.AddScoped<Hanbit.Application.Lessons.LessonService>();
+builder.Services.AddScoped<Hanbit.Application.Lessons.SubmitLessonHandler>();
 
 var app = builder.Build();
 
