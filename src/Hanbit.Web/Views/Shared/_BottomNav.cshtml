@@ -1,0 +1,20 @@
+@* Điều hướng mobile/tablet (< 1024px, DESIGN.md §4): thanh cố định dưới đáy, chừa vùng an toàn của iPhone. *@
+@{
+    var path = Context.Request.Path;
+}
+<nav aria-label="Điều hướng chính" data-testid="bottom-nav"
+     class="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <ul class="mx-auto grid max-w-2xl grid-cols-5">
+        @foreach (var item in MainNavigation.Items)
+        {
+            var active = item.IsActive(path);
+            <li>
+                <a href="@item.Href" aria-current="@(active ? "page" : null)"
+                   class="flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 py-1.5 text-xs font-medium @(active ? "text-primary" : "text-ink-muted hover:text-ink")">
+                    <partial name="_NavIcon" model="item.Icon" />
+                    <span>@item.Label</span>
+                </a>
+            </li>
+        }
+    </ul>
+</nav>

@@ -17,9 +17,22 @@
     <script defer src="~/lib/alpinejs/alpine.min.js" asp-append-version="true"></script>
 </head>
 <body class="bg-bg text-ink font-sans">
-    <main role="main">
-        @RenderBody()
-    </main>
+    <a href="#noi-dung" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-surface focus:px-4 focus:py-2">
+        Bỏ qua điều hướng
+    </a>
+    <partial name="_Sidebar" />
+    <div class="flex min-h-dvh flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-60">
+        <header class="flex items-center border-b border-border bg-surface px-4 py-3 lg:hidden" data-testid="mobile-header">
+            <a href="/" class="flex items-baseline gap-2 text-lg font-bold">
+                Hanbit <span lang="ko" class="font-ko text-ink-muted">한빛</span>
+            </a>
+        </header>
+        <main id="noi-dung" tabindex="-1" class="flex-1">
+            @RenderBody()
+        </main>
+        <partial name="_Footer" />
+    </div>
+    <partial name="_BottomNav" />
     <partial name="_ToastRegion" />
     @await RenderSectionAsync("Scripts", required: false)
 </body>

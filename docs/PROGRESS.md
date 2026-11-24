@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 1 — Dữ liệu nội dung ✅ xong → tiếp theo 2 — Layout & điều hướng                                                       |
+| Giai đoạn                     | 2 — Layout & điều hướng                                                                                                   |
 | Task đang làm                 | —                                                                                                                           |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm) |
-| Task tiếp theo                 | **T2.1** `_Layout.cshtml`: `_BottomNav`, `_Sidebar`, `_Footer` ghi công |
+| Task tiếp theo                 | **T2.2** Trang chủ `/`: hero, 3 lợi ích, CTA "Bắt đầu miễn phí" |
 | Việc song song (người dùng) | Duyệt ngữ pháp + bài tập AI soạn ở T1.8 (câu hỏi 10) · (tùy chọn) sửa nghĩa krdict chưa tự nhiên (câu hỏi 9) |
 | Blocker                         | —                                                                                                                           |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-24 — T2.1 Layout: sidebar, bottom nav, footer ghi công
+- Đã làm: `Models/Shared/Navigation.cs` (`MainNavigation.Items` dùng chung: Tổng quan `/dashboard`, Hangul `/hangul`, Bài học `/learn/beginner`, Ôn tập `/review`, Hồ sơ `/profile`; `NavItem.IsActive` so tiền tố theo segment, không phân biệt hoa thường). Partial `_Sidebar` (desktop ≥ 1024px, `lg`), `_BottomNav` (mobile + tablet, 5 cột, chừa `safe-area-inset-bottom`), `_NavIcon` (SVG nội tuyến tự vẽ + chữ 한 cho Hangul, `aria-hidden`), `_Footer` (ghi công *한국어기초사전 © 국립국어원, CC BY-SA 2.0 KR* + link krdict, giấy phép, `/nguon-du-lieu`). `_Layout`: link "Bỏ qua điều hướng", header thương hiệu trên mobile, `aria-current="page"` cho mục đang ở, nội dung chừa chỗ cho bottom nav. Toast nâng lên trên bottom nav tới `lg`. Fixture E2E nhận thêm `viewport`.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ 293/293 (Web +13, E2E +6: hiện/ẩn nav theo mobile/tablet/desktop, footer không bị bottom nav che, không cuộn ngang ở 320px, ghi công hiển thị) · xem ảnh chụp mobile/desktop OK.
+- Vấn đề / ghi chú: các link điều hướng (trừ `/`) **chưa có trang** → 404 cho tới T2.3 (`/nguon-du-lieu`), T2.4 (`/dashboard`), T3.2, T4.1, T6.3, T7.1. Chưa có nút đổi sáng/tối trên layout (lưu lựa chọn thuộc T5.3).
+- Tiếp theo: T2.2
 
 ### 2026-11-24 — T1.8 Khóa `beginner`: 5 bài đầu
 - Đã làm: dàn bài được người dùng duyệt trước. `content/grammar/beginner.json` — 8 điểm ngữ pháp tự viết giải thích (-ㅂ니다/-습니다, N은/는, N입니다/입니까, N이에요/예요, N이/가 아니에요, N의, 무슨 N이에요?, N에 thời gian). `content/courses/beginner/course.json` + 5 bài `lessons/`: chào hỏi (14 từ), giới thiệu bản thân (15), nghề nghiệp (14), gia đình (18), thứ trong tuần (10) — **71 từ, toàn bộ đã duyệt**; mỗi bài 7 bài tập tự soạn đủ 5 loại (vị trí đáp án đúng đã xáo tay). Đầu mỗi file có comment "AI soạn — chờ người dùng duyệt". Test `BeginnerCourseDataTests` (dữ liệu thật qua `JsonContentRepository`: validator sạch, 5 bài đúng thứ tự, từ đều `reviewed`, ngữ pháp tồn tại, đủ 5 loại bài tập).
