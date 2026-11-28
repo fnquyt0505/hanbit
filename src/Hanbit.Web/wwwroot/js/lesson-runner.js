@@ -1,5 +1,6 @@
 // Màn học (T4.4): từ vựng → ngữ pháp → bài tập (chấm qua POST /api/exercises/check) → kết thúc.
 // Dữ liệu: <script type="application/json" id="lesson-data"> (bài tập KHÔNG đáp án).
+import { apiFetch } from './api.js';
 import { speak } from './speech.js';
 import { applyLessonResult, lessonContext } from './progress-store.js';
 
@@ -96,7 +97,7 @@ document.addEventListener('alpine:init', () => {
         this.saved = 'saving';
         const lessonKey = `${this.course}/${this.lesson}`;
         try {
-          const response = await fetch(`/api/lessons/${encodeURIComponent(this.course)}/${encodeURIComponent(this.lesson)}/complete`, {
+          const response = await apiFetch(`/api/lessons/${encodeURIComponent(this.course)}/${encodeURIComponent(this.lesson)}/complete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -181,7 +182,7 @@ document.addEventListener('alpine:init', () => {
         this.loading = true;
         this.error = null;
         try {
-          const response = await fetch('/api/exercises/check', {
+          const response = await apiFetch('/api/exercises/check', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ course: this.course, lesson: this.lesson, exerciseId: this.exercise.id, answer }),

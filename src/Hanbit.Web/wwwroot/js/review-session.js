@@ -1,5 +1,6 @@
 // Phiên ôn tập /review (T6.3): flashcard lật (Space), 4 mức Quên/Khó/Được/Dễ (phím 1–4).
 // Server lọc thẻ đến hạn + lập lịch SM-2 (POST /api/reviews/due, /grade); JS chỉ hiển thị và lưu qua progress-store.js.
+import { apiFetch } from './api.js';
 import { applyReviewResult, load } from './progress-store.js';
 import { speak } from './speech.js';
 
@@ -42,7 +43,7 @@ document.addEventListener('alpine:init', () => {
       this.status = 'loading';
       try {
         const progress = load();
-        const response = await fetch('/api/reviews/due', {
+        const response = await apiFetch('/api/reviews/due', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cards: Object.values(progress.cards), limit: SESSION_LIMIT }),
@@ -81,7 +82,7 @@ document.addEventListener('alpine:init', () => {
       this.error = null;
       const item = this.current;
       try {
-        const response = await fetch('/api/reviews/grade', {
+        const response = await apiFetch('/api/reviews/grade', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ card: item.card, grade, activity: load().activity }),

@@ -1,4 +1,5 @@
 // Trang /hangul/{group} (T3.4): học từng chữ (stepper) → quiz 10 câu, đề + chấm qua API (đáp án không nằm trong HTML/JSON đề).
+import { apiFetch } from './api.js';
 import { speak } from './speech.js';
 import { applyLessonResult, load } from './progress-store.js';
 
@@ -47,7 +48,7 @@ document.addEventListener('alpine:init', () => {
       this.loading = true;
       this.error = null;
       try {
-        const response = await fetch(`/api/hangul/quiz/${encodeURIComponent(group)}`);
+        const response = await apiFetch(`/api/hangul/quiz/${encodeURIComponent(group)}`);
         if (!response.ok) {
           throw new Error(String(response.status));
         }
@@ -81,7 +82,7 @@ document.addEventListener('alpine:init', () => {
       this.error = null;
       try {
         const q = this.question;
-        const response = await fetch('/api/hangul/quiz/check', {
+        const response = await apiFetch('/api/hangul/quiz/check', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ group, kind: q.kind, prompt: q.prompt, answer: choice }),
@@ -142,7 +143,7 @@ document.addEventListener('alpine:init', () => {
       this.saved = 'saving';
       const progress = load();
       try {
-        const response = await fetch('/api/hangul/quiz/complete', {
+        const response = await apiFetch('/api/hangul/quiz/complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

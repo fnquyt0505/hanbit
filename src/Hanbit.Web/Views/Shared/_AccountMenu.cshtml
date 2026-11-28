@@ -1,0 +1,33 @@
+@using System.Security.Claims
+@inject Hanbit.Web.Hosting.AccountFeature Accounts
+@* Khu tài khoản (T8.2) — chỉ hiện khi site bật tài khoản. Model: "sidebar" | "header". *@
+@model string
+@if (Accounts.Enabled)
+{
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var name = User.FindFirstValue(Hanbit.Web.Hosting.AppUserClaimsPrincipalFactory.DisplayNameClaim) ?? User.FindFirstValue(ClaimTypes.Email) ?? "Bạn";
+    var initial = name.Trim().Length > 0 ? name.Trim()[..1].ToUpperInvariant() : "?";
+    var compact = Model == "header";
+
+    if (signedIn)
+    {
+        <div class="flex items-center gap-2" data-account="signed-in" data-testid="account-@Model">
+            <span class="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-bg" aria-hidden="true">@initial</span>
+            @if (!compact)
+            {
+                <span class="min-w-0 flex-1 truncate text-sm font-medium" title="@name">@name</span>
+            }
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                <button type="submit" class="rounded-full px-2 py-1 text-sm text-ink-muted underline underline-offset-2 hover:text-ink" data-testid="logout-@Model">Đăng xuất</button>
+            </form>
+        </div>
+    }
+    else
+    {
+        var returnUrl = Context.Request.Path + Context.Request.QueryString;
+        <a href="@($"{Hanbit.Web.Hosting.AccountServices.LoginPath}?returnUrl={Uri.EscapeDataString(returnUrl)}")" data-account="signed-out" data-testid="login-link-@Model"
+           class="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm font-semibold hover:border-secondary">
+            Đăng nhập
+        </a>
+    }
+}

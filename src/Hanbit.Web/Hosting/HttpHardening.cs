@@ -35,7 +35,7 @@ public static class HttpHardening
         "connect-src 'self'",
         "object-src 'none'",
         "base-uri 'self'",
-        "form-action 'self'",
+        "form-action 'self' https://accounts.google.com", // đăng nhập Google: form POST → chuyển hướng tới Google (Chrome áp form-action cho redirect)
         "frame-ancestors 'none'");
 
     public const string ImmutableCache = "public, max-age=31536000, immutable";

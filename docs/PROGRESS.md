@@ -9,7 +9,7 @@
 | Giai đoạn                     | 8 — Tài khoản (P1) |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T8.2** Identity (cookie) + Google login; Data Protection keys vào DB; anti-forgery |
+| Task tiếp theo                 | **T8.2** chờ người dùng tạo Google OAuth client → T8.3 đồng bộ tiến độ |
 | Việc song song (người dùng) | Tạo monitor UptimeRobot cho `/health` (câu hỏi 14) · (tùy chọn) thêm `docker` làm required check trong ruleset `main-protection` |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-28 — T8.2 Identity + đăng nhập Google (chờ người dùng tạo OAuth client)
+- Đã làm: package `Identity.EntityFrameworkCore` + `DataProtection.EntityFrameworkCore` (Infrastructure), `Authentication.Google` (Web) — 10.0.15. `HanbitDbContext` → `IdentityDbContext<AppUser>` (`AppUser`: `DisplayName`, `CreatedAt`, `LastSignInAt`) + `IDataProtectionKeyContext` (`data_protection_keys`), FK `learner_progress` → tài khoản (xóa tài khoản → xóa tiến độ); migration `AddIdentity`. `Hosting/AccountServices.cs`: bật khi có DB + Google OAuth; cookie, 401 cho API, `ExternalAccountService` (tìm/tạo tài khoản từ Google, cập nhật tên + lần đăng nhập), `AppUserClaimsPrincipalFactory` (claim `display_name`), `AuthenticatedApiAntiforgeryFilter`. `AccountController` `/tai-khoan/dang-nhap` · `POST /tai-khoan/google` · `/tai-khoan/google-callback` · `POST /tai-khoan/dang-xuat` (chống open redirect). `GET /api/account/me`. UI: trang đăng nhập (nút Google + ghi chú quyền riêng tư), `_AccountMenu` (sidebar + header: chữ cái đầu + tên + Đăng xuất / nút Đăng nhập), thẻ tài khoản trên `/profile`, meta CSRF; `api.js` (`apiFetch`) thay `fetch` ở mọi module gọi API. `render.yaml` khai báo 2 biến Google (`sync: false`). Giảm retry Npgsql 5×5 s → 3×2 s (DB hỏng làm app khởi động chậm ~25 s).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Web +13: tắt khi thiếu cấu hình/thiếu DB, filter CSRF; +6 cần DB chạy ở CI: trang đăng nhập, POST → chuyển hướng Google với client_id + /signin-google, khóa Data Protection lưu DB, thiếu token → 400, tạo/tìm tài khoản, đăng xuất, chống open redirect).
+- Tiếp theo: người dùng tạo OAuth client Google + đặt biến trên Render → thử đăng nhập thật → T8.3
 
 ### 2026-11-28 — T8.1 hoàn tất: production kết nối Neon
 - Người dùng tạo Neon (vùng Singapore) + đặt `ConnectionStrings__Hanbit` trên Render (khai báo `sync: false` trong `render.yaml`, PR #56). Lần đầu dán chuỗi dạng URL `postgresql://…` → `/health` **Degraded** (Npgsql không đọc URL) → đổi sang định dạng **.NET** (`Host=…;Database=…;Username=…;Password=…;SSL Mode=Require`) → `/health` **Healthy** ổn định (5/5, < 0,31 s).

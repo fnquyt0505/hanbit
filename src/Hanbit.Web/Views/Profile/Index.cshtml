@@ -1,3 +1,5 @@
+@using System.Security.Claims
+@inject Hanbit.Web.Hosting.AccountFeature Accounts
 @{
     ViewData["Title"] = "Hồ sơ";
     ViewData["NoIndex"] = true;
@@ -10,7 +12,24 @@
 
 <div class="mx-auto max-w-2xl px-4 py-8 sm:py-12" data-testid="profile">
     <h1 class="text-3xl font-bold">Hồ sơ</h1>
-    <p class="mt-2 text-ink-muted">Bạn đang học ở <strong>chế độ khách</strong>: tiến độ chỉ lưu trên trình duyệt của thiết bị này.</p>
+    @if (Accounts.Enabled && User.Identity?.IsAuthenticated == true)
+    {
+        <p class="mt-2 text-ink-muted" data-testid="profile-account">
+            Đã đăng nhập: <strong class="text-ink">@(User.FindFirstValue(Hanbit.Web.Hosting.AppUserClaimsPrincipalFactory.DisplayNameClaim) ?? User.FindFirstValue(ClaimTypes.Email))</strong>
+            @if (User.FindFirstValue(ClaimTypes.Email) is { } email)
+            {
+                <span>(@email)</span>
+            }
+        </p>
+    }
+    else
+    {
+        <p class="mt-2 text-ink-muted">Bạn đang học ở <strong>chế độ khách</strong>: tiến độ chỉ lưu trên trình duyệt của thiết bị này.</p>
+        @if (Accounts.Enabled)
+        {
+            <p class="mt-3"><a href="@($"{Hanbit.Web.Hosting.AccountServices.LoginPath}?returnUrl=%2Fprofile")" class="text-secondary underline underline-offset-2" data-testid="profile-login">Đăng nhập bằng Google</a> để lưu tiến độ lên tài khoản.</p>
+        }
+    }
 
     @* Số liệu (store "progress" — server tính) *@
     <section class="mt-8 grid grid-cols-3 gap-3" aria-label="Số liệu" x-data>

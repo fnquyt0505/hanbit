@@ -25,7 +25,10 @@ builder.Services.PostConfigure<ContentOptions>(options =>
 builder.Services.AddInfrastructure();
 
 // Giai đoạn 8: PostgreSQL (Neon) — chỉ khi có ConnectionStrings:Hanbit; không có thì chạy chế độ khách như MVP.
-builder.AddDatabaseIfConfigured();
+var databaseConfigured = builder.AddDatabaseIfConfigured();
+
+// Giai đoạn 8 (T8.2): đăng nhập Google — chỉ khi có cả DB và Authentication:Google:ClientId/ClientSecret.
+var accountsEnabled = builder.AddAccountsIfConfigured(databaseConfigured);
 builder.Services.AddScoped<Hanbit.Application.Lessons.LessonService>();
 builder.Services.AddScoped<Hanbit.Application.Lessons.SubmitLessonHandler>();
 builder.Services.AddScoped<Hanbit.Application.Progress.ProgressService>();
@@ -74,6 +77,11 @@ app.UseSecurityHeaders();
 app.UseRouting();
 
 app.UseRateLimiter();
+
+if (accountsEnabled)
+{
+    app.UseAuthentication();
+}
 
 app.UseAuthorization();
 
