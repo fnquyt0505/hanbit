@@ -1,4 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <!-- Máy dev: chuỗi kết nối Neon (ConnectionStrings:Hanbit) lưu bằng dotnet user-secrets, KHÔNG commit -->
+    <UserSecretsId>bd415ce7-c609-49a2-ad1f-f546c5f4762d</UserSecretsId>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Hanbit.Application\Hanbit.Application.csproj" />

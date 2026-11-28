@@ -395,3 +395,8 @@ dotnet_naming_style.s_camelcase.capitalization = camel_case
 # IDE0161: namespace phải là file-scoped (RULES §2)
 [*.cs]
 dotnet_diagnostic.IDE0161.severity = warning
+
+# Migration EF Core do dotnet-ef sinh — không sửa tay, bỏ qua analyzer/format (RULES: không sửa migration đã apply)
+[**/Persistence/Migrations/*.cs]
+generated_code = true
+dotnet_analyzer_diagnostic.severity = none

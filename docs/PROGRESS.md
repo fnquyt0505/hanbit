@@ -9,7 +9,7 @@
 | Giai đoạn                     | 7 — Hoàn thiện & ra mắt MVP ✅ (MVP xong) → giai đoạn 8 (P1) chờ người dùng |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | (P1) **T8.1** PostgreSQL + EF Core — chờ người dùng quyết |
+| Task tiếp theo                 | **T8.1** chờ người dùng tạo Neon (hướng dẫn trong báo cáo) → T8.2 Identity + Google login |
 | Việc song song (người dùng) | Tạo monitor UptimeRobot cho `/health` (câu hỏi 14) · (tùy chọn) thêm `docker` làm required check trong ruleset `main-protection` |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,12 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-28 — T8.1 PostgreSQL (Neon) + EF Core + migration Initial (chờ người dùng kết nối Neon)
+- Quyết định: database dùng **Neon free** (không hết hạn, vùng Singapore) thay cho Render free Postgres (hết hạn 30 ngày rồi xóa dữ liệu) — người dùng đồng ý 2026-11-28.
+- Đã làm: package `Npgsql.EntityFrameworkCore.PostgreSQL` 10.0.4 + `Microsoft.EntityFrameworkCore.Design` 10.0.15 (Infrastructure) — nâng mọi package Microsoft 10.0.12 → 10.0.15 cho khớp (tránh NU1605); local tool `dotnet-ef` 10.0.15 (`dotnet-tools.json`). `Infrastructure/Persistence`: `HanbitDbContext` + `LearnerProgressRecord` (bảng `learner_progress`, `data jsonb`), `DesignTimeDbContextFactory`, `AddPersistence` (retry lỗi tạm thời), migration `Initial` (`.editorconfig`: thư mục Migrations là generated code). Web `Hosting/DatabaseServices.cs`: DB **tùy chọn** theo `ConnectionStrings:Hanbit` — không có → chế độ khách như MVP; có → `DatabaseMigrator` áp migration khi khởi động (lỗi chỉ log), health check `database` (Degraded, tối đa 3 s). User-secrets cho `Hanbit.Web` (máy dev). CI: service container `postgres:17` + `HANBIT_TEST_DB`, bước kiểm tra `has-pending-model-changes`.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Infrastructure +4: model khớp migration, Initial đầu tiên, mapping snake_case/jsonb, **áp migration + đọc/ghi jsonb trên PostgreSQL thật** — chạy ở CI, bỏ qua trên máy dev chưa có DB; Web +2: không cấu hình → không đăng ký DbContext; DB lỗi → `/health` Degraded trong ≤ 3 s, trang vẫn chạy).
+- Tiếp theo: người dùng tạo Neon + đặt `ConnectionStrings__Hanbit` trên Render → xác nhận `/health` → T8.2
 
 ### 2026-11-24 — T7.6 Tối ưu cold start + 4G (chờ đo thực tế)
 - Đo production trước khi sửa (warm): `/` TTFB 0,30 s / 22 KB, `/hangul` 0,68 s / 88 KB, bài học 1,42 s / 87 KB — HTML **không nén**, request bài học đầu tiên phải đọc tệp từ vựng 1,3 MB. Domain: giữ `hanbit.onrender.com` (người dùng chọn).

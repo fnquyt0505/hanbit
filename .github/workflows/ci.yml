@@ -22,6 +22,20 @@ jobs:
     name: build-test
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # PostgreSQL cho test persistence (giai đoạn 8) — test tạo database riêng mỗi lần chạy rồi xóa
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v5
 
@@ -45,7 +59,12 @@ jobs:
         run: pwsh tests/Hanbit.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
       - name: Test
+        env:
+          HANBIT_TEST_DB: Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=postgres
         run: dotnet test --no-build --configuration Release
+
+      - name: Migrations khớp model (không cần DB)
+        run: dotnet tool restore && dotnet tool run dotnet-ef migrations has-pending-model-changes -p src/Hanbit.Infrastructure -s src/Hanbit.Infrastructure --no-build --configuration Release
 
   # Build image giống Render + chạy thử (Production, cổng 10000)
   docker:
