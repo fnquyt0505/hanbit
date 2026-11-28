@@ -1,3 +1,4 @@
+using Hanbit.Domain.Progress;
 using Hanbit.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
@@ -101,6 +102,58 @@ public class PersistenceDatabaseTests
         finally
         {
             await db.Database.EnsureDeletedAsync();
+        }
+    }
+}
+
+/// <summary>T8.3: <see cref="EfProgressStore"/> — đọc/ghi jsonb, đồng bộ song song không mất cập nhật (khóa dòng). Cần PostgreSQL.</summary>
+public class EfProgressStoreTests
+{
+    private sealed class Clock : Hanbit.Application.Abstractions.IClock
+    {
+        public DateTimeOffset UtcNow { get; } = new(2026, 11, 28, 5, 0, 0, TimeSpan.Zero);
+    }
+
+    [DatabaseFact]
+    public async Task Update_CreatesThenUpdates_ParallelUpdatesAllApplied()
+    {
+        var connection = new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable(DatabaseFactAttribute.EnvironmentVariable))
+        {
+            Database = $"hanbit_store_{Guid.NewGuid():N}",
+        }.ConnectionString;
+        var options = new DbContextOptionsBuilder<HanbitDbContext>()
+            .UseNpgsql(connection, npgsql => npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(1), null))
+            .Options;
+        var clock = new Clock();
+
+        await using var setup = new HanbitDbContext(options);
+        try
+        {
+            await setup.Database.MigrateAsync();
+            setup.Users.Add(new AppUser { Id = "u1", UserName = "google-u1", CreatedAt = clock.UtcNow });
+            await setup.SaveChangesAsync();
+
+            (await new EfProgressStore(setup, clock).GetAsync("u1", default)).ShouldBeNull();
+
+            // 10 thiết bị cùng lúc, mỗi lần +1 XP (cả lần tạo dòng đầu tiên chạy song song)
+            await Task.WhenAll(Enumerable.Range(0, 10).Select(async _ =>
+            {
+                await using var db = new HanbitDbContext(options);
+                await new EfProgressStore(db, clock).UpdateAsync(
+                    "u1",
+                    current => (current ?? LearnerProgress.Empty(clock.UtcNow)) with { TotalXp = (current?.TotalXp ?? 0) + 1 },
+                    default);
+            }));
+
+            await using var read = new HanbitDbContext(options);
+            var stored = await new EfProgressStore(read, clock).GetAsync("u1", default);
+            stored.ShouldNotBeNull();
+            stored.TotalXp.ShouldBe(10);
+            (await read.LearnerProgress.SingleAsync()).Data.ShouldContain("\"totalXp\": 10");
+        }
+        finally
+        {
+            await setup.Database.EnsureDeletedAsync();
         }
     }
 }

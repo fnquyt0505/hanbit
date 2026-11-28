@@ -17,7 +17,7 @@
             {
                 <span class="min-w-0 flex-1 truncate text-sm font-medium" title="@name">@name</span>
             }
-            <form asp-controller="Account" asp-action="Logout" method="post">
+            <form asp-controller="Account" asp-action="Logout" method="post" data-logout>
                 <button type="submit" class="rounded-full px-2 py-1 text-sm text-ink-muted underline underline-offset-2 hover:text-ink" data-testid="logout-@Model">Đăng xuất</button>
             </form>
         </div>

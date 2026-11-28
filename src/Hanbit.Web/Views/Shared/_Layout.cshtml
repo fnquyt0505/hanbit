@@ -41,6 +41,8 @@
     {
         @* T8.2: mã chống CSRF cho API ghi khi đã đăng nhập — api.js gửi qua header X-CSRF-TOKEN *@
         <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
+        @* T8.3: chủ tài khoản — progress-sync.js biết tiến độ trên máy thuộc ai (không gộp nhầm sang tài khoản khác) *@
+        <meta name="hanbit-user" content="@System.Security.Claims.PrincipalExtensions.FindFirstValue(User, System.Security.Claims.ClaimTypes.NameIdentifier)" />
     }
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -53,6 +55,10 @@
     <script type="module" src="~/js/ui.js" asp-append-version="true"></script>
     <script type="module" src="~/js/audio-button.js" asp-append-version="true"></script>
     <script type="module" src="~/js/progress-summary.js" asp-append-version="true"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script type="module" src="~/js/progress-sync.js" asp-append-version="true"></script>
+    }
     @await RenderSectionAsync("Head", required: false)
     <script defer src="~/lib/alpinejs/alpine.min.js" asp-append-version="true"></script>
 </head>

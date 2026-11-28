@@ -85,7 +85,8 @@ document.addEventListener('alpine:init', () => {
     clearAll() {
       clearProgress();
       this.confirmClear = false;
-      window.Alpine.store('toast').show('Đã xóa tiến độ trên thiết bị này.', 'info');
+      const signedIn = document.querySelector('meta[name="hanbit-user"]') !== null;
+      window.Alpine.store('toast').show(signedIn ? 'Đã xóa tiến độ trên tài khoản và thiết bị này.' : 'Đã xóa tiến độ trên thiết bị này.', 'info');
     },
   }));
 });
