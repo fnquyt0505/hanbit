@@ -29,6 +29,7 @@ var databaseConfigured = builder.AddDatabaseIfConfigured();
 
 // Giai đoạn 8 (T8.2): đăng nhập Google — chỉ khi có cả DB và Authentication:Google:ClientId/ClientSecret.
 var accountsEnabled = builder.AddAccountsIfConfigured(databaseConfigured);
+builder.AddRemindersIfConfigured(accountsEnabled);
 builder.Services.AddScoped<Hanbit.Application.Lessons.LessonService>();
 builder.Services.AddScoped<Hanbit.Application.Lessons.SubmitLessonHandler>();
 builder.Services.AddScoped<Hanbit.Application.Progress.ProgressService>();

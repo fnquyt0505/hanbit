@@ -24,3 +24,8 @@ services:
         sync: false
       - key: Authentication__Google__ClientSecret
         sync: false
+      # Giai đoạn 9 — nhắc học (Web Push): khóa VAPID tạo bằng `npx web-push generate-vapid-keys`, đặt trên dashboard
+      - key: Push__PublicKey
+        sync: false
+      - key: Push__PrivateKey
+        sync: false

@@ -1,5 +1,6 @@
 @using System.Security.Claims
 @inject Hanbit.Web.Hosting.AccountFeature Accounts
+@inject Hanbit.Web.Hosting.ReminderFeature ReminderFeature
 @{
     ViewData["Title"] = "Hồ sơ";
     ViewData["NoIndex"] = true;
@@ -8,6 +9,10 @@
 
 @section Head {
     <script type="module" src="~/js/profile.js" asp-append-version="true"></script>
+    @if (ReminderFeature.Enabled && User.Identity?.IsAuthenticated == true)
+    {
+        <script type="module" src="~/js/reminders.js" asp-append-version="true"></script>
+    }
 }
 
 <div class="mx-auto max-w-2xl px-4 py-8 sm:py-12" data-testid="profile">
@@ -123,6 +128,65 @@
             </p>
         </section>
     </div>
+
+    @* Nhắc học (giai đoạn 9) — Web Push; server quyết định khi nào nhắc *@
+    @if (ReminderFeature.Enabled)
+    {
+        <section class="mt-8 rounded-2xl border border-border bg-surface p-6" aria-labelledby="reminder-title" data-testid="reminders">
+            <h2 id="reminder-title" class="text-xl font-bold">Nhắc học</h2>
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <p class="mt-2 text-ink-muted">
+                    <a href="@($"{Hanbit.Web.Hosting.AccountServices.LoginPath}?returnUrl=%2Fprofile")" class="text-secondary underline underline-offset-2">Đăng nhập</a>
+                    để nhận thông báo nhắc học mỗi ngày.
+                </p>
+            }
+            else
+            {
+                <div x-data="reminderSettings" x-bind:aria-busy="(!loaded).toString()" aria-busy="true">
+                    <p class="mt-2 text-ink-muted">Nhận thông báo vào giờ bạn chọn nếu hôm đó bạn <strong>chưa học</strong> — tối đa 1 lần mỗi ngày.</p>
+
+                    <div x-show="!loaded" class="mt-4 h-12 animate-pulse rounded-xl bg-border" aria-hidden="true"></div>
+
+                    <template x-if="loaded && settings && !supported">
+                        <p class="mt-4 text-sm text-warning-ink" data-testid="reminder-unsupported">Trình duyệt này chưa hỗ trợ thông báo. Hãy dùng Chrome, Edge, Firefox hoặc Safari bản mới.</p>
+                    </template>
+                    <template x-if="loaded && settings && supported && homeScreen">
+                        <p class="mt-4 text-sm text-warning-ink" data-testid="reminder-homescreen">
+                            Trên iPhone/iPad: bấm nút <strong>Chia sẻ</strong> → <strong>Thêm vào Màn hình chính</strong>, rồi mở Hanbit từ biểu tượng đó để bật nhắc học (iOS 16.4 trở lên).
+                        </p>
+                    </template>
+
+                    <div x-show="loaded && settings && supported && !homeScreen" x-cloak class="mt-4 flex flex-col gap-4">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <label for="reminder-time" class="font-medium">Giờ nhắc</label>
+                            <select id="reminder-time" class="h-11 rounded-xl border border-border bg-bg px-3 text-base"
+                                    x-bind:disabled="busy" x-on:change="changeTime($event.target.value)" data-testid="reminder-time">
+                                <template x-for="t in settings?.allowedTimes ?? []" x-bind:key="t">
+                                    <option x-bind:value="t" x-text="t" x-bind:selected="t === settings?.time"></option>
+                                </template>
+                            </select>
+                            <span class="text-sm text-ink-muted">(giờ Việt Nam)</span>
+                        </div>
+
+                        <p class="text-sm" x-show="active" data-testid="reminder-status-on">🔔 Đang bật trên thiết bị này.</p>
+                        <p class="text-sm text-ink-muted" x-show="!active && permission === 'denied'" data-testid="reminder-denied">
+                            Thông báo đang bị chặn cho trang này — mở cài đặt trình duyệt (biểu tượng ổ khóa cạnh địa chỉ) để cho phép.
+                        </p>
+
+                        <div class="flex flex-col gap-2 sm:flex-row">
+                            <hb-button x-show="!active" x-on:click="enable()" x-bind:disabled="busy" data-testid="reminder-enable">Bật nhắc học</hb-button>
+                            <hb-button x-show="active" variant="outline" x-on:click="test()" x-bind:disabled="busy" data-testid="reminder-test">Gửi thử</hb-button>
+                            <hb-button x-show="active" variant="outline" x-on:click="disable()" x-bind:disabled="busy" data-testid="reminder-disable">Tắt nhắc học</hb-button>
+                        </div>
+                    </div>
+
+                    <p x-show="notice" x-cloak x-text="notice" role="status" class="mt-4 text-sm text-success-ink" data-testid="reminder-notice"></p>
+                    <p x-show="error" x-cloak x-text="error" role="alert" class="mt-4 text-sm text-danger" data-testid="reminder-error"></p>
+                </div>
+            }
+        </section>
+    }
 
     @* Sao lưu & khôi phục *@
     <section class="mt-8 rounded-2xl border border-border bg-surface p-6" aria-labelledby="backup-title" x-data="progressBackup" data-testid="backup">

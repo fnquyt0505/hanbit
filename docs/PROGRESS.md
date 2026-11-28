@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 8 — Tài khoản (P1) |
+| Giai đoạn                     | 9 — Nhắc học (P2) |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | Giai đoạn 8 xong — chờ người dùng chọn việc trong Backlog |
+| Task tiếp theo                 | **T9.1** chờ người dùng tạo khóa VAPID → T9.2 gửi nhắc tự động |
 | Việc song song (người dùng) | Tạo monitor UptimeRobot cho `/health` (câu hỏi 14) · (tùy chọn) thêm `docker` làm required check trong ruleset `main-protection` |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-28 — T9.1 Nền tảng thông báo nhắc học (chờ người dùng tạo khóa VAPID)
+- Đã làm: Domain `ReminderSettings` (giờ VN 05:00–23:00, bước 30 phút, mặc định 20:00), `PushMessage`/`PushDevice`; Application `IReminderStore`/`IPushSender` + `ReminderService` (chỉ nhận endpoint của FCM/Mozilla/WNS/Apple — chống SSRF; gửi thử, xóa thiết bị hết hạn); Infrastructure `WebPushCrypto` (RFC 8291 `aes128gcm` + RFC 8292 VAPID bằng ECDH/HKDF/AES-GCM/ECDSA có sẵn), `WebPushSender` (TTL 12 giờ, 404/410 → xóa), `EfReminderStore`, bảng `reminder_settings` + `push_subscriptions` (migration `AddReminders`, xóa tài khoản → xóa theo). Web: `ReminderFeature` (bật khi có tài khoản + `Push:PublicKey/PrivateKey`), `/api/reminders` (GET/PUT, subscriptions, subscriptions/remove, test). Trình duyệt: `/sw.js` (chỉ nhận push + mở trang khi bấm), `/manifest.webmanifest` + icon PNG 192/512/maskable/apple-touch/badge (render từ favicon.svg bằng Chromium headless), `reminders.js` + mục **Nhắc học** trên /profile (chọn giờ, Bật/Tắt/Gửi thử, hướng dẫn iPhone "Thêm vào Màn hình chính"). `render.yaml` khai báo `Push__PublicKey`/`Push__PrivateKey` (`sync: false`). Bỏ package `WebPush` (bản nháp `aesgcm`).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Domain +10 giờ nhắc; Infrastructure +10 — **khớp vector RFC 8291 Phụ lục A**, giải mã lại, chữ ký VAPID kiểm bằng khóa công khai, ánh xạ 201/404/410/429/500; Web +19 chống SSRF/khóa xấu/gửi thử/tắt khi thiếu cấu hình/manifest + sw.js, +4 cần DB ở CI; E2E +3 service worker đăng ký dưới CSP, manifest, tiện ích JS).
+- Tiếp theo: người dùng tạo khóa VAPID + đặt biến Render → thử "Gửi thử" trên điện thoại → T9.2
 
 ### 2026-11-28 — T8.3 Đồng bộ tiến độ với tài khoản (gộp localStorage khi đăng nhập)
 - Đã làm: `ProgressMerger` (Domain — gộp bài/thẻ/hoạt động, XP theo phần chênh từ lần đồng bộ trước), `IProgressStore` + `ProgressSyncService` (Application), `EfProgressStore` (jsonb, khóa dòng `FOR UPDATE`, thử lại khi trùng khóa), `GET/PUT /api/progress/sync` (404 khi tắt tài khoản, 401 khi chưa đăng nhập, CSRF). JS: `progress-sync.js` (nạp khi đã đăng nhập — gộp dữ liệu khách lần đầu, đồng bộ sau mỗi thay đổi, tài khoản khác → sao lưu + lấy bản của tài khoản, đăng xuất → đồng bộ rồi xóa máy), `progress-store.js` thêm trạng thái `hanbit.sync.v1` + cờ thay hẳn khi nhập file / xóa tiến độ. Meta `hanbit-user` khi đã đăng nhập; lộ trình cập nhật khi tiến độ tải về; hồ sơ ghi rõ tiến độ lưu trên tài khoản. T8.2 xác nhận: production đăng nhập Google được.
@@ -430,6 +435,8 @@
 | 2026-11-24      | SM-2 rút gọn: Again → lặp 0, đến hạn ngay (ôn lại trong phiên), ease −0,20 · Hard 1 → 1 → ×1,2, ease −0,15 · Good 1 → 3 → ×ease · Easy 3 → 6 → ×ease×1,3, ease +0,15 · ease 1,3–5, khoảng ≤ 3650 ngày, đến hạn 00:00 giờ VN | AI chọn theo SM-2 phổ biến (ARCHITECTURE §7 chỉ nêu khung); hằng số trong `Sm2Scheduler` |
 | 2026-11-24      | Giai đoạn 7: thêm `Deque.AxeCore.Playwright` (chỉ project E2E) cho T7.4 · giữ domain `hanbit.onrender.com` · "đã thuộc" = thẻ có khoảng ôn ≥ 21 ngày | Người dùng chọn (axe, domain); ngưỡng 21 ngày AI chọn theo Anki "mature" |
 | 2026-11-24      | Nút đánh giá ôn tập giữ 4 màu ngữ nghĩa (ngoại lệ DESIGN §2) · chống cold start bằng UptimeRobot ping `/health` mỗi 5 phút (không nâng gói Render) | Người dùng chọn (câu hỏi 13, 14) |
+| 2026-11-28      | Nhắc học: **Web Push** + **GitHub Actions cron** + quy tắc **chưa học hôm nay** (giờ tự chọn, mặc định 20:00 VN, tối đa 1 lần/ngày) | Người dùng chọn. Free, không dịch vụ ngoài; Render free ngủ nên phải có lịch bên ngoài đánh thức |
+| 2026-11-28      | Tự cài đặt mã hóa Web Push (RFC 8291 `aes128gcm` + RFC 8292 VAPID) thay package `WebPush` | Package dùng bản nháp `aesgcm` → dịch vụ push Apple (iPhone) không nhận; bỏ luôn `Portable.BouncyCastle` đã ngừng phát triển. Kiểm bằng vector RFC 8291 Phụ lục A |
 
 ---
 
