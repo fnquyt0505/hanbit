@@ -54,4 +54,27 @@ public class ReminderTests(WebServerFixture server)
 
         manifest.ShouldBe("Hanbit");
     }
+
+    [Fact]
+    public async Task DescribePushError_TranslatesBrowserErrors()
+    {
+        var page = await server.NewPageAsync();
+        await page.GotoAsync($"{server.BaseUrl}/hangul");
+
+        var messages = await page.EvaluateAsync<string[]>(
+            """
+            async () => {
+              const { describePushError } = await import('/js/reminders.js');
+              return [
+                describePushError(new DOMException('Registration failed - push service error', 'AbortError')),
+                describePushError(new DOMException('Permission denied', 'NotAllowedError')),
+                describePushError(new Error('khác')),
+              ];
+            }
+            """);
+
+        messages[0].ShouldContain("Dịch vụ thông báo của trình duyệt từ chối");
+        messages[1].ShouldContain("chưa cho phép thông báo");
+        messages[2].ShouldContain("thử lại sau");
+    }
 }

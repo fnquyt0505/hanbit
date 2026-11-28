@@ -78,6 +78,36 @@ public class WebPushCryptoTests
         vapid.VerifyData(Encoding.ASCII.GetBytes($"{jwt[0]}.{jwt[1]}"), B64(jwt[2]), HashAlgorithmName.SHA256).ShouldBeTrue();
     }
 
+    private const string RfcServerPublic = "BP4z9KsN6nGRTbVYI_c7VJSPQTBtkgcy27mlmlMoZIIgDll6e3vCYLocInmYWAmS6TlzAC8wEqKK6PBru3jl7A8";
+    private const string RfcServerPrivate = "yfWPiYE-n46HLnH0KqZOF1fJJU3MYrct3AELtAQ-oRw";
+    private const string RfcBrowserPublic = "BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4";
+
+    [Fact]
+    public void ValidateVapidKeys_MatchingPair_Ok()
+    {
+        WebPushCrypto.ValidateVapidKeys(RfcServerPublic, RfcServerPrivate).ShouldBeNull();
+    }
+
+    [Theory]
+    [InlineData(RfcBrowserPublic, RfcServerPrivate, "không khớp")]
+    [InlineData(RfcServerPrivate, RfcServerPublic, "65 byte")] // đảo hai khóa
+    [InlineData(RfcServerPublic, "abc", "32 byte")]
+    [InlineData("không-phải base64!", RfcServerPrivate, "base64url")]
+    public void ValidateVapidKeys_DetectsCommonMistakes(string publicKey, string privateKey, string expected)
+    {
+        WebPushCrypto.ValidateVapidKeys(publicKey, privateKey).ShouldNotBeNull().ShouldContain(expected);
+    }
+
+    [Theory]
+    [InlineData(" \"BCVx\" ", "BCVx")]
+    [InlineData("'BCVx'\n", "BCVx")]
+    [InlineData("BCVx", "BCVx")]
+    [InlineData(null, null)]
+    public void NormalizeKey_StripsQuotesAndWhitespace(string? input, string? expected)
+    {
+        WebPushCrypto.NormalizeKey(input).ShouldBe(expected);
+    }
+
     /// <summary>Giải mã phía trình duyệt (RFC 8291 §3.4 + RFC 8188), viết độc lập để kiểm tra.</summary>
     internal static byte[] Decrypt(byte[] body, ECDiffieHellman ua, byte[] uaPublic, byte[] auth)
     {
