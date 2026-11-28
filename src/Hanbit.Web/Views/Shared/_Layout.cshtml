@@ -1,3 +1,4 @@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -36,6 +37,11 @@
     <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
     @* Áp chế độ sáng/tối đã lưu TRƯỚC khi vẽ (tránh nháy). Chỉ ĐỌC khóa do progress-store.js ghi — ngoại lệ đã chốt 2026-11-23. *@
     <script>@Html.Raw(Hanbit.Web.Hosting.InlineScripts.ThemeInit)</script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        @* T8.2: mã chống CSRF cho API ghi khi đã đăng nhập — api.js gửi qua header X-CSRF-TOKEN *@
+        <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
+    }
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
@@ -60,7 +66,10 @@
             <a href="/" class="flex items-baseline gap-2 text-lg font-bold">
                 Hanbit <span lang="ko" class="font-ko text-ink-muted">한빛</span>
             </a>
-            <partial name="_StreakBadge" />
+            <div class="flex items-center gap-2">
+                <partial name="_StreakBadge" />
+                <partial name="_AccountMenu" model="@("header")" />
+            </div>
         </header>
         <main id="noi-dung" tabindex="-1" class="flex-1">
             @RenderBody()

@@ -19,3 +19,8 @@ services:
       # KHÔNG nằm trong repo; Blueprint sync không ghi đè. Bỏ trống → app chạy chế độ khách.
       - key: ConnectionStrings__Hanbit
         sync: false
+      # Giai đoạn 8 (T8.2): Google OAuth — nhập trên dashboard (sync: false). Thiếu → không bật đăng nhập (chế độ khách).
+      - key: Authentication__Google__ClientId
+        sync: false
+      - key: Authentication__Google__ClientSecret
+        sync: false

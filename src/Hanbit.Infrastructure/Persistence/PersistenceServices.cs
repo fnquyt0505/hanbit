@@ -10,13 +10,14 @@ public static class PersistenceServices
 
     /// <summary>
     /// Đăng ký PostgreSQL (Neon) — Web chỉ gọi khi có chuỗi kết nối; không có → app chạy chế độ khách như MVP.
-    /// Thử lại khi lỗi tạm thời (Neon free tự tắt compute khi rảnh, lần đầu đánh thức có thể chậm).
+    /// Thử lại khi lỗi tạm thời (Neon free tự tắt compute khi rảnh, lần đầu đánh thức có thể chậm) — ít lần, chờ ngắn:
+    /// khóa Data Protection được nạp lúc khởi động, DB hỏng mà thử lại lâu sẽ làm app khởi động chậm.
     /// Migration được Web áp khi khởi động (<c>Hosting/DatabaseServices.cs</c>).
     /// </summary>
     public static IServiceCollection AddPersistence(this IServiceCollection services, string connectionString)
     {
         services.AddDbContext<HanbitDbContext>(options => options.UseNpgsql(connectionString, npgsql =>
-            npgsql.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null)));
+            npgsql.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(2), errorCodesToAdd: null)));
         return services;
     }
 }

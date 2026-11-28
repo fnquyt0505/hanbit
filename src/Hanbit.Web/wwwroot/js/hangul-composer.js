@@ -1,4 +1,5 @@
 // Bảng ghép âm (T3.3): chọn phụ âm đầu + nguyên âm (+ phụ âm cuối) → server ghép qua GET /api/hangul/compose.
+import { apiFetch } from './api.js';
 import { speak } from './speech.js';
 
 document.addEventListener('alpine:init', () => {
@@ -32,7 +33,7 @@ document.addEventListener('alpine:init', () => {
       }
 
       try {
-        const response = await fetch(`/api/hangul/compose?${params}`, { signal: controller.signal });
+        const response = await apiFetch(`/api/hangul/compose?${params}`, { signal: controller.signal });
         const body = await response.json();
         if (!response.ok) {
           this.error = Object.values(body.errors ?? {}).flat()[0] ?? 'Không ghép được.';

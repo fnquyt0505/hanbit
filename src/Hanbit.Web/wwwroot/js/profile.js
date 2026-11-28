@@ -1,5 +1,6 @@
 // Trang /profile (T5.5): xuất / nhập / xóa tiến độ. Nhập: server kiểm tra + migrate + làm sạch (POST /api/progress/validate)
 // rồi người dùng xác nhận mới ghi đè. Ghi/đọc localStorage chỉ qua progress-store.js.
+import { apiFetch } from './api.js';
 import { backupFileName, clearProgress, CHANGED_EVENT, exportJson, load, replaceProgress } from './progress-store.js';
 
 /** Thống kê ngắn của một bản tiến độ (hiển thị khi xác nhận ghi đè). */
@@ -43,7 +44,7 @@ document.addEventListener('alpine:init', () => {
       this.busy = true;
       try {
         const text = await file.text();
-        const response = await fetch('/api/progress/validate', {
+        const response = await apiFetch('/api/progress/validate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: text,
@@ -112,7 +113,7 @@ document.addEventListener('alpine:init', () => {
     async refresh() {
       try {
         const progress = load();
-        const response = await fetch('/api/progress/stats', {
+        const response = await apiFetch('/api/progress/stats', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cards: Object.values(progress.cards), activity: progress.activity }),

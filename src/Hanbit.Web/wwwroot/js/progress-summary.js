@@ -1,5 +1,6 @@
 // Store Alpine "progress" (T5.4): số liệu dashboard/StreakBadge do SERVER tính từ tiến độ localStorage
 // (POST /api/progress/summary — JS không tự tính streak/thẻ đến hạn, RULES). Làm mới khi tiến độ thay đổi.
+import { apiFetch } from './api.js';
 import { CHANGED_EVENT, load } from './progress-store.js';
 
 /** Thân yêu cầu tóm tắt từ tiến độ đã lưu. */
@@ -19,7 +20,7 @@ document.addEventListener('alpine:init', () => {
     summary: null, // ProgressSummaryResponse
     async refresh() {
       try {
-        const response = await fetch('/api/progress/summary', {
+        const response = await apiFetch('/api/progress/summary', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(summaryRequest(load())),
