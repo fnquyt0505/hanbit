@@ -219,5 +219,7 @@ public sealed record DailyActivity(DateOnly Date, int Xp, int Reviews);
 
 `appsettings.json`: `{ "Content": { "RootPath": "content" } }` — đường dẫn tương đối tính từ `ContentRootPath` (Docker: `/app/content`).
 `appsettings.Development.json`: `RootPath: "../../content"` (repo root), `CacheDuration: "00:00:02"` (sửa content thấy ngay). Production: cache không hết hạn.
+
+**Database (giai đoạn 8 — T8.1):** PostgreSQL trên **Neon free** (vùng Singapore; Render free DB hết hạn sau 30 ngày và bị xóa). Chuỗi kết nối `ConnectionStrings:Hanbit` — Render: biến môi trường `ConnectionStrings__Hanbit`; máy dev: user-secrets của `Hanbit.Web`. **Tùy chọn**: không có → không đăng ký DbContext, app chạy chế độ khách. Có → `HanbitDbContext` (Infrastructure/Persistence, Npgsql, retry khi lỗi tạm thời), `DatabaseMigrator` áp migration khi khởi động (lỗi chỉ ghi log), `/health` thêm mục `database` (lỗi → Degraded, tối đa 3 s — Render không khởi động lại app). Bảng `learner_progress(user_id PK, schema_version, data jsonb, created_at, updated_at)` lưu nguyên `LearnerProgress` (T8.3). Migration trong `Infrastructure/Persistence/Migrations` (bỏ qua analyzer/format).
 `/health` gồm check `content` (đọc được `hangul.json`) → Render phát hiện image thiếu/sai `content/`.
 Importer: `dotnet user-secrets set "Krdict:ApiKey" "..."` — không commit, không đưa lên Render.

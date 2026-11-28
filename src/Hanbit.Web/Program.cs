@@ -23,6 +23,9 @@ builder.Services.Configure<ContentOptions>(builder.Configuration.GetSection(Cont
 builder.Services.PostConfigure<ContentOptions>(options =>
     options.RootPath = Path.GetFullPath(options.RootPath, builder.Environment.ContentRootPath));
 builder.Services.AddInfrastructure();
+
+// Giai đoạn 8: PostgreSQL (Neon) — chỉ khi có ConnectionStrings:Hanbit; không có thì chạy chế độ khách như MVP.
+builder.AddDatabaseIfConfigured();
 builder.Services.AddScoped<Hanbit.Application.Lessons.LessonService>();
 builder.Services.AddScoped<Hanbit.Application.Lessons.SubmitLessonHandler>();
 builder.Services.AddScoped<Hanbit.Application.Progress.ProgressService>();
