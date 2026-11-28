@@ -199,12 +199,14 @@ export function replaceProgress(progress) {
     throw new Error('Tiến độ không hợp lệ.');
   }
   lastIssue = null;
+  markReplace(); // đã đăng nhập → thay bản trên tài khoản, không gộp
   return save(progress);
 }
 
 /** Xóa tiến độ (bắt đầu lại từ đầu). */
 export function clearProgress() {
   lastIssue = null;
+  markReplace();
   return save(emptyProgress());
 }
 
@@ -225,4 +227,62 @@ export function applyReviewResult(result) {
   const next = mergeReviewResult(load(), result);
   save(next);
   return next;
+}
+
+// ── Đồng bộ tài khoản (T8.3) — trạng thái do progress-sync.js dùng ──
+
+export const SYNC_KEY = 'hanbit.sync.v1';
+
+/**
+ * Trạng thái đồng bộ: tiến độ trên máy thuộc tài khoản nào (`userId`; không có = dữ liệu khách), XP ngay sau lần đồng bộ
+ * trước (`baseXp` — server chỉ cộng phần XP kiếm thêm), `replace` = lần gửi tới phải THAY bản trên tài khoản (nhập file / xóa).
+ * @returns {{ userId?: string, baseXp?: number, syncedAt?: string, replace?: boolean }}
+ */
+export function loadSyncState() {
+  try {
+    const parsed = JSON.parse(storage()?.getItem(SYNC_KEY) ?? '{}');
+    return isObject(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveSyncState(state) {
+  try {
+    const s = storage();
+    if (state) {
+      s?.setItem(SYNC_KEY, JSON.stringify(state));
+    } else {
+      s?.removeItem(SYNC_KEY);
+    }
+  } catch {
+    // bỏ qua — lần sau đồng bộ lại theo chế độ gộp
+  }
+}
+
+/** Đánh dấu thay hẳn bản trên tài khoản ở lần đồng bộ tới (chỉ khi tiến độ trên máy đã gắn với tài khoản). */
+function markReplace() {
+  const state = loadSyncState();
+  if (state.userId) {
+    saveSyncState({ ...state, replace: true });
+  }
+}
+
+/** Cất bản hiện tại vào khóa sao lưu (trước khi thay bằng tiến độ của tài khoản khác). */
+export function backupCurrent() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw !== null) {
+      backup(raw);
+    }
+  } catch {
+    // không sao lưu được → bỏ qua
+  }
+}
+
+/** Sau khi đăng xuất (đã đồng bộ): xóa tiến độ + trạng thái đồng bộ trên máy — tiến độ vẫn nằm trên tài khoản. */
+export function forgetAccountProgress() {
+  lastIssue = null;
+  saveSyncState(null);
+  return save(emptyProgress());
 }

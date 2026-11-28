@@ -18,6 +18,7 @@ public static class PersistenceServices
     {
         services.AddDbContext<HanbitDbContext>(options => options.UseNpgsql(connectionString, npgsql =>
             npgsql.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(2), errorCodesToAdd: null)));
+        services.AddScoped<Hanbit.Application.Abstractions.IProgressStore, EfProgressStore>();
         return services;
     }
 }

@@ -18,6 +18,7 @@ public static class DatabaseServices
         }
 
         builder.Services.AddPersistence(connectionString);
+        builder.Services.AddScoped<Hanbit.Application.Progress.ProgressSyncService>();
         builder.Services.AddHostedService<DatabaseMigrator>();
         builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database", failureStatus: HealthStatus.Degraded);
         return true;
