@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Bạn đang offline";
+    ViewData["NoIndex"] = true;
+    ViewData["Description"] = "Trang này chưa được lưu để xem khi mất mạng.";
+}
+
+@* PWA offline (giai đoạn 10): service worker trả trang này khi mất mạng mà trang cần mở chưa được lưu. *@
+<div class="mx-auto max-w-2xl px-4 py-12 text-center" data-testid="offline-page">
+    <p class="text-5xl" aria-hidden="true">📴</p>
+    <h1 class="mt-4 text-3xl font-bold">Bạn đang offline</h1>
+    <p class="mt-3 text-ink-muted">
+        Trang này chưa được lưu trên máy. Khi có mạng lại, trang sẽ mở bình thường.
+        Bài tập, ôn tập và lưu tiến độ cần có mạng.
+    </p>
+
+    <div class="mt-8 text-left" x-data="savedPages">
+        <h2 class="text-xl font-bold">Xem offline được</h2>
+        <p x-show="loaded && pages.length === 0" x-cloak class="mt-2 text-ink-muted">
+            Chưa có trang nào được lưu. Lần sau khi có mạng, mở trang khóa học và bấm <strong>Tải để xem offline</strong>.
+        </p>
+        <ul x-show="pages.length > 0" x-cloak class="mt-3 divide-y divide-border rounded-xl border border-border bg-surface" data-testid="saved-pages">
+            <template x-for="page in pages" x-bind:key="page.url">
+                <li><a x-bind:href="page.url" x-text="page.title" class="block px-4 py-3 hover:text-secondary"></a></li>
+            </template>
+        </ul>
+    </div>
+
+    <div class="mt-8" x-data>
+        <hb-button x-on:click="location.reload()" data-testid="offline-retry">Thử lại</hb-button>
+    </div>
+</div>

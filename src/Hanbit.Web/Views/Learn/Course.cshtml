@@ -14,6 +14,21 @@
     <h1 class="mt-1 text-3xl font-bold">@course.Title</h1>
     <p class="mt-2 text-ink-muted">@course.Description</p>
 
+    @* Giai đoạn 10: lưu trang khóa + mọi bài để xem offline (bài tập vẫn cần mạng) *@
+    @{
+        var offlineUrls = new[] { $"/learn/{course.Slug}" }
+            .Concat(course.Lessons.OrderBy(l => l.Order).Select(l => $"/learn/{course.Slug}/{l.Slug}"))
+            .ToArray();
+    }
+    <div x-data="offlineCourse(@System.Text.Json.JsonSerializer.Serialize(offlineUrls))" x-show="supported" x-cloak
+         class="mt-4 flex flex-wrap items-center gap-3" data-testid="offline-course">
+        <hb-button size="sm" variant="outline" x-show="state !== 'saved'" x-on:click="download()" x-bind:disabled="state === 'saving'" data-testid="offline-download">
+            <span x-text="state === 'saving' ? `Đang tải ${done}/${total}…` : 'Tải để xem offline'">Tải để xem offline</span>
+        </hb-button>
+        <p x-show="state === 'saved'" class="text-sm text-success-ink" data-testid="offline-saved">✓ Đã tải — xem được từ vựng, ngữ pháp khi mất mạng.</p>
+        <p x-show="state === 'failed'" class="text-sm text-danger" role="alert">Chưa tải hết (mất mạng?). Bấm lại để thử tiếp.</p>
+    </div>
+
     <div class="mt-8">
         @await Component.InvokeAsync("CourseMap", new { course })
     </div>

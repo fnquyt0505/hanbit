@@ -18,10 +18,18 @@ public sealed class WebServerFixture : IAsyncLifetime
 
     public IBrowser Browser => _browser ?? throw new InvalidOperationException("Fixture chưa khởi tạo.");
 
-    /// <summary>Trang mới; chặn mọi request ra ngoài server test (font CDN…) để test không phụ thuộc mạng.</summary>
-    public async Task<IPage> NewPageAsync(ColorScheme colorScheme = ColorScheme.Light, ViewportSize? viewport = null)
+    /// <summary>
+    /// Trang mới (context riêng); chặn mọi request ra ngoài server test (font CDN…) để test không phụ thuộc mạng.
+    /// Service worker mặc định BỊ CHẶN (cache offline + route giả của Playwright không đi cùng nhau); test PWA truyền
+    /// <paramref name="serviceWorkers"/> = true.
+    /// </summary>
+    public async Task<IPage> NewPageAsync(ColorScheme colorScheme = ColorScheme.Light, ViewportSize? viewport = null, bool serviceWorkers = false)
     {
-        var options = new BrowserNewPageOptions { ColorScheme = colorScheme };
+        var options = new BrowserNewPageOptions
+        {
+            ColorScheme = colorScheme,
+            ServiceWorkers = serviceWorkers ? ServiceWorkerPolicy.Allow : ServiceWorkerPolicy.Block,
+        };
         if (viewport is not null)
         {
             options.ViewportSize = viewport;

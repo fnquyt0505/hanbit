@@ -18,6 +18,7 @@
             <h1 class="text-2xl font-bold sm:text-3xl">Chào bạn 👋</h1>
             <p class="mt-1 text-ink-muted" x-show="!loaded || isNewLearner">Hôm nay mình bắt đầu từ đâu nhé?</p>
             <p class="mt-1 text-ink-muted" x-show="loaded && !isNewLearner" x-cloak>Tiếp tục giữ chuỗi ngày học nhé!</p>
+            <p class="mt-1 text-sm text-warning-ink" x-show="$store.progress.stale" x-cloak data-testid="dashboard-stale">Đang offline — số liệu lần cập nhật trước.</p>
         </div>
 
         @* StreakBadge (DESIGN.md §5): ngọn lửa + số ngày *@

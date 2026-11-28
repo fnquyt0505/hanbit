@@ -5,6 +5,7 @@
 //   - Tiến độ trên máy của tài khoản KHÁC → sao lưu sang khóa backup, lấy tiến độ của tài khoản đang đăng nhập.
 //   - Đăng xuất → đồng bộ lần cuối rồi xóa tiến độ trên máy (vẫn còn trên tài khoản).
 import { apiFetch } from './api.js';
+import { clearSavedPages } from './offline-cache.js';
 import {
   backupCurrent, CHANGED_EVENT, emptyProgress, forgetAccountProgress, load, loadSyncState, reset, save, saveSyncState,
 } from './progress-store.js';
@@ -151,6 +152,7 @@ if (currentUserId()) {
     }
     event.preventDefault();
     await syncBeforeLogout();
+    await clearSavedPages().catch(() => {}); // trang đã lưu có tên/email của tài khoản (giai đoạn 10)
     form.dataset.synced = '1';
     form.submit();
   });
