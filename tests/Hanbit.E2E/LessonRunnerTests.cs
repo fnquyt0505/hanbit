@@ -191,7 +191,8 @@ public class LessonRunnerTests(WebServerFixture server)
     {
         var feedback = page.GetByTestId("exercise-feedback");
         await feedback.WaitForAsync();
-        (await feedback.InnerTextAsync()).ShouldContain("Chính xác");
+        // x-show hiện khung trước, x-text điền chữ ở lượt sau → chờ nội dung thay vì đọc ngay
+        await page.WaitForFunctionAsync("() => document.querySelector('[data-testid=exercise-feedback]')?.innerText.includes('Chính xác')");
     }
 
     [Fact]
