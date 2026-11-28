@@ -195,8 +195,10 @@ public class ProgressSyncTests(WebServerFixture server)
             }
             """);
 
+        // Bắt đầu chờ TRƯỚC khi gửi form — chờ sau dễ lỡ sự kiện điều hướng (race)
+        var navigated = page.WaitForURLAsync("**/__logout-test");
         await page.EvaluateAsync("() => document.querySelector('form[data-logout]').requestSubmit()");
-        await page.WaitForURLAsync("**/__logout-test");
+        await navigated;
 
         requests.Count.ShouldBe(2); // lần nạp + lần cuối trước khi đăng xuất
         (await page.EvaluateAsync<string?>("() => localStorage.getItem('hanbit.sync.v1')")).ShouldBeNull();

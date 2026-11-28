@@ -9,7 +9,7 @@
 | Giai đoạn                     | 9 — Nhắc học (P2) |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T9.1** chờ người dùng tạo khóa VAPID → T9.2 gửi nhắc tự động |
+| Task tiếp theo                 | **T9.1 + T9.2** chờ người dùng đặt khóa VAPID + token (Render, GitHub secret) → thử trên điện thoại |
 | Việc song song (người dùng) | Tạo monitor UptimeRobot cho `/health` (câu hỏi 14) · (tùy chọn) thêm `docker` làm required check trong ruleset `main-protection` |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-28 — T9.2 Gửi nhắc học tự động (chờ người dùng đặt token)
+- Đã làm: Domain `ReminderPolicy` (tới giờ VN, trễ < 2 giờ, hôm nay chưa nhắc, **hôm nay chưa có XP**; nội dung theo chuỗi ngày + số thẻ đến hạn) + `VietnamTime.ToTime`; Application `ReminderJob` (ứng viên → quy tắc → giữ chỗ nguyên tử → gửi mọi thiết bị → xóa thiết bị hết hạn; không gửi được → trả chỗ để thử lại); `IReminderStore` thêm `GetCandidatesAsync`/`TryClaimAsync`/`ReleaseClaimAsync` (EF `ExecuteUpdate`). Web: `POST /internal/reminders/run` (Bearer token ≥ 32 ký tự, so sánh thời gian hằng; thiếu cấu hình → 404), robots `Disallow: /internal/`. `.github/workflows/reminders.yml` cron 15 phút 05:00–01:00 giờ VN, chờ Render thức (120 s, thử lại 3 lần), thiếu secret → bỏ qua. `render.yaml` thêm `Reminders__RunToken` (`sync: false`).
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Domain +11 quy tắc + nội dung; Web +16: job chọn đúng người / chạy 2 lần gửi 1 lần / không có tiến độ vẫn nhắc / lỗi → trả chỗ + xóa thiết bị hết hạn, token đúng chuẩn Bearer, token ngắn coi như chưa đặt, tắt → 404; +1 cần DB ở CI: luồng đầy đủ với đồng hồ cố định 20:05 VN — sai token 401, chỉ nhắc người chưa học, chạy lại không nhắc đôi).
+- Tiếp theo: người dùng tạo khóa VAPID + token, đặt trên Render + GitHub → bật nhắc trên điện thoại, "Gửi thử", chờ nhắc thật
 
 ### 2026-11-28 — T9.1 Nền tảng thông báo nhắc học (chờ người dùng tạo khóa VAPID)
 - Đã làm: Domain `ReminderSettings` (giờ VN 05:00–23:00, bước 30 phút, mặc định 20:00), `PushMessage`/`PushDevice`; Application `IReminderStore`/`IPushSender` + `ReminderService` (chỉ nhận endpoint của FCM/Mozilla/WNS/Apple — chống SSRF; gửi thử, xóa thiết bị hết hạn); Infrastructure `WebPushCrypto` (RFC 8291 `aes128gcm` + RFC 8292 VAPID bằng ECDH/HKDF/AES-GCM/ECDSA có sẵn), `WebPushSender` (TTL 12 giờ, 404/410 → xóa), `EfReminderStore`, bảng `reminder_settings` + `push_subscriptions` (migration `AddReminders`, xóa tài khoản → xóa theo). Web: `ReminderFeature` (bật khi có tài khoản + `Push:PublicKey/PrivateKey`), `/api/reminders` (GET/PUT, subscriptions, subscriptions/remove, test). Trình duyệt: `/sw.js` (chỉ nhận push + mở trang khi bấm), `/manifest.webmanifest` + icon PNG 192/512/maskable/apple-touch/badge (render từ favicon.svg bằng Chromium headless), `reminders.js` + mục **Nhắc học** trên /profile (chọn giờ, Bật/Tắt/Gửi thử, hướng dẫn iPhone "Thêm vào Màn hình chính"). `render.yaml` khai báo `Push__PublicKey`/`Push__PrivateKey` (`sync: false`). Bỏ package `WebPush` (bản nháp `aesgcm`).

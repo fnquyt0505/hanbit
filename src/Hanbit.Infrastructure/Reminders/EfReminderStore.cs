@@ -89,6 +89,26 @@ public sealed class EfReminderStore(HanbitDbContext db, IClock clock) : IReminde
     public Task RemoveExpiredDeviceAsync(string endpoint, CancellationToken cancellationToken) =>
         db.PushSubscriptions.Where(s => s.Endpoint == endpoint).ExecuteDeleteAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<ReminderCandidate>> GetCandidatesAsync(TimeOnly from, TimeOnly to, DateOnly today, CancellationToken cancellationToken)
+    {
+        var rows = await db.ReminderSettings.AsNoTracking()
+            .Where(r => r.Enabled && r.ReminderTime >= from && r.ReminderTime <= to && (r.LastSentOn == null || r.LastSentOn != today))
+            .Where(r => db.PushSubscriptions.Any(s => s.UserId == r.UserId))
+            .OrderBy(r => r.ReminderTime)
+            .ToListAsync(cancellationToken);
+        return [.. rows.Select(r => new ReminderCandidate(r.UserId, new ReminderSettings(r.Enabled, r.ReminderTime, r.LastSentOn)))];
+    }
+
+    public async Task<bool> TryClaimAsync(string userId, DateOnly today, CancellationToken cancellationToken) =>
+        await db.ReminderSettings
+            .Where(r => r.UserId == userId && (r.LastSentOn == null || r.LastSentOn != today))
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.LastSentOn, today), cancellationToken) == 1;
+
+    public Task ReleaseClaimAsync(string userId, DateOnly today, DateOnly? previous, CancellationToken cancellationToken) =>
+        db.ReminderSettings
+            .Where(r => r.UserId == userId && r.LastSentOn == today)
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.LastSentOn, previous), cancellationToken);
+
     private static bool IsUniqueViolation(DbUpdateException ex) =>
         ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
 }
