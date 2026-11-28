@@ -9,7 +9,7 @@
 | Giai đoạn                     | 9 — Nhắc học (P2) |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T9.1 + T9.2** chờ người dùng đặt khóa VAPID + token (Render, GitHub secret) → thử trên điện thoại |
+| Task tiếp theo                 | Giai đoạn 9 xong — chờ người dùng chọn việc trong Backlog |
 | Việc song song (người dùng) | Tạo monitor UptimeRobot cho `/health` (câu hỏi 14) · (tùy chọn) thêm `docker` làm required check trong ruleset `main-protection` |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,10 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-28 — Đóng giai đoạn 9 (nhắc học)
+- Người dùng tạo lại cặp khóa VAPID (lần đầu đặt sai → `/health` Degraded nhờ bước kiểm tra khóa) + token; production `/health` Healthy, `/api/reminders` bật (401 khi chưa đăng nhập). Người dùng bật nhắc và gửi thử thành công. Workflow Reminders chạy tay thành công; lịch 15 phút tự chạy.
+- Tiếp theo: chọn việc trong Backlog
 
 ### 2026-11-28 — T9.1 sửa: chẩn đoán lỗi đăng ký push
 - Người dùng bật nhắc trên Android → "Registration failed - push service error" (dịch vụ push từ chối khi đăng ký). Đã làm: kiểm tra cặp khóa VAPID lúc khởi động (`WebPushCrypto.ValidateVapidKeys`: định dạng, 65/32 byte, khóa bí mật sinh đúng khóa công khai) + tự bỏ ngoặc/khoảng trắng khi dán; sai → tắt nhắc học + `/health` Degraded (mục `push`, không lộ khóa). JS: thử lại 1 lần, lỗi dịch ra tiếng Việt kèm hướng xử lý (Chrome bản mới, tắt VPN/chặn quảng cáo, cập nhật Dịch vụ Google Play).
