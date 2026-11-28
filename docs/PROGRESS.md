@@ -25,6 +25,10 @@
 
 ## ✅ Đã hoàn thành
 
+### 2026-11-28 — T9.1 sửa: chẩn đoán lỗi đăng ký push
+- Người dùng bật nhắc trên Android → "Registration failed - push service error" (dịch vụ push từ chối khi đăng ký). Đã làm: kiểm tra cặp khóa VAPID lúc khởi động (`WebPushCrypto.ValidateVapidKeys`: định dạng, 65/32 byte, khóa bí mật sinh đúng khóa công khai) + tự bỏ ngoặc/khoảng trắng khi dán; sai → tắt nhắc học + `/health` Degraded (mục `push`, không lộ khóa). JS: thử lại 1 lần, lỗi dịch ra tiếng Việt kèm hướng xử lý (Chrome bản mới, tắt VPN/chặn quảng cáo, cập nhật Dịch vụ Google Play).
+- Kiểm tra: build ✅ · format ✅ · test ✅ (Infrastructure +9 kiểm tra khóa, Web +2 health, E2E +1).
+
 ### 2026-11-28 — T9.2 Gửi nhắc học tự động (chờ người dùng đặt token)
 - Đã làm: Domain `ReminderPolicy` (tới giờ VN, trễ < 2 giờ, hôm nay chưa nhắc, **hôm nay chưa có XP**; nội dung theo chuỗi ngày + số thẻ đến hạn) + `VietnamTime.ToTime`; Application `ReminderJob` (ứng viên → quy tắc → giữ chỗ nguyên tử → gửi mọi thiết bị → xóa thiết bị hết hạn; không gửi được → trả chỗ để thử lại); `IReminderStore` thêm `GetCandidatesAsync`/`TryClaimAsync`/`ReleaseClaimAsync` (EF `ExecuteUpdate`). Web: `POST /internal/reminders/run` (Bearer token ≥ 32 ký tự, so sánh thời gian hằng; thiếu cấu hình → 404), robots `Disallow: /internal/`. `.github/workflows/reminders.yml` cron 15 phút 05:00–01:00 giờ VN, chờ Render thức (120 s, thử lại 3 lần), thiếu secret → bỏ qua. `render.yaml` thêm `Reminders__RunToken` (`sync: false`).
 - Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Domain +11 quy tắc + nội dung; Web +16: job chọn đúng người / chạy 2 lần gửi 1 lần / không có tiến độ vẫn nhắc / lỗi → trả chỗ + xóa thiết bị hết hạn, token đúng chuẩn Bearer, token ngắn coi như chưa đặt, tắt → 404; +1 cần DB ở CI: luồng đầy đủ với đồng hồ cố định 20:05 VN — sai token 401, chỉ nhắc người chưa học, chạy lại không nhắc đôi).

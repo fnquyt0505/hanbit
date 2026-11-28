@@ -124,6 +124,48 @@ public static class WebPushCrypto
         return $"vapid t={header}.{claims}.{Base64UrlEncode(signature)}, k={publicKey}";
     }
 
+    /// <summary>
+    /// Kiểm tra cặp khóa VAPID: khóa công khai = điểm P-256 không nén 65 byte, khóa bí mật 32 byte, và khóa bí mật sinh ra đúng
+    /// khóa công khai (bắt lỗi dán nhầm/đảo khóa). Trả về lỗi (tiếng Việt, không chứa giá trị khóa) hoặc null.
+    /// </summary>
+    public static string? ValidateVapidKeys(string publicKey, string privateKey)
+    {
+        byte[] q, d;
+        try
+        {
+            q = Base64UrlDecode(publicKey);
+            d = Base64UrlDecode(privateKey);
+        }
+        catch (FormatException)
+        {
+            return "Khóa VAPID không phải chuỗi base64url.";
+        }
+
+        if (q.Length != 65 || q[0] != 0x04)
+        {
+            return $"Khóa công khai VAPID phải dài 65 byte (đang {q.Length}) — có thể đã đặt nhầm/đảo hai khóa.";
+        }
+
+        if (d.Length != 32)
+        {
+            return $"Khóa bí mật VAPID phải dài 32 byte (đang {d.Length}).";
+        }
+
+        try
+        {
+            using var key = ECDiffieHellman.Create(new ECParameters { Curve = ECCurve.NamedCurves.nistP256, D = d });
+            var derived = Uncompressed(key.ExportParameters(false).Q);
+            return derived.AsSpan().SequenceEqual(q) ? null : "Khóa bí mật VAPID không khớp khóa công khai (hai khóa không cùng một cặp).";
+        }
+        catch (CryptographicException)
+        {
+            return "Khóa bí mật VAPID không hợp lệ.";
+        }
+    }
+
+    /// <summary>Bỏ khoảng trắng và dấu ngoặc thừa khi dán khóa (VD <c>"BCVx…"</c>).</summary>
+    public static string? NormalizeKey(string? value) => value?.Trim().Trim('"', '\'', '`').Trim();
+
     public static string Base64UrlEncode(ReadOnlySpan<byte> bytes) =>
         Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 

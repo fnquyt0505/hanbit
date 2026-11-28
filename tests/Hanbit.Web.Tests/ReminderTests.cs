@@ -218,7 +218,7 @@ public class ReminderDisabledTests(WebApplicationFactory<Program> factory) : ICl
             .UseSetting("Push:PublicKey", "public")
             .UseSetting("Push:PrivateKey", "private"));
 
-        configured.Services.GetRequiredService<ReminderFeature>().ShouldBe(new ReminderFeature(false, null));
+        configured.Services.GetRequiredService<ReminderFeature>().Enabled.ShouldBeFalse();
     }
 
     [Fact]
@@ -255,6 +255,9 @@ public sealed partial class ReminderEnabledTests : IAsyncLifetime
 {
     private const string PublicKey = "BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4";
     private const string RunToken = "test-run-token-0123456789abcdef0123";
+
+    /// <summary>Cặp khóa server trong RFC 8291 Phụ lục A (khớp nhau).</summary>
+    private const string VapidPublicKey = "BP4z9KsN6nGRTbVYI_c7VJSPQTBtkgcy27mlmlMoZIIgDll6e3vCYLocInmYWAmS6TlzAC8wEqKK6PBru3jl7A8";
     private static readonly DateTimeOffset At2005Vn = new(2026, 11, 28, 13, 5, 0, TimeSpan.Zero);
 
     private sealed class FixedClock(DateTimeOffset now) : IClock
@@ -288,7 +291,7 @@ public sealed partial class ReminderEnabledTests : IAsyncLifetime
             .UseSetting("ConnectionStrings:Hanbit", connectionString)
             .UseSetting("Authentication:Google:ClientId", "test-client.apps.googleusercontent.com")
             .UseSetting("Authentication:Google:ClientSecret", "test-secret")
-            .UseSetting("Push:PublicKey", PublicKey)
+            .UseSetting("Push:PublicKey", $" \"{VapidPublicKey}\" ") // dán kèm ngoặc/khoảng trắng → app tự bỏ
             .UseSetting("Push:PrivateKey", "yfWPiYE-n46HLnH0KqZOF1fJJU3MYrct3AELtAQ-oRw")
             .UseSetting("Reminders:RunToken", RunToken)
             .ConfigureTestServices(s =>
@@ -364,7 +367,7 @@ public sealed partial class ReminderEnabledTests : IAsyncLifetime
             defaults.GetProperty("time").GetString().ShouldBe("20:00");
             defaults.GetProperty("devices").GetInt32().ShouldBe(0);
             defaults.GetProperty("allowedTimes").GetArrayLength().ShouldBe(37);
-            defaults.GetProperty("publicKey").GetString().ShouldBe(PublicKey);
+            defaults.GetProperty("publicKey").GetString().ShouldBe(VapidPublicKey);
 
             (await SendAsync(client, HttpMethod.Post, "/api/reminders/subscriptions", csrf, Subscription("https://fcm.googleapis.com/fcm/send/phone")))
                 .StatusCode.ShouldBe(HttpStatusCode.NoContent);
@@ -629,5 +632,34 @@ public class InternalRemindersAuthTests(WebApplicationFactory<Program> factory) 
 
         (await client.SendAsync(request)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
         (await client.GetStringAsync("/robots.txt")).ShouldContain("Disallow: /internal/");
+    }
+}
+
+/// <summary>Khóa VAPID đặt sai → nhắc học tắt, /health Degraded (không lộ giá trị khóa).</summary>
+public class PushKeysHealthTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+{
+    [Fact]
+    public async Task MismatchedVapidKeys_HealthDegraded_WithoutLeakingKeys()
+    {
+        const string privateKey = "yfWPiYE-n46HLnH0KqZOF1fJJU3MYrct3AELtAQ-oRw";
+        using var configured = factory.WithWebHostBuilder(b => b
+            .UseSetting("Push:PublicKey", "BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4")
+            .UseSetting("Push:PrivateKey", privateKey));
+        using var client = configured.CreateClient();
+
+        var feature = configured.Services.GetRequiredService<ReminderFeature>();
+        feature.Enabled.ShouldBeFalse();
+        feature.KeyError.ShouldNotBeNull().ShouldContain("không khớp");
+        var health = await client.GetStringAsync("/health");
+        health.ShouldBe("Degraded");
+        health.ShouldNotContain(privateKey);
+    }
+
+    [Fact]
+    public async Task NoVapidKeys_HealthStaysHealthy()
+    {
+        using var client = factory.CreateClient();
+
+        (await client.GetStringAsync("/health")).ShouldBe("Healthy");
     }
 }

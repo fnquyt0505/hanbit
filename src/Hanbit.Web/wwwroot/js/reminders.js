@@ -23,6 +23,38 @@ export function needsHomeScreen() {
   return ios && !standalone;
 }
 
+/** Lỗi đăng ký push của trình duyệt → lời nhắn tiếng Việt có hướng xử lý. */
+export function describePushError(error) {
+  const text = `${error?.name ?? ''} ${error?.message ?? ''}`;
+  if (/NotAllowed/i.test(text)) {
+    return 'Bạn chưa cho phép thông báo. Hãy bật quyền thông báo cho trang này trong cài đặt trình duyệt.';
+  }
+  if (/push service|AbortError/i.test(text)) {
+    return 'Dịch vụ thông báo của trình duyệt từ chối đăng ký. Hãy thử: dùng Chrome bản mới (không dùng Cốc Cốc/Brave), '
+      + 'tắt VPN hoặc ứng dụng chặn quảng cáo, cập nhật "Dịch vụ Google Play", rồi bấm "Bật nhắc học" lại.';
+  }
+  return 'Không đăng ký nhận thông báo được trên trình duyệt này. Bạn thử lại sau nhé.';
+}
+
+/** Đăng ký push; lỗi tạm thời của dịch vụ push → bỏ đăng ký cũ (nếu có), chờ 1 giây, thử lại một lần. */
+async function subscribeWithRetry(registration, key) {
+  const options = { userVisibleOnly: true, applicationServerKey: key };
+  try {
+    return await registration.pushManager.subscribe(options);
+  } catch (first) {
+    if (/NotAllowed/i.test(first?.name ?? '')) {
+      throw new Error(describePushError(first));
+    }
+    try {
+      await (await registration.pushManager.getSubscription())?.unsubscribe();
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return await registration.pushManager.subscribe(options);
+    } catch (second) {
+      throw new Error(describePushError(second));
+    }
+  }
+}
+
 async function send(url, method, body) {
   const response = await apiFetch(url, {
     method,
@@ -95,7 +127,7 @@ document.addEventListener('alpine:init', () => {
           subscription = null;
         }
       }
-      subscription ??= await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+      subscription ??= await subscribeWithRetry(registration, key);
       await send(`${API}/subscriptions`, 'POST', subscription.toJSON());
       this.subscribed = true;
     },
