@@ -1,0 +1,37 @@
+# Giai đoạn 9 (T9.2): kích hoạt gửi nhắc học. Render free ngủ khi rảnh → app không tự hẹn giờ được;
+# workflow này gọi POST /internal/reminders/run mỗi 15 phút (server tự quyết ai cần nhắc — ReminderPolicy).
+# Repo public → GitHub Actions miễn phí. GitHub có thể trễ vài phút và tắt lịch nếu repo không hoạt động 60 ngày.
+name: Reminders
+
+on:
+  schedule:
+    # Giờ nhắc chọn được 05:00–23:00 giờ VN (+ 2 giờ trễ cho phép) = 22:00–18:00 UTC
+    - cron: "*/15 22-23,0-17 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: reminders
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Trigger reminder run
+        env:
+          TOKEN: ${{ secrets.REMINDER_RUN_TOKEN }}
+          URL: https://hanbit.onrender.com/internal/reminders/run
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::notice::Chưa đặt secret REMINDER_RUN_TOKEN — bỏ qua."
+            exit 0
+          fi
+          # Render free có thể đang ngủ: lần đầu chờ tới 120 s, thử lại khi lỗi mạng / 5xx.
+          curl --fail-with-body --silent --show-error --request POST \
+            --header "Authorization: Bearer $TOKEN" \
+            --max-time 120 --retry 3 --retry-delay 20 --retry-all-errors \
+            "$URL"
+          echo

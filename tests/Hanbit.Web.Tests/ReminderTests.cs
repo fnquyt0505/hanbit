@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 using Hanbit.Application.Abstractions;
 using Hanbit.Application.Reminders;
+using Hanbit.Domain.Progress;
 using Hanbit.Domain.Reminders;
 using Hanbit.Infrastructure.Persistence;
 using Hanbit.Web.Hosting;
@@ -61,6 +62,33 @@ public class ReminderServiceTests
         public Task RemoveExpiredDeviceAsync(string endpoint, CancellationToken cancellationToken)
         {
             Devices.RemoveAll(d => d.Device.Endpoint == endpoint);
+            return Task.CompletedTask;
+        }
+
+        public Task<IReadOnlyList<ReminderCandidate>> GetCandidatesAsync(TimeOnly from, TimeOnly to, DateOnly today, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<ReminderCandidate>>([.. Settings
+                .Where(s => s.Value.Enabled && s.Value.Time >= from && s.Value.Time <= to && s.Value.LastSentOn != today
+                    && Devices.Any(d => d.UserId == s.Key))
+                .Select(s => new ReminderCandidate(s.Key, s.Value))]);
+
+        public Task<bool> TryClaimAsync(string userId, DateOnly today, CancellationToken cancellationToken)
+        {
+            if (Settings[userId].LastSentOn == today)
+            {
+                return Task.FromResult(false);
+            }
+
+            Settings[userId] = Settings[userId] with { LastSentOn = today };
+            return Task.FromResult(true);
+        }
+
+        public Task ReleaseClaimAsync(string userId, DateOnly today, DateOnly? previous, CancellationToken cancellationToken)
+        {
+            if (Settings[userId].LastSentOn == today)
+            {
+                Settings[userId] = Settings[userId] with { LastSentOn = previous };
+            }
+
             return Task.CompletedTask;
         }
     }
@@ -226,6 +254,13 @@ public class ReminderDisabledTests(WebApplicationFactory<Program> factory) : ICl
 public sealed partial class ReminderEnabledTests : IAsyncLifetime
 {
     private const string PublicKey = "BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4";
+    private const string RunToken = "test-run-token-0123456789abcdef0123";
+    private static readonly DateTimeOffset At2005Vn = new(2026, 11, 28, 13, 5, 0, TimeSpan.Zero);
+
+    private sealed class FixedClock(DateTimeOffset now) : IClock
+    {
+        public DateTimeOffset UtcNow => now;
+    }
 
     [GeneratedRegex("<meta name=\"csrf-token\" content=\"([^\"]+)\"")]
     private static partial Regex CsrfMeta();
@@ -255,10 +290,12 @@ public sealed partial class ReminderEnabledTests : IAsyncLifetime
             .UseSetting("Authentication:Google:ClientSecret", "test-secret")
             .UseSetting("Push:PublicKey", PublicKey)
             .UseSetting("Push:PrivateKey", "yfWPiYE-n46HLnH0KqZOF1fJJU3MYrct3AELtAQ-oRw")
+            .UseSetting("Reminders:RunToken", RunToken)
             .ConfigureTestServices(s =>
             {
                 s.AddSingleton<Microsoft.AspNetCore.Hosting.IStartupFilter, TestSignInStartupFilter>();
                 s.AddSingleton<IPushSender>(_sender);
+                s.AddSingleton<IClock>(new FixedClock(At2005Vn)); // 20:05 giờ VN 28/11
             }));
     }
 
@@ -386,5 +423,211 @@ public sealed partial class ReminderEnabledTests : IAsyncLifetime
 
         (await db.PushSubscriptions.CountAsync()).ShouldBe(0);
         (await db.ReminderSettings.CountAsync()).ShouldBe(0);
+    }
+
+    [DatabaseFact]
+    public async Task InternalRun_TokenRequired_RemindsOnlyLearnerWhoHasNotStudied_Once()
+    {
+        var (idle, idleCsrf) = await SignInAsync("chua-hoc");
+        var (busy, busyCsrf) = await SignInAsync("da-hoc");
+        using (idle)
+        using (busy)
+        {
+            foreach (var (client, csrf, name) in new[] { (idle, idleCsrf, "idle"), (busy, busyCsrf, "busy") })
+            {
+                (await SendAsync(client, HttpMethod.Post, "/api/reminders/subscriptions", csrf, Subscription($"https://fcm.googleapis.com/fcm/send/{name}")))
+                    .StatusCode.ShouldBe(HttpStatusCode.NoContent);
+                (await SendAsync(client, HttpMethod.Put, "/api/reminders", csrf, new { enabled = true, time = "20:00" }))
+                    .StatusCode.ShouldBe(HttpStatusCode.NoContent);
+            }
+
+            // "da-hoc" đã học hôm nay (đồng bộ tiến độ lên tài khoản — T8.3)
+            var studied = new
+            {
+                progress = new
+                {
+                    schemaVersion = 1,
+                    createdAt = "2026-11-20T00:00:00Z",
+                    lessons = new { },
+                    cards = new { },
+                    activity = new[] { new { date = "2026-11-28", xp = 12, reviews = 0 } },
+                    totalXp = 12,
+                },
+                baseXp = 0,
+            };
+            (await SendAsync(busy, HttpMethod.Put, "/api/progress/sync", busyCsrf, studied)).StatusCode.ShouldBe(HttpStatusCode.OK);
+        }
+
+        using var cron = Factory.CreateClient();
+        (await SendRunAsync(cron, "sai-token")).StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+
+        using var first = await SendRunAsync(cron, RunToken);
+        first.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var result = await first.Content.ReadFromJsonAsync<JsonElement>();
+        result.GetProperty("candidates").GetInt32().ShouldBe(2);
+        result.GetProperty("reminded").GetInt32().ShouldBe(1);
+        result.GetProperty("skippedStudied").GetInt32().ShouldBe(1);
+        var (device, message) = _sender.Sent.ShouldHaveSingleItem();
+        device.Endpoint.ShouldEndWith("/idle");
+        message.Tag.ShouldBe("hanbit-reminder");
+
+        // Cron chạy lại trong cùng ngày → không nhắc lần nữa
+        using var second = await SendRunAsync(cron, RunToken);
+        (await second.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("reminded").GetInt32().ShouldBe(0);
+        _sender.Sent.Count.ShouldBe(1);
+    }
+
+    private static async Task<HttpResponseMessage> SendRunAsync(HttpClient client, string token)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/internal/reminders/run");
+        request.Headers.Add("Authorization", $"Bearer {token}");
+        return await client.SendAsync(request);
+    }
+}
+
+/// <summary>T9.2: một lần chạy gửi nhắc — chọn đúng người, không gửi đôi, giữ lại để thử lần sau khi không gửi được.</summary>
+public class ReminderJobTests
+{
+    private static readonly DateOnly Today = new(2026, 11, 28);
+    private static readonly DateTimeOffset At2005Vn = new(2026, 11, 28, 13, 5, 0, TimeSpan.Zero);
+
+    private sealed class FixedClock(DateTimeOffset now) : IClock
+    {
+        public DateTimeOffset UtcNow => now;
+    }
+
+    private sealed class MemoryProgressStore : IProgressStore
+    {
+        public Dictionary<string, LearnerProgress> Rows { get; } = [];
+
+        public Task<LearnerProgress?> GetAsync(string userId, CancellationToken cancellationToken) => Task.FromResult(Rows.GetValueOrDefault(userId));
+
+        public Task<LearnerProgress> UpdateAsync(string userId, Func<LearnerProgress?, LearnerProgress> update, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+    }
+
+    private static PushDevice Device(string name) => new($"https://fcm.googleapis.com/fcm/send/{name}", "p", "a");
+
+    private static LearnerProgress Progress(IReadOnlyList<DailyActivity> activity, int dueCards = 0) => new(
+        1, At2005Vn.AddDays(-10), new Dictionary<string, LessonRecord>(),
+        Enumerable.Range(0, dueCards).ToDictionary(i => $"kd-{i}", i => new ReviewCard($"kd-{i}", ItemType.Vocab, 2.5, 1, 1, At2005Vn.AddHours(-1), At2005Vn.AddDays(-1))),
+        activity, 100);
+
+    private static (ReminderJob Job, ReminderServiceTests.MemoryReminderStore Store, MemoryProgressStore Progress, ReminderServiceTests.FakePushSender Sender) Create()
+    {
+        var store = new ReminderServiceTests.MemoryReminderStore();
+        var progress = new MemoryProgressStore();
+        var sender = new ReminderServiceTests.FakePushSender();
+        return (new ReminderJob(store, progress, sender, new FixedClock(At2005Vn)), store, progress, sender);
+    }
+
+    [Fact]
+    public async Task Run_RemindsOnlyEligible_MessageUsesStreakAndDueCards()
+    {
+        var (job, store, progress, sender) = Create();
+        // u1: 20:00, chưa học hôm nay, chuỗi 2 ngày, 3 thẻ đến hạn → nhắc
+        store.Settings["u1"] = new ReminderSettings(true, new TimeOnly(20, 0), null);
+        store.Devices.Add(("u1", Device("u1-phone")));
+        progress.Rows["u1"] = Progress([new(Today.AddDays(-2), 10, 0), new(Today.AddDays(-1), 10, 0)], dueCards: 3);
+        // u2: đã học hôm nay → bỏ qua
+        store.Settings["u2"] = new ReminderSettings(true, new TimeOnly(19, 30), null);
+        store.Devices.Add(("u2", Device("u2-phone")));
+        progress.Rows["u2"] = Progress([new(Today, 15, 2)]);
+        // u3: giờ nhắc 21:00 → chưa tới; u4: tắt
+        store.Settings["u3"] = new ReminderSettings(true, new TimeOnly(21, 0), null);
+        store.Devices.Add(("u3", Device("u3-phone")));
+        store.Settings["u4"] = new ReminderSettings(false, new TimeOnly(20, 0), null);
+        store.Devices.Add(("u4", Device("u4-phone")));
+
+        var result = await job.RunAsync(default);
+
+        result.ShouldBe(new ReminderRunResult(Candidates: 2, Reminded: 1, SkippedStudied: 1, Sent: 1, Removed: 0, Failed: 0));
+        var (device, message) = sender.Sent.ShouldHaveSingleItem();
+        device.Endpoint.ShouldEndWith("u1-phone");
+        message.ShouldBe(ReminderPolicy.BuildMessage(2, 3));
+        store.Settings["u1"].LastSentOn.ShouldBe(Today);
+        store.Settings["u2"].LastSentOn.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Run_Twice_SendsOnce()
+    {
+        var (job, store, _, sender) = Create();
+        store.Settings["u1"] = new ReminderSettings(true, new TimeOnly(20, 0), null);
+        store.Devices.Add(("u1", Device("phone")));
+
+        await job.RunAsync(default);
+        var second = await job.RunAsync(default);
+
+        sender.Sent.Count.ShouldBe(1);
+        second.Candidates.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Run_NoProgressOnServer_StillReminds_AllDevicesOfAccount()
+    {
+        var (job, store, _, sender) = Create();
+        store.Settings["u1"] = new ReminderSettings(true, new TimeOnly(20, 0), null);
+        store.Devices.Add(("u1", Device("phone")));
+        store.Devices.Add(("u1", Device("laptop")));
+
+        (await job.RunAsync(default)).Sent.ShouldBe(2);
+        sender.Sent.ShouldAllBe(s => s.Message == ReminderPolicy.BuildMessage(0, 0));
+    }
+
+    [Fact]
+    public async Task Run_AllDevicesFailOrGone_ReleasesClaim_RemovesGone()
+    {
+        var (job, store, _, sender) = Create();
+        var yesterday = Today.AddDays(-1);
+        store.Settings["u1"] = new ReminderSettings(true, new TimeOnly(20, 0), yesterday);
+        store.Devices.Add(("u1", Device("gone")));
+        store.Devices.Add(("u1", Device("fail")));
+
+        var result = await job.RunAsync(default);
+
+        result.ShouldBe(new ReminderRunResult(1, 0, 0, 0, Removed: 1, Failed: 1));
+        sender.Sent.ShouldBeEmpty();
+        store.Settings["u1"].LastSentOn.ShouldBe(yesterday); // lần sau thử lại
+        store.Devices.ShouldHaveSingleItem().Device.Endpoint.ShouldEndWith("fail");
+    }
+}
+
+/// <summary>T9.2: xác thực token của endpoint nội bộ.</summary>
+public class InternalRemindersAuthTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+{
+    private const string Token = "0123456789abcdef0123456789abcdef";
+
+    [Theory]
+    [InlineData("Bearer " + Token, true)]
+    [InlineData("Bearer  " + Token + " ", true)]
+    [InlineData("Bearer " + Token + "x", false)]
+    [InlineData("bearer " + Token, false)]
+    [InlineData(Token, false)]
+    [InlineData("", false)]
+    public void IsAuthorized_ExactBearerToken(string header, bool expected)
+    {
+        Hanbit.Web.Controllers.InternalRemindersController.IsAuthorized(header, Token).ShouldBe(expected);
+    }
+
+    [Theory]
+    [InlineData(null, false)]
+    [InlineData("ngan-qua", false)]
+    [InlineData(Token, true)]
+    public void RunToken_RequiresAtLeast32Chars(string? token, bool configured)
+    {
+        new ReminderRunOptions { RunToken = token }.IsConfigured.ShouldBe(configured);
+    }
+
+    [Fact]
+    public async Task RemindersDisabled_Run404_EvenWithToken_AndRobotsDisallowsInternal()
+    {
+        using var configured = factory.WithWebHostBuilder(b => b.UseSetting("Reminders:RunToken", Token));
+        using var client = configured.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/internal/reminders/run");
+        request.Headers.Add("Authorization", $"Bearer {Token}");
+
+        (await client.SendAsync(request)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await client.GetStringAsync("/robots.txt")).ShouldContain("Disallow: /internal/");
     }
 }

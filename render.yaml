@@ -29,3 +29,6 @@ services:
         sync: false
       - key: Push__PrivateKey
         sync: false
+      # T9.2: token cho POST /internal/reminders/run (≥ 32 ký tự, `openssl rand -hex 32`) — trùng GitHub secret REMINDER_RUN_TOKEN
+      - key: Reminders__RunToken
+        sync: false

@@ -24,6 +24,7 @@ public sealed class SeoController(IContentRepository contentRepository, IOptions
             .AppendLine("User-agent: *")
             .AppendLine("Allow: /")
             .AppendLine("Disallow: /api/")
+            .AppendLine("Disallow: /internal/")
             .AppendLine()
             .AppendLine($"Sitemap: {baseUrl}/sitemap.xml")
             .ToString();

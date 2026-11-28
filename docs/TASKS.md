@@ -84,7 +84,7 @@
 > Chốt 2026-11-28: kênh **Web Push** (tự cài đặt RFC 8291 `aes128gcm` + RFC 8292 VAPID bằng crypto có sẵn của .NET — package `WebPush` dùng bản nháp `aesgcm`, iPhone không nhận), hẹn giờ bằng **GitHub Actions cron** gọi endpoint nội bộ có token (Render free ngủ), quy tắc **chưa học hôm nay** lúc giờ người học chọn (mặc định 20:00 giờ VN), tối đa 1 lần/ngày. Cần đăng nhập.
 
 - [x] **T9.1** Nền tảng thông báo: khóa VAPID, service worker + manifest + icon, bảng đăng ký/cài đặt nhắc, API bật/tắt/giờ nhắc/gửi thử, UI trên /profile. *(Chờ người dùng tạo khóa VAPID + đặt biến trên Render.)*
-- [ ] **T9.2** Gửi nhắc tự động: quy tắc nhắc (Domain), endpoint `/internal/reminders/run` (token), workflow cron 15 phút, xóa đăng ký hết hạn (404/410).
+- [x] **T9.2** Gửi nhắc tự động: quy tắc nhắc (Domain), endpoint `/internal/reminders/run` (token), workflow cron 15 phút, xóa đăng ký hết hạn (404/410). *(Chờ người dùng đặt token trên Render + GitHub secret.)*
 
 ## Backlog
 
