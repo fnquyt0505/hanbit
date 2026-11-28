@@ -147,13 +147,17 @@ public sealed partial class AccountEnabledTests : IAsyncLifetime
         }
 
         _connectionString = new NpgsqlConnectionStringBuilder(baseConnection) { Database = $"hanbit_acct_{Guid.NewGuid():N}" }.ConnectionString;
+
+        // Migrate TRƯỚC khi khởi động host — nếu không, DatabaseMigrator (BackgroundService) chạy song song → "relation already exists".
+        await using (var db = new HanbitDbContext(new DbContextOptionsBuilder<HanbitDbContext>().UseNpgsql(_connectionString).Options))
+        {
+            await db.Database.MigrateAsync();
+        }
+
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(b => b
             .UseSetting("ConnectionStrings:Hanbit", _connectionString)
             .UseSetting("Authentication:Google:ClientId", "test-client.apps.googleusercontent.com")
             .UseSetting("Authentication:Google:ClientSecret", "test-secret"));
-
-        await using var scope = Factory.Services.CreateAsyncScope();
-        await scope.ServiceProvider.GetRequiredService<HanbitDbContext>().Database.MigrateAsync();
     }
 
     public async Task DisposeAsync()

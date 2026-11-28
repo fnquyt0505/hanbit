@@ -78,6 +78,7 @@ public class PersistenceDatabaseTests
             (await db.Database.GetPendingMigrationsAsync()).ShouldBeEmpty();
 
             var now = new DateTimeOffset(2026, 11, 28, 10, 0, 0, TimeSpan.Zero);
+            db.Users.Add(new AppUser { Id = "user-1", UserName = "google-1", CreatedAt = now }); // FK learner_progress → tài khoản (T8.2)
             db.LearnerProgress.Add(new LearnerProgressRecord
             {
                 UserId = "user-1",
