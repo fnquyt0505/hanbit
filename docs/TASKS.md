@@ -75,7 +75,7 @@
 
 ## Giai đoạn 8 — Tài khoản (P1, sau MVP)
 
-- [~] **T8.1** PostgreSQL (**Neon free** — Render free DB hết hạn 30 ngày) + EF Core + migration `Initial`. *(Code xong; chờ người dùng tạo Neon + đặt `ConnectionStrings__Hanbit` trên Render.)*
+- [x] **T8.1** PostgreSQL (**Neon free** — Render free DB hết hạn 30 ngày) + EF Core + migration `Initial`. *(Production kết nối Neon 2026-11-28: `/health` Healthy.)*
 - [ ] **T8.2** ASP.NET Core Identity (cookie) + Google login; persist Data Protection keys vào DB; anti-forgery cho API có cookie.
 - [ ] **T8.3** Lưu tiến độ trên server + gộp dữ liệu localStorage khi đăng nhập.
 

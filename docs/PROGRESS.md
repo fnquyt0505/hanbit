@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 7 — Hoàn thiện & ra mắt MVP ✅ (MVP xong) → giai đoạn 8 (P1) chờ người dùng |
+| Giai đoạn                     | 8 — Tài khoản (P1) |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | **T8.1** chờ người dùng tạo Neon (hướng dẫn trong báo cáo) → T8.2 Identity + Google login |
+| Task tiếp theo                 | **T8.2** Identity (cookie) + Google login; Data Protection keys vào DB; anti-forgery |
 | Việc song song (người dùng) | Tạo monitor UptimeRobot cho `/health` (câu hỏi 14) · (tùy chọn) thêm `docker` làm required check trong ruleset `main-protection` |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-28 — T8.1 hoàn tất: production kết nối Neon
+- Người dùng tạo Neon (vùng Singapore) + đặt `ConnectionStrings__Hanbit` trên Render (khai báo `sync: false` trong `render.yaml`, PR #56). Lần đầu dán chuỗi dạng URL `postgresql://…` → `/health` **Degraded** (Npgsql không đọc URL) → đổi sang định dạng **.NET** (`Host=…;Database=…;Username=…;Password=…;SSL Mode=Require`) → `/health` **Healthy** ổn định (5/5, < 0,31 s).
+- Ghi chú: `Degraded` = có cấu hình DB nhưng không kết nối được (chế độ khách vẫn chạy); không có biến → không kiểm tra DB.
+- Tiếp theo: T8.2
 
 ### 2026-11-28 — T8.1 PostgreSQL (Neon) + EF Core + migration Initial (chờ người dùng kết nối Neon)
 - Quyết định: database dùng **Neon free** (không hết hạn, vùng Singapore) thay cho Render free Postgres (hết hạn 30 ngày rồi xóa dữ liệu) — người dùng đồng ý 2026-11-28.
