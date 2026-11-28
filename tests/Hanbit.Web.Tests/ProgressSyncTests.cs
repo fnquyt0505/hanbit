@@ -143,8 +143,15 @@ public sealed partial class ProgressSyncEnabledTests : IAsyncLifetime
     {
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
         {
-            app.Map(TestSignInPath, branch => branch.Run(async context =>
+            // Không dùng app.Map: Map đặt PathBase = /__test/sign-in → cookie đăng nhập bị gắn Path đó, trang khác không nhận.
+            app.Use(async (context, nextMiddleware) =>
             {
+                if (!context.Request.Path.Equals(TestSignInPath, StringComparison.Ordinal))
+                {
+                    await nextMiddleware(context);
+                    return;
+                }
+
                 var name = context.Request.Query["name"].ToString();
                 var users = context.RequestServices.GetRequiredService<UserManager<AppUser>>();
                 var user = await users.FindByNameAsync(name);
@@ -156,7 +163,7 @@ public sealed partial class ProgressSyncEnabledTests : IAsyncLifetime
 
                 await context.RequestServices.GetRequiredService<SignInManager<AppUser>>().SignInAsync(user, isPersistent: true);
                 context.Response.StatusCode = StatusCodes.Status204NoContent;
-            }));
+            });
             next(app);
         };
     }
