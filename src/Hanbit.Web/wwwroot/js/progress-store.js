@@ -284,5 +284,33 @@ export function backupCurrent() {
 export function forgetAccountProgress() {
   lastIssue = null;
   saveSyncState(null);
+  try {
+    storage()?.removeItem(SUMMARY_KEY); // số liệu offline của tài khoản
+  } catch {
+    // bỏ qua
+  }
   return save(emptyProgress());
+}
+
+// ── Số liệu tóm tắt lần trước (giai đoạn 10 — xem offline) ──
+
+export const SUMMARY_KEY = 'hanbit.summary.v1';
+
+/** Lưu phản hồi /api/progress/summary gần nhất (server đã tính) để dashboard hiện khi mất mạng. */
+export function saveLastSummary(summary) {
+  try {
+    storage()?.setItem(SUMMARY_KEY, JSON.stringify({ savedAt: new Date().toISOString(), summary }));
+  } catch {
+    // bỏ qua — chỉ mất số liệu offline
+  }
+}
+
+/** Số liệu tóm tắt lần trước: { savedAt, summary } hoặc null. */
+export function loadLastSummary() {
+  try {
+    const parsed = JSON.parse(storage()?.getItem(SUMMARY_KEY) ?? 'null');
+    return isObject(parsed) && isObject(parsed.summary) ? parsed : null;
+  } catch {
+    return null;
+  }
 }

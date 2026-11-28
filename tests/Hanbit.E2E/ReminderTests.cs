@@ -10,7 +10,7 @@ public class ReminderTests(WebServerFixture server)
     [Fact]
     public async Task ServiceWorker_RegistersAtRootScope_AndActivates()
     {
-        var page = await server.NewPageAsync();
+        var page = await server.NewPageAsync(serviceWorkers: true);
         await page.GotoAsync($"{server.BaseUrl}/hangul");
 
         var scope = await page.EvaluateAsync<string>(

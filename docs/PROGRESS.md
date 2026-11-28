@@ -6,10 +6,10 @@
 
 |                                 |                                                                                                                                                           |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Giai đoạn                     | 9 — Nhắc học (P2) |
+| Giai đoạn                     | 10 — PWA offline (P2) |
 | Task đang làm                 | —                                                                                                                                                        |
 | Production                      | https://hanbit.onrender.com (Render free, Singapore — ngủ khi không có truy cập, request đầu chậm)                                                |
-| Task tiếp theo                 | Giai đoạn 9 xong — chờ người dùng chọn việc trong Backlog |
+| Task tiếp theo                 | **T10.1** chờ người dùng thử trên điện thoại → chọn việc trong Backlog |
 | Việc song song (người dùng) | Tạo monitor UptimeRobot cho `/health` (câu hỏi 14) · (tùy chọn) thêm `docker` làm required check trong ruleset `main-protection` |
 | Blocker                         | —                                                                                                                                                        |
 
@@ -24,6 +24,11 @@
 | Quy ước | Repo, tool, file tạm lớn → đặt trên ổ **D**                                                                                       |
 
 ## ✅ Đã hoàn thành
+
+### 2026-11-29 — T10.1 PWA xem offline
+- Đã làm: `sw.js` cache (vỏ app JS/CSS/lib lưu sẵn khi cài theo `GET /offline/assets.json`; trang HTML mạng trước ≤ 4 s rồi lưu, mất mạng → bản đã lưu → `/offline`; file tĩnh lưu theo đường dẫn bỏ `?v=`; bỏ qua /api, /internal, /tai-khoan, request ghi). `offline.js` (đăng ký SW mọi trang, store `network`, nút **Tải để xem offline** trên trang khóa học, danh sách trang đã lưu trên `/offline`) + `offline-cache.js` (không tác dụng phụ). Thanh báo offline trong layout; dashboard offline dùng số liệu lần trước (`hanbit.summary.v1`) + ghi chú; đăng xuất xóa trang đã lưu + số liệu lần trước. Manifest thêm `id`. E2E: service worker mặc định chặn, test PWA bật riêng.
+- Kiểm tra: build ✅ 0 warning · format ✅ · test ✅ (Web +4 trang /offline, vỏ app (mọi file trả 200), nút tải, SW bỏ qua /api; E2E +5 với SW thật + chế độ offline của Chromium: trang đã mở chạy offline + thanh báo, trang chưa lưu → /offline có danh sách, tải khóa rồi mở bài **chưa từng xem** khi offline (Alpine + module chạy), dashboard số liệu lần trước, API không bị cache; axe thêm /offline).
+- Tiếp theo: người dùng thử trên điện thoại (cài lên màn hình chính, tải khóa, bật chế độ máy bay)
 
 ### 2026-11-28 — Đóng giai đoạn 9 (nhắc học)
 - Người dùng tạo lại cặp khóa VAPID (lần đầu đặt sai → `/health` Degraded nhờ bước kiểm tra khóa) + token; production `/health` Healthy, `/api/reminders` bật (401 khi chưa đăng nhập). Người dùng bật nhắc và gửi thử thành công. Workflow Reminders chạy tay thành công; lịch 15 phút tự chạy.

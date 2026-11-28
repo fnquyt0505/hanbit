@@ -57,6 +57,7 @@
     @* Module đăng ký component Alpine phải nạp TRƯỚC alpine.min.js (cùng là defer → chạy theo thứ tự). *@
     <script type="module" src="~/js/theme.js" asp-append-version="true"></script>
     <script type="module" src="~/js/ui.js" asp-append-version="true"></script>
+    <script type="module" src="~/js/offline.js" asp-append-version="true"></script>
     <script type="module" src="~/js/audio-button.js" asp-append-version="true"></script>
     <script type="module" src="~/js/progress-summary.js" asp-append-version="true"></script>
     @if (User.Identity?.IsAuthenticated == true)
@@ -81,6 +82,11 @@
                 <partial name="_AccountMenu" model="@("header")" />
             </div>
         </header>
+        @* Giai đoạn 10: báo đang offline (đang xem bản đã lưu) *@
+        <div x-data x-show="!$store.network.online" x-cloak role="status" data-testid="offline-banner"
+             class="sticky top-0 z-30 border-b border-border bg-surface px-4 py-2 text-sm text-warning-ink">
+            Bạn đang offline — đang xem bản đã lưu. Bài tập, ôn tập và lưu tiến độ cần có mạng.
+        </div>
         <main id="noi-dung" tabindex="-1" class="flex-1">
             @RenderBody()
         </main>

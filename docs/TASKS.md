@@ -86,6 +86,12 @@
 - [x] **T9.1** Nền tảng thông báo: khóa VAPID, service worker + manifest + icon, bảng đăng ký/cài đặt nhắc, API bật/tắt/giờ nhắc/gửi thử, UI trên /profile. *(Production: người dùng bật nhắc + gửi thử được 2026-11-28.)*
 - [x] **T9.2** Gửi nhắc tự động: quy tắc nhắc (Domain), endpoint `/internal/reminders/run` (token), workflow cron 15 phút, xóa đăng ký hết hạn (404/410). *(Token Render + GitHub secret đã đặt; chạy tay workflow thành công 2026-11-28.)*
 
+## Giai đoạn 10 — PWA offline (P2)
+
+> Chốt 2026-11-29: **xem offline** (trang đã mở / đã tải: từ vựng, ngữ pháp, Hangul, lộ trình, dashboard theo số liệu lần trước); bài tập, ôn tập, chấm điểm vẫn cần mạng (giữ kiến trúc server chấm). Lưu: **tự lưu trang đã mở + nút "Tải để xem offline"** ở trang khóa học.
+
+- [x] **T10.1** Service worker cache (vỏ app JS/CSS, trang HTML network-first, trang `/offline`), thanh báo offline, dashboard dùng số liệu lần trước, nút tải khóa học, xóa trang đã lưu khi đăng xuất. *(Chờ người dùng thử trên điện thoại.)*
+
 ## Backlog
 
-- Tra từ Hàn–Việt · Khóa 중급 · Luyện dạng đề TOPIK (tự soạn) · MP3 tạo trước (Azure AI Speech) · PWA offline · Admin duyệt nội dung · AI giải thích lỗi.
+- Tra từ Hàn–Việt · Khóa 중급 · Luyện dạng đề TOPIK (tự soạn) · MP3 tạo trước (Azure AI Speech) · Admin duyệt nội dung · AI giải thích lỗi.

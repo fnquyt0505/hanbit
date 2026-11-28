@@ -15,7 +15,7 @@ public class AccessibilityTests(WebServerFixture server)
     private static readonly string[] Pages =
     [
         "/", "/dashboard", "/hangul", "/hangul/phu-am", "/learn/beginner", "/learn/beginner/chao-hoi",
-        "/review", "/profile", "/nguon-du-lieu", "/trang-chua-co",
+        "/review", "/profile", "/nguon-du-lieu", "/trang-chua-co", "/offline",
     ];
 
     public static TheoryData<string, string> PagesAndThemes()
