@@ -77,7 +77,7 @@
 
 - [x] **T8.1** PostgreSQL (**Neon free** — Render free DB hết hạn 30 ngày) + EF Core + migration `Initial`. *(Production kết nối Neon 2026-11-28: `/health` Healthy.)*
 - [x] **T8.2** ASP.NET Core Identity (cookie) + Google login; persist Data Protection keys vào DB; anti-forgery cho API có cookie. *(Production đăng nhập Google thành công 2026-11-28.)*
-- [x] **T8.3** Lưu tiến độ trên server + gộp dữ liệu localStorage khi đăng nhập. *(Gộp phía server — `ProgressMerger`; localStorage vẫn là bản làm việc.)*
+- [x] **T8.3** Lưu tiến độ trên server + gộp dữ liệu localStorage khi đăng nhập. *(Gộp phía server — `ProgressMerger`; localStorage vẫn là bản làm việc. Người dùng thử 2 máy trên production 2026-11-28: đồng bộ được.)*
 
 ## Backlog
 
