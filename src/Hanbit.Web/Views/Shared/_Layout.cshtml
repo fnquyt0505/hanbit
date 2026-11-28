@@ -35,6 +35,10 @@
     <meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14120f" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
+    @* Giai đoạn 9: manifest + icon — iPhone chỉ nhận thông báo khi đã "Thêm vào Màn hình chính" *@
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Hanbit" />
     @* Áp chế độ sáng/tối đã lưu TRƯỚC khi vẽ (tránh nháy). Chỉ ĐỌC khóa do progress-store.js ghi — ngoại lệ đã chốt 2026-11-23. *@
     <script>@Html.Raw(Hanbit.Web.Hosting.InlineScripts.ThemeInit)</script>
     @if (User.Identity?.IsAuthenticated == true)

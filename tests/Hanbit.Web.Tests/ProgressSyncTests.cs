@@ -129,44 +129,12 @@ public class ProgressSyncDisabledTests(WebApplicationFactory<Program> factory) :
 /// <summary>T8.3: đồng bộ thật với PostgreSQL + cookie đăng nhập (đăng nhập qua endpoint chỉ có trong test) — CI.</summary>
 public sealed partial class ProgressSyncEnabledTests : IAsyncLifetime
 {
-    private const string TestSignInPath = "/__test/sign-in";
-
     [GeneratedRegex("<meta name=\"csrf-token\" content=\"([^\"]+)\"")]
     private static partial Regex CsrfMeta();
 
     private WebApplicationFactory<Program>? _factory;
 
     private WebApplicationFactory<Program> Factory => _factory ?? throw new InvalidOperationException("Chưa khởi tạo.");
-
-    /// <summary>Đăng nhập không qua Google: tạo tài khoản theo tên rồi phát cookie như sau callback.</summary>
-    private sealed class TestSignInStartupFilter : IStartupFilter
-    {
-        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
-        {
-            // Không dùng app.Map: Map đặt PathBase = /__test/sign-in → cookie đăng nhập bị gắn Path đó, trang khác không nhận.
-            app.Use(async (context, nextMiddleware) =>
-            {
-                if (!context.Request.Path.Equals(TestSignInPath, StringComparison.Ordinal))
-                {
-                    await nextMiddleware(context);
-                    return;
-                }
-
-                var name = context.Request.Query["name"].ToString();
-                var users = context.RequestServices.GetRequiredService<UserManager<AppUser>>();
-                var user = await users.FindByNameAsync(name);
-                if (user is null)
-                {
-                    user = new AppUser { UserName = name, CreatedAt = DateTimeOffset.UtcNow };
-                    (await users.CreateAsync(user)).Succeeded.ShouldBeTrue();
-                }
-
-                await context.RequestServices.GetRequiredService<SignInManager<AppUser>>().SignInAsync(user, isPersistent: true);
-                context.Response.StatusCode = StatusCodes.Status204NoContent;
-            });
-            next(app);
-        };
-    }
 
     public async Task InitializeAsync()
     {
@@ -208,7 +176,7 @@ public sealed partial class ProgressSyncEnabledTests : IAsyncLifetime
     private async Task<(HttpClient Client, string Csrf)> SignInAsync(string name)
     {
         var client = Factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        (await client.PostAsync($"{TestSignInPath}?name={name}", null)).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        (await client.PostAsync($"{TestSignInStartupFilter.Path}?name={name}", null)).StatusCode.ShouldBe(HttpStatusCode.NoContent);
         var html = await client.GetStringAsync("/dashboard");
         html.ShouldContain("progress-sync.js");
         html.ShouldContain("<meta name=\"hanbit-user\"");

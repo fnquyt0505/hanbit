@@ -125,6 +125,86 @@ namespace Hanbit.Infrastructure.Persistence.Migrations
                     b.ToTable("learner_progress", (string)null);
                 });
 
+            modelBuilder.Entity("Hanbit.Infrastructure.Persistence.PushSubscriptionRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Auth")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("auth");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("endpoint");
+
+                    b.Property<string>("P256dh")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("p256dh");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Endpoint")
+                        .IsUnique()
+                        .HasDatabaseName("ux_push_subscriptions_endpoint");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_push_subscriptions_user_id");
+
+                    b.ToTable("push_subscriptions", (string)null);
+                });
+
+            modelBuilder.Entity("Hanbit.Infrastructure.Persistence.ReminderSettingsRecord", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("user_id");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<DateOnly?>("LastSentOn")
+                        .HasColumnType("date")
+                        .HasColumnName("last_sent_on");
+
+                    b.Property<TimeOnly>("ReminderTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("reminder_time");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("Enabled", "ReminderTime")
+                        .HasDatabaseName("ix_reminder_settings_enabled_time");
+
+                    b.ToTable("reminder_settings", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
                 {
                     b.Property<int>("Id")
@@ -281,6 +361,24 @@ namespace Hanbit.Infrastructure.Persistence.Migrations
                     b.HasOne("Hanbit.Infrastructure.Persistence.AppUser", null)
                         .WithOne()
                         .HasForeignKey("Hanbit.Infrastructure.Persistence.LearnerProgressRecord", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Hanbit.Infrastructure.Persistence.PushSubscriptionRecord", b =>
+                {
+                    b.HasOne("Hanbit.Infrastructure.Persistence.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Hanbit.Infrastructure.Persistence.ReminderSettingsRecord", b =>
+                {
+                    b.HasOne("Hanbit.Infrastructure.Persistence.AppUser", null)
+                        .WithOne()
+                        .HasForeignKey("Hanbit.Infrastructure.Persistence.ReminderSettingsRecord", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
