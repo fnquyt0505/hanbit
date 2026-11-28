@@ -18,7 +18,8 @@ public class DashboardTests(WebServerFixture server)
         var dashboard = page.GetByTestId("dashboard");
         await page.WaitForFunctionAsync("() => document.querySelector('[data-testid=dashboard]').getAttribute('aria-busy') === 'false'");
 
-        (await page.Locator("[data-skeleton]").First.IsVisibleAsync()).ShouldBeFalse();
+        // aria-busy và x-show cập nhật ở hai lượt hiệu ứng khác nhau của Alpine → chờ skeleton ẩn hẳn
+        await page.Locator("[data-skeleton]").First.WaitForAsync(new() { State = WaitForSelectorState.Hidden });
         (await page.GetByTestId("streak-days").InnerTextAsync()).ShouldBe("0");
         (await dashboard.GetByTestId("stat-due").InnerTextAsync()).ShouldContain("0");
         (await page.GetByTestId("continue-cta").GetAttributeAsync("href")).ShouldBe("/hangul");
